@@ -31,7 +31,7 @@ export class RefreshJwtStrategy extends PassportStrategy(
     payload: JwtPayload,
   ): Promise<{ userId: string; login: string }> {
     const refreshToken = req.cookies['refreshToken'] as string;
-    const rT = await this.sessionRepo.isRefreshTokenExists(refreshToken);
+    const rT = await this.sessionRepo.isExistByRefreshToken(refreshToken);
     if (!rT) {
       throw new DomainException({
         code: HttpStatus.UNAUTHORIZED,

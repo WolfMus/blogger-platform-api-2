@@ -49,7 +49,7 @@ export class SessionService {
       userId,
       refreshToken,
     );
-    console.log('current session id: ', sessionCurrent!._id.toString());
+    console.log('current session id: ', sessionCurrent!.id.toString());
     if (!sessionCurrent) {
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,
@@ -67,9 +67,9 @@ export class SessionService {
     }
     const sessionsIds = sessions
       .filter((s) => {
-        return s._id.toString() !== sessionCurrent._id.toString();
+        return s.id.toString() !== sessionCurrent.id.toString();
       })
-      .map((s) => s._id.toString());
+      .map((s) => s.id.toString());
     await this.sessionRepo.deleteSessionsByIds(sessionsIds);
     return;
   }

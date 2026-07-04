@@ -28,16 +28,12 @@ export class LogoutUseCase implements ICommandHandler<LogoutCommand> {
       throw new DomainException({
         code: HttpStatus.BAD_REQUEST,
         message: 'Bad Request',
-        extensions: [new Extension('Session not found', 'refreshToken')],
+        extensions: [
+          new Extension('Session not found', 'userId or refreshToken'),
+        ],
       });
     }
     // Удаляем сессию из бд
-    await this.sessionRepo.delete(session._id.toString());
+    await this.sessionRepo.delete(session.id.toString());
   }
 }
-
-/**
- * Найти в бд сессию по userId и refreshToken
- * Удалить сессию из бд
- * Вернуть статус 204 No Content
- */

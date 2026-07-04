@@ -14,6 +14,10 @@ export class UserPostRepository {
     private userRepo: Repository<UserPostgres>,
   ) {}
 
+  private toEntity(user: UserPostgres): UserPostgres {
+    return this.userRepo.create(user);
+  }
+
   async findAll(
     pagination: UserPaginationRequest,
   ): Promise<{ users: UserPostgresResponseDto[]; totalCount: number }> {
@@ -70,16 +74,21 @@ export class UserPostRepository {
     };
   }
 
-  async findById(id: number): Promise<UserPostgres | null> {
-    const user = await this.userRepo.findOneBy({ id });
+  async findById(id: string): Promise<UserPostgres | null> {
+    const user = await this.userRepo.findOne({ where: { id } });
     if (!user) return null;
     return user;
   }
 
-  async isExistByLoginOrEmail(
-    login: string,
-    email: string,
-  ): Promise<void | null> {
+  async findByConfirmationCode(
+    confirmationCode: string,
+  ): Promise<UserPostgres | null> {
+    const user = await this.userRepo.findOne({ where: { confirmationCode } });
+    if (!user) return null;
+    return user;
+  }
+
+  async isExistByLoginAndEmail(login: string, email: string): Promise<boolean> {
     const row: { exists: boolean }[] = await this.dataSource.query(
       `
       SELECT EXISTS (
@@ -91,91 +100,100 @@ export class UserPostRepository {
       [login, email],
     );
     const isExist = row[0].exists;
-    if (!isExist) return null;
-    return;
+    if (!isExist) return false;
+    return true;
   }
 
-  // async findByLoginOrEmail(loginOrEmail: string): Promise<UserDocument | null> {
-  //   const user = await this.UserModel.findOne({
-  //     $or: [{ login: loginOrEmail }, { email: loginOrEmail }],
-  //   });
-  //   if (!user) return null;
-  //   return user;
-  // }
+  async findByLoginOrEmail(loginOrEmail: string): Promise<UserPostgres | null> {
+    const row: UserPostgres[] = await this.dataSource.query(
+      `
+        SELECT 
+        id, 
+        login, 
+        email, 
+        created_at as "createdAt", 
+        updated_at as "updatedAt", 
+        recovery_code as "recoveryCode", 
+        recovery_code_expire_date as "recoveryCodeExpireDate", 
+        is_confirmed as "isConfirmed", 
+        confirmation_code as "confirmationCode", 
+        confirmation_code_expire_date as "confirmationCodeExpireDate", 
+        password_hash as "passwordHash"
+          FROM public.users
+                WHERE login LIKE $1 OR email LIKE $1;
+    `,
+      [loginOrEmail],
+    );
+    const user = row[0];
+    if (!user) {
+      return null;
+    }
+    return this.toEntity(user);
+  }
 
-  // async findByConfirmationCode(code: string): Promise<UserDocument> {
-  //   const user = await this.UserModel.findOne({
-  //     'confirmation.confirmationCode': code,
-  //   });
+  async findByRecoveryCode(recoveryCode: string): Promise<UserPostgres | null> {
+    const row: UserPostgres[] = await this.dataSource.query(
+      `
+        SELECT 
+        id, 
+        login, 
+        email, 
+        created_at as "createdAt", 
+        updated_at as "updatedAt", 
+        recovery_code as "recoveryCode", 
+        recovery_code_expire_date as "recoveryCodeExpireDate", 
+        is_confirmed as "isConfirmed", 
+        confirmation_code as "confirmationCode", 
+        confirmation_code_expire_date as "confirmationCodeExpireDate", 
+        password_hash as "passwordHash"
+          FROM public.users
+                WHERE recovery_code LIKE $1;
+      `,
+      [recoveryCode],
+    );
+    const user = row[0];
+    if (!user) return null;
+    return this.toEntity(user);
+  }
 
-  //   if (!user) {
-  //     throw new DomainException({
-  //       code: HttpStatus.BAD_REQUEST,
-  //       message: 'Not Found',
-  //       extensions: [new Extension('Confirmation Code Not Found', 'code')],
-  //     });
-  //   }
+  async findByEmail(email: string): Promise<UserPostgres | null> {
+    const row = await this.dataSource.query<UserPostgres[]>(
+      `
+        SELECT *
+        FROM users
+        WHERE email LIKE $1;
+      `,
+      [email],
+    );
+    const user = row[0];
+    if (!user) {
+      console.log('Пользователя не существует');
+      return null;
+    }
+    return this.toEntity(user);
+  }
 
-  //   return user;
-  // }
-
-  // async findByRecoveryCode(recoveryCode: string): Promise<UserDocument> {
-  //   console.log(recoveryCode);
-  //   const user = await this.UserModel.findOne({
-  //     'recovery.recoveryCode': recoveryCode,
-  //   });
-
-  //   if (!user) {
-  //     throw new DomainException({
-  //       code: HttpStatus.BAD_REQUEST,
-  //       message: 'Not Found',
-  //       extensions: [new Extension('Recovery Code Not Found', 'recoveryCode')],
-  //     });
-  //   }
-
-  //   return user;
-  // }
-
-  // async findByEmailOrFail(email: string): Promise<UserDocument> {
-  //   const user = await this.UserModel.findOne({
-  //     email: email,
-  //   });
-
-  //   if (!user) {
-  //     throw new DomainException({
-  //       code: HttpStatus.BAD_REQUEST,
-  //       message: 'Not Found',
-  //       extensions: [new Extension('Confirmation Code Not Found', 'email')],
-  //     });
-  //   }
-
-  //   return user;
-  // }
-
-  // async findByEmail(email: string): Promise<UserDocument | null> {
-  //   const user = await this.UserModel.findOne({
-  //     email: email,
-  //   });
-
-  //   return user;
-  // }
+  async save(user: UserPostgres): Promise<void> {
+    await this.userRepo.save(user);
+    return;
+  }
 
   async create(user: UserPostgres): Promise<UserPostgresResponseDto> {
     const row: UserPostgresResponseDto[] = await this.dataSource.query(
       `
-      INSERT INTO PUBLIC.USERS (
-		    LOGIN,
-		    EMAIL,
-		    PASSWORD_HASH,
-		    CREATED_AT,
-		    IS_CONFIRMED
+      INSERT INTO users (
+		    login,
+		    email,
+		    password_hash,
+		    created_at,
+		    is_confirmed
 	    )
         VALUES (
           $1,
           $2,
           $3,
           $4,
-          TRUE
+          False
         )
         RETURNING
           id,

@@ -21,10 +21,6 @@ import {
   Like,
   LikeSchema,
 } from '../modules/blogger-platform/likes/domain/like.entity';
-import {
-  Session,
-  SessionSchema,
-} from '../modules/user-accounts/domain/sessions/session.entity';
 
 @Module({
   imports: [
@@ -34,7 +30,6 @@ import {
       { name: Comment.name, schema: CommentSchema },
       { name: User.name, schema: UserSchema },
       { name: Like.name, schema: LikeSchema },
-      { name: Session.name, schema: SessionSchema },
     ]),
   ],
   controllers: [TestingController],

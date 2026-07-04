@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { UserRepository } from '../infrastructure/user.repository';
 import { CryptoService } from './crypto.service';
+import { UserPostRepository } from '../infrastructure/postgresql/user.postgres.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private userRepo: UserRepository,
+    private userPostRepo: UserPostRepository,
     private cryptoService: CryptoService,
   ) {}
 
@@ -13,14 +13,10 @@ export class AuthService {
     loginOrEmail: string,
     pass: string,
   ): Promise<{ id: string } | null> {
-    const user = await this.userRepo.findByLoginOrEmail(loginOrEmail);
+    const user = await this.userPostRepo.findByLoginOrEmail(loginOrEmail);
+    console.log(user);
     if (!user) {
       return null;
-      // throw new DomainException({
-      //   code: HttpStatus.NOT_FOUND,
-      //   message: 'Not Found',
-      //   extensions: [new Extension('User Not Found', 'code')],
-      // });
     }
     const isPasswordValid = await this.cryptoService.compare(
       pass,
@@ -33,6 +29,6 @@ export class AuthService {
       return null;
     }
 
-    return { id: user._id.toString() };
+    return { id: user.id.toString() };
   }
 }

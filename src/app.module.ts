@@ -12,6 +12,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserPostgres } from './modules/user-accounts/domain/users/postgresql/user.postgres.entity';
+import { Session } from './modules/user-accounts/domain/sessions/session.entity';
 
 @Module({
   imports: [
@@ -20,9 +21,10 @@ import { UserPostgres } from './modules/user-accounts/domain/users/postgresql/us
       host: 'localhost',
       port: 5432,
       username: 'postgres',
-      password: 'pass',
+      password: 'severe',
       database: 'BloggerPlatformAPI',
-      entities: [UserPostgres],
+      entities: [UserPostgres, Session],
+      synchronize: true,
     }),
     ConfigModule,
     CqrsModule.forRoot(),

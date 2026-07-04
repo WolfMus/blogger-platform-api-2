@@ -9,7 +9,7 @@ import { AuthService } from './application/auth.service';
 import { CryptoService } from './application/crypto.service';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { JwtModule } from '@nestjs/jwt';
-import { Session, SessionSchema } from './domain/sessions/session.entity';
+import { Session } from './domain/sessions/session.entity';
 import { UserQwRepository } from './infrastructure/user-query.repository';
 import { SessionRepository } from './infrastructure/sessions/session.repository';
 import { LoginUserUseCase } from './application/usecases/login.usecase';
@@ -49,10 +49,10 @@ const sessionUseCases = [RefreshTokenUseCase];
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserPostgres]),
+    TypeOrmModule.forFeature([UserPostgres, Session]),
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
-      { name: Session.name, schema: SessionSchema },
+      // { name: Session.name, schema: SessionSchema },
     ]),
     NotificationsModule,
     JwtModule.register({

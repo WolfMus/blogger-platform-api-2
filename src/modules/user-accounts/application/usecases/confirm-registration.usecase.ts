@@ -4,7 +4,7 @@ import {
   DomainException,
   Extension,
 } from '../../../../core/exceptions/domain-exception';
-import { UserRepository } from '../../infrastructure/user.repository';
+import { UserPostRepository } from '../../infrastructure/postgresql/user.postgres.repository';
 
 export class ConfirmRegistrationCommand {
   constructor(public code: string) {}
@@ -15,23 +15,30 @@ export class ConfirmRegistrationUseClass implements ICommandHandler<
   ConfirmRegistrationCommand,
   void
 > {
-  constructor(private userRepo: UserRepository) {}
+  constructor(private userPostRepo: UserPostRepository) {}
 
   async execute(command: ConfirmRegistrationCommand): Promise<void> {
     // find user by confirmation code
-    const user = await this.userRepo.findByConfirmationCode(command.code);
-    console.log(user);
+    const user = await this.userPostRepo.findByConfirmationCode(command.code);
+    if (!user) {
+      throw new DomainException({
+        code: HttpStatus.BAD_REQUEST,
+        message: 'Not Found',
+        extensions: [new Extension('Confirmation Code Not Found', 'code')],
+      });
+    }
+
     // is code expired?
-    if (user.confirmation.confirmationExpireDate!.getTime() < Date.now()) {
+    if (user.confirmationCodeExpireDate!.getTime() < Date.now()) {
       throw new DomainException({
         code: HttpStatus.BAD_REQUEST,
         message: 'Bad Request',
         extensions: [new Extension('Code Expired', 'confirmationExpireDate')],
       });
     }
-    console.log('checked');
+
     // is status already true?
-    if (user.confirmation.isConfirmed === true) {
+    if (user.isConfirmed === true) {
       throw new DomainException({
         code: HttpStatus.BAD_REQUEST,
         message: 'Bad Request',
@@ -40,9 +47,9 @@ export class ConfirmRegistrationUseClass implements ICommandHandler<
     }
 
     // change confirmation status
-    user.isConfirmed();
+    user.changeAccoutConfirmation();
 
     // save user
-    return await this.userRepo.save(user);
+    return await this.userPostRepo.save(user);
   }
 }

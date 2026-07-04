@@ -35,7 +35,7 @@ export class AuthController {
     private commandBus: CommandBus,
   ) {}
 
-  // LOGIN
+  // ✅ LOGIN
   @HttpCode(HttpStatus.OK)
   @UseGuards(ThrottlerGuard, LocalAuthGuard)
   @Post('/login')
@@ -62,7 +62,7 @@ export class AuthController {
     return { accessToken };
   }
 
-  // LOGOUT
+  // ✅ LOGOUT
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtRefreshGuard)
   @Post('/logout')
@@ -79,7 +79,7 @@ export class AuthController {
     return;
   }
 
-  // NEW REFRESH TOKEN
+  // ✅ NEW REFRESH TOKEN
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtRefreshGuard)
   @Post('/refresh-token')
@@ -104,7 +104,7 @@ export class AuthController {
     return { accessToken };
   }
 
-  // REGISTRATION
+  // ✅ REGISTRATION
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(ThrottlerGuard)
   @Post('/registration')
@@ -114,7 +114,7 @@ export class AuthController {
     );
   }
 
-  // REGISTRATION-CONFIRMATION
+  // ✅ REGISTRATION-CONFIRMATION
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(ThrottlerGuard)
   @Post('/registration-confirmation')
@@ -124,7 +124,7 @@ export class AuthController {
     );
   }
 
-  // REGISTRATION EMAIL RESENDING
+  // ✅ REGISTRATION EMAIL RESENDING
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(ThrottlerGuard)
   @Post('/registration-email-resending')
@@ -134,7 +134,7 @@ export class AuthController {
     );
   }
 
-  // RECOVERY CODE PASSWORD
+  // ✅ RECOVERY CODE PASSWORD
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(ThrottlerGuard)
   @Post('/password-recovery')
@@ -144,7 +144,7 @@ export class AuthController {
     );
   }
 
-  // NEW PASSWORD
+  // ✅ NEW PASSWORD
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(ThrottlerGuard)
   @Post('/new-password')
@@ -154,7 +154,7 @@ export class AuthController {
     );
   }
 
-  // GET ME
+  // ✅ GET ME
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   @Get('/me')

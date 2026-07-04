@@ -1,8 +1,8 @@
-import { SessionDocument } from '../../domain/sessions/session.entity';
+import { Session } from '../../domain/sessions/session.entity';
 import { SessionResponseDto } from '../session.response.dto';
 
 export class SessionMapper {
-  toResponseView(sessions: SessionDocument[]): SessionResponseDto[] {
+  toResponseView(sessions: Session[]): SessionResponseDto[] {
     if (sessions === null || sessions.length === 0) {
       return [];
     }

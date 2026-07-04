@@ -4,8 +4,8 @@ import {
   DomainException,
   Extension,
 } from '../../../../core/exceptions/domain-exception';
-import { UserRepository } from '../../infrastructure/user.repository';
 import { EmailService } from '../../../notifications/applications/email.service';
+import { UserPostRepository } from '../../infrastructure/postgresql/user.postgres.repository';
 
 export class ResendConfirmationCodeCommand {
   constructor(public email: string) {}
@@ -17,16 +17,23 @@ export class ResendConfirmationCodeUseCase implements ICommandHandler<
   void
 > {
   constructor(
-    private userRepo: UserRepository,
+    private userPostRepo: UserPostRepository,
     private emailService: EmailService,
   ) {}
 
   async execute(command: ResendConfirmationCodeCommand): Promise<void> {
     // find user by email
-    const user = await this.userRepo.findByEmailOrFail(command.email);
+    const user = await this.userPostRepo.findByEmail(command.email);
+    if (!user) {
+      throw new DomainException({
+        code: HttpStatus.BAD_REQUEST,
+        message: 'Not Found',
+        extensions: [new Extension('User Not Found', 'email')],
+      });
+    }
 
     // is status already true?
-    if (user.confirmation.isConfirmed === true) {
+    if (user.isConfirmed === true) {
       throw new DomainException({
         code: HttpStatus.BAD_REQUEST,
         message: 'Bad Request',
@@ -38,12 +45,12 @@ export class ResendConfirmationCodeUseCase implements ICommandHandler<
     user.setConfirmationCode();
 
     // save user
-    await this.userRepo.save(user);
+    await this.userPostRepo.save(user);
 
     // send confirmation code on user's email
     await this.emailService.sendConfirmationEmail(
       user.email,
-      user.confirmation.confirmationCode!,
+      user.confirmationCode!,
     );
     return;
   }

@@ -7,14 +7,10 @@ import {
 } from '../../../../core/exceptions/domain-exception';
 import { CreateSessionDto } from '../../domain/sessions/dto/create-session.domain.dto';
 import { JwtService } from '@nestjs/jwt';
-import { InjectModel } from '@nestjs/mongoose';
-import {
-  Session,
-  type SessionModelType,
-} from '../../domain/sessions/session.entity';
+import { Session } from '../../domain/sessions/session.entity';
 import { SessionRepository } from '../../infrastructure/sessions/session.repository';
-import { UserRepository } from '../../infrastructure/user.repository';
 import { CryptoService } from '../crypto.service';
+import { UserPostRepository } from '../../infrastructure/postgresql/user.postgres.repository';
 
 export class LoginUserCommand {
   constructor(
@@ -26,26 +22,24 @@ export class LoginUserCommand {
 @CommandHandler(LoginUserCommand)
 export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
   constructor(
-    @InjectModel(Session.name)
-    private SessionModel: SessionModelType,
-    private jwtService: JwtService,
-    private userRepo: UserRepository,
-    private cryptoService: CryptoService,
     private sessionRepo: SessionRepository,
+    private jwtService: JwtService,
+    private cryptoService: CryptoService,
+    private userPostRepository: UserPostRepository,
   ) {}
 
   async execute(
     command: LoginUserCommand,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     // find user by login or email
-    const user = await this.userRepo.findByLoginOrEmail(
+    const user = await this.userPostRepository.findByLoginOrEmail(
       command.dto.loginOrEmail,
     );
     if (!user) {
       throw new DomainException({
         code: HttpStatus.BAD_REQUEST,
         message: 'Not Found',
-        extensions: [new Extension('Confirmation Code Not Found', 'code')],
+        extensions: [new Extension('User Not Found', 'loginOrEmail')],
       });
     }
 
@@ -65,7 +59,7 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
 
     // create payload
     const payload = {
-      sub: user._id.toString(),
+      sub: user.id.toString(),
       login: user.login,
     };
 
@@ -87,14 +81,14 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
       },
     );
     const createSessionDto: CreateSessionDto = {
-      userId: user._id.toString(),
+      userId: user.id.toString(),
       refreshToken: refreshToken,
       tokenVersion: tokenVersion,
       title: command.deviceInfo.title,
       ip: command.deviceInfo.ip,
       deviceId: deviceId,
     };
-    const session = this.SessionModel.createInstance(createSessionDto);
+    const session = Session.createInstance(createSessionDto);
     await this.sessionRepo.save(session);
 
     // create access token

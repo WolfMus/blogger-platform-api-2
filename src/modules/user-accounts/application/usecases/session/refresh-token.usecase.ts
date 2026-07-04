@@ -2,6 +2,11 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { JwtService } from '@nestjs/jwt';
 import { SessionRepository } from '../../../infrastructure/sessions/session.repository';
 import { JwtPayload } from '../../../../../core/types/payload.interface';
+import {
+  DomainException,
+  Extension,
+} from '../../../../../core/exceptions/domain-exception';
+import { HttpStatus } from '@nestjs/common';
 
 export class RefreshTokenCommand {
   constructor(
@@ -32,7 +37,13 @@ export class RefreshTokenUseCase implements ICommandHandler<RefreshTokenCommand>
       oldRefreshToken,
     );
     if (!session) {
-      throw new Error('Session not found <RefreshTokenUseCase>');
+      throw new DomainException({
+        code: HttpStatus.NOT_FOUND,
+        message: 'Not Found',
+        extensions: [
+          new Extension('Session Not Found', 'userId and refreshToken'),
+        ],
+      });
     }
 
     // Создаем новый accessToken и refreshToken
@@ -60,15 +71,9 @@ export class RefreshTokenUseCase implements ICommandHandler<RefreshTokenCommand>
         secret: 'access-token-secret',
       },
     );
+    console.log(session);
     session.updateRefreshToken(refreshToken);
     await this.sessionRepo.save(session);
     return { accessToken, refreshToken };
   }
 }
-
-/**
- * Найти в бд сессию по userId и oldRefreshToken
- * Создать новый accessToken и refreshToken
- * Обновить сессию в бд новым refreshToken и lastActiveDate
- * Вернуть новый accessToken и refreshToken
- */

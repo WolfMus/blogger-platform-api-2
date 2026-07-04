@@ -15,6 +15,7 @@ export class UserService {
   constructor(
     private userPostgresRepo: UserPostRepository,
     private userRepo: UserRepository,
+    private userPostRepo: UserPostRepository,
     private userQueryRepo: UserQwRepository,
     private userMapper: UserMapper,
   ) {}
@@ -48,7 +49,7 @@ export class UserService {
     login: string;
     userId: string;
   }> {
-    const user = await this.userRepo.findById(userId);
+    const user = await this.userPostRepo.findById(userId);
     if (!user) {
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,
@@ -59,7 +60,7 @@ export class UserService {
     const userInfo = {
       email: user.email,
       login: user.login,
-      userId: user._id.toString(),
+      userId: user.id.toString(),
     };
     return userInfo;
   }
