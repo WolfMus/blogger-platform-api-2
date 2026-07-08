@@ -1,5 +1,6 @@
 import { ApiProperty, ApiSchema } from '@nestjs/swagger';
 import { BlogDocument } from '../domain/blog.entity';
+import { BlogsPostgres } from '../domain/blog-postgres.entity';
 
 @ApiSchema({ name: 'BlogResponseDto' })
 export class BlogResponseDto {
@@ -24,6 +25,17 @@ export class BlogResponseDto {
   static mapToView(blog: BlogDocument): BlogResponseDto {
     const dto = new BlogResponseDto();
     dto.id = blog._id.toString();
+    dto.name = blog.name;
+    dto.description = blog.description;
+    dto.websiteUrl = blog.websiteUrl;
+    dto.createdAt = blog.createdAt;
+    dto.isMembership = blog.isMembership;
+    return dto;
+  }
+
+  static mapToViewPostgres(blog: BlogsPostgres): BlogResponseDto {
+    const dto = new BlogResponseDto();
+    dto.id = blog.id.toString();
     dto.name = blog.name;
     dto.description = blog.description;
     dto.websiteUrl = blog.websiteUrl;

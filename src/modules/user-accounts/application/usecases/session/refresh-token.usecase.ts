@@ -57,8 +57,8 @@ export class RefreshTokenUseCase implements ICommandHandler<RefreshTokenCommand>
         deviceId: session.deviceId,
       },
       {
-        expiresIn: '20s',
-        secret: 'refresh-token-secret',
+        expiresIn: Number(process.env.REFRESH_TOKEN_EXPIRE_IN),
+        secret: process.env.REFRESH_TOKEN_SECRET,
       },
     );
     const accessToken = await this.jwtService.signAsync(
@@ -67,11 +67,11 @@ export class RefreshTokenUseCase implements ICommandHandler<RefreshTokenCommand>
         tokenVersion: session.tokenVersion + 1,
       },
       {
-        expiresIn: '10s',
-        secret: 'access-token-secret',
+        expiresIn: Number(process.env.ACCESS_TOKEN_EXPIRE_IN),
+        secret: process.env.ACCESS_TOKEN_SECRET,
       },
     );
-    console.log(session);
+
     session.updateRefreshToken(refreshToken);
     await this.sessionRepo.save(session);
     return { accessToken, refreshToken };

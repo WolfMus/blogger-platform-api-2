@@ -50,15 +50,14 @@ const sessionUseCases = [RefreshTokenUseCase];
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserPostgres, Session]),
-    MongooseModule.forFeature([
-      { name: User.name, schema: UserSchema },
-      // { name: Session.name, schema: SessionSchema },
-    ]),
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     NotificationsModule,
     JwtModule.register({
       global: true,
-      secret: 'access-token-secret',
-      signOptions: { expiresIn: '10s' },
+      secret: process.env.ACCESS_TOKEN_SECRET,
+      signOptions: {
+        expiresIn: Number(process.env.ACCESS_TOKEN_EXPIRE_IN),
+      },
     }),
     PassportModule,
   ],

@@ -41,7 +41,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
         error?: string;
         statusCode?: number;
       };
-      console.log(responseBody);
 
       if (Array.isArray(responseBody.message)) {
         responseBody.message.forEach((m) =>

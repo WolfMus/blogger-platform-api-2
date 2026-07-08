@@ -14,7 +14,6 @@ export class AuthService {
     pass: string,
   ): Promise<{ id: string } | null> {
     const user = await this.userPostRepo.findByLoginOrEmail(loginOrEmail);
-    console.log(user);
     if (!user) {
       return null;
     }

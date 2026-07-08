@@ -25,7 +25,7 @@ export class CreateUserUseCase implements ICommandHandler<
     private userRepo: UserPostRepository,
   ) {}
   async execute(command: CreateUserCommand): Promise<UserPostgresResponseDto> {
-    // // user exists?
+    // user exists?
     const isExist = await this.userRepo.isExistByLoginAndEmail(
       command.dto.login,
       command.dto.email,
@@ -34,7 +34,7 @@ export class CreateUserUseCase implements ICommandHandler<
       throw new DomainException({
         code: HttpStatus.BAD_REQUEST,
         message: 'Exists',
-        extensions: [new Extension('User exist', 'login or email')],
+        extensions: [new Extension('User exist', isExist)],
       });
     }
 

@@ -13,6 +13,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserPostgres } from './modules/user-accounts/domain/users/postgresql/user.postgres.entity';
 import { Session } from './modules/user-accounts/domain/sessions/session.entity';
+import { BlogsPostgres } from './modules/blogger-platform/blogs/domain/blog-postgres.entity';
 
 @Module({
   imports: [
@@ -22,11 +23,11 @@ import { Session } from './modules/user-accounts/domain/sessions/session.entity'
       port: 5432,
       username: 'postgres',
       password: 'severe',
-      database: 'BloggerPlatformAPI',
-      entities: [UserPostgres, Session],
+      database: 'BloggerPlatformAPII',
+      entities: [UserPostgres, Session, BlogsPostgres],
       synchronize: true,
     }),
-    ConfigModule,
+    ConfigModule.forRoot({ isGlobal: true }),
     CqrsModule.forRoot(),
     MongooseModule.forRoot(
       process.env.MONGODB_URI ||

@@ -76,8 +76,8 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
         deviceId: deviceId,
       },
       {
-        expiresIn: '20s',
-        secret: 'refresh-token-secret',
+        expiresIn: Number(process.env.REFRESH_TOKEN_EXPIRE_IN),
+        secret: process.env.REFRESH_TOKEN_SECRET,
       },
     );
     const createSessionDto: CreateSessionDto = {

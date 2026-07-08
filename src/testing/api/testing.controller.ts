@@ -7,12 +7,12 @@ import type { PostModelType } from '../../modules/blogger-platform/posts/domain/
 import { Comment } from '../../modules/blogger-platform/comments/domain/comment.entity';
 import type { CommentModelType } from '../../modules/blogger-platform/comments/domain/comment.entity';
 import { ApiNoContentResponse } from '@nestjs/swagger';
-import { User } from '../../modules/user-accounts/domain/users/mongo/user.entity';
-import type { UserModelType } from '../../modules/user-accounts/domain/users/mongo/user.entity';
 import {
   Like,
   type LikeModelType,
 } from '../../modules/blogger-platform/likes/domain/like.entity';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Controller('testing')
 export class TestingController {
@@ -23,20 +23,23 @@ export class TestingController {
     private PostModel: PostModelType,
     @InjectModel(Comment.name)
     private CommentModel: CommentModelType,
-    @InjectModel(User.name)
-    private UserModel: UserModelType,
     @InjectModel(Like.name)
     private LikeModel: LikeModelType,
+    @InjectDataSource()
+    private dataSource: DataSource,
   ) {}
   @ApiNoContentResponse()
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('/all-data')
   async deleteAllData(): Promise<void> {
+    console.log('‼️ALL CONTENT DELETED‼️');
     await this.BlogModel.deleteMany();
     await this.PostModel.deleteMany();
     await this.CommentModel.deleteMany();
-    await this.UserModel.deleteMany();
     await this.LikeModel.deleteMany();
+
+    await this.dataSource.query('TRUNCATE users, session;');
+
     return;
   }
 }

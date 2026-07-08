@@ -62,7 +62,6 @@ export class UserRepository {
   }
 
   async findByRecoveryCode(recoveryCode: string): Promise<UserDocument> {
-    console.log(recoveryCode);
     const user = await this.UserModel.findOne({
       'recovery.recoveryCode': recoveryCode,
     });

@@ -18,10 +18,14 @@ export class UserPostRepository {
     return this.userRepo.create(user);
   }
 
+  private toSnakeCase(key: string): string {
+    return key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+  }
+
   async findAll(
     pagination: UserPaginationRequest,
   ): Promise<{ users: UserPostgresResponseDto[]; totalCount: number }> {
-    const sortBy = pagination.sortBy ?? 'created_at';
+    const sortBy = pagination.sortBy ?? 'createdAt';
     const sortDirection =
       pagination.sortDirection === SortDirection.Asc
         ? SortDirection.Asc
@@ -37,35 +41,40 @@ export class UserPostRepository {
 
     if (searchLoginTerm) {
       params.push(`%${searchLoginTerm}%`);
-      conditions.push(`login ILIKE '%${params.length}%'`);
+      conditions.push(`login ILIKE $${params.length}`);
     }
 
     if (searchEmailTerm) {
       params.push(`%${searchEmailTerm}%`);
-      conditions.push(`email ILIKE '%${params.length}%'`);
+      conditions.push(`email ILIKE $${params.length}`);
     }
 
     const where =
-      conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+      conditions.length > 0 ? `WHERE ${conditions.join(' OR ')}` : '';
 
     const usersQuery = `
 	    SELECT id, login, email, created_at as "createdAt"
       FROM users
         ${where}
-	      ORDER BY $1 ${sortDirection}
-	      LIMIT $2
-	      OFFSET $3;
+	      ORDER BY ${this.toSnakeCase(sortBy)} ${sortDirection.toUpperCase()}
+	      LIMIT $${params.length + 1}
+	      OFFSET $${params.length + 2};
     `;
-    const usersParam = [sortBy, pageSize, offset];
+
+    console.log(usersQuery);
+    console.log('toSnakeCase(sortBy):', this.toSnakeCase(sortBy)); // должен быть 'login'
+
+    const usersParam = [...params, pageSize, offset];
     const totalQuery = `
       SELECT COUNT(*) as total_count
       FROM users
       ${where}
       `;
+    const totalParams = [...params];
 
     const [users, totalCount] = await Promise.all([
       this.dataSource.query<UserPostgresResponseDto[]>(usersQuery, usersParam),
-      this.dataSource.query<CountResponseDto[]>(totalQuery),
+      this.dataSource.query<CountResponseDto[]>(totalQuery, totalParams),
     ]);
 
     return {
@@ -88,20 +97,26 @@ export class UserPostRepository {
     return user;
   }
 
-  async isExistByLoginAndEmail(login: string, email: string): Promise<boolean> {
-    const row: { exists: boolean }[] = await this.dataSource.query(
+  async isExistByLoginAndEmail(
+    login: string,
+    email: string,
+  ): Promise<string | null> {
+    const row: { login: string; email: string }[] = await this.dataSource.query(
       `
-      SELECT EXISTS (
-		    SELECT 1
+		    SELECT login, email
 		    FROM public.users
 		    WHERE login = $1 OR email = $2
-	    )
     `,
       [login, email],
     );
-    const isExist = row[0].exists;
-    if (!isExist) return false;
-    return true;
+    if (row.length == 0) {
+      return null;
+    } else if (row[0].email === email) {
+      return 'email';
+    } else if (row[0].login === login) {
+      return 'login';
+    }
+    return null;
   }
 
   async findByLoginOrEmail(loginOrEmail: string): Promise<UserPostgres | null> {
@@ -159,7 +174,18 @@ export class UserPostRepository {
   async findByEmail(email: string): Promise<UserPostgres | null> {
     const row = await this.dataSource.query<UserPostgres[]>(
       `
-        SELECT *
+        SELECT
+        id, 
+        login, 
+        email, 
+        created_at as "createdAt", 
+        updated_at as "updatedAt", 
+        recovery_code as "recoveryCode", 
+        recovery_code_expire_date as "recoveryCodeExpireDate", 
+        is_confirmed as "isConfirmed", 
+        confirmation_code as "confirmationCode", 
+        confirmation_code_expire_date as "confirmationCodeExpireDate", 
+        password_hash as "passwordHash"
         FROM users
         WHERE email LIKE $1;
       `,
@@ -167,7 +193,6 @@ export class UserPostRepository {
     );
     const user = row[0];
     if (!user) {
-      console.log('Пользователя не существует');
       return null;
     }
     return this.toEntity(user);

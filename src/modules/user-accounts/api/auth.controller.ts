@@ -109,6 +109,7 @@ export class AuthController {
   @UseGuards(ThrottlerGuard)
   @Post('/registration')
   async registration(@Body() dto: CreateUserRequestDto): Promise<void> {
+    console.log(dto);
     return await this.commandBus.execute<RegistrationUserCommand, void>(
       new RegistrationUserCommand(dto),
     );

@@ -60,7 +60,6 @@ export class SessionRepository {
       `,
       [userId],
     );
-    console.log(row);
     const sessions = row;
     if (!sessions || sessions.length === 0) {
       return null;
@@ -89,7 +88,6 @@ export class SessionRepository {
       [userId, refreshToken],
     );
     const session = row[0];
-    console.log(session);
     if (!session) return null;
     return this.toEntity(session);
   }

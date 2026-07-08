@@ -30,6 +30,9 @@ import { Like, LikeSchema } from './likes/domain/like.entity';
 import { LikesRepository } from './likes/infrastructure/likes.repository';
 import { UserAccountsModule } from '../user-accounts/user-accounts.module';
 import { LikePostUseCase } from './posts/application/usecases/like-post.usecase';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { BlogsPostgres } from './blogs/domain/blog-postgres.entity';
+import { BlogsPostgresRepository } from './blogs/infrastructure/postgres/blogs.repository';
 
 const blogUseCases = [CreateBlogUseCase, UpdateBlogUseCase, DeleteBlogUseCase];
 const postUseCases = [
@@ -46,6 +49,7 @@ const commentUseCases = [
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([BlogsPostgres]),
     MongooseModule.forFeature([
       { name: Blog.name, schema: BlogSchema },
       { name: Post.name, schema: PostSchema },
@@ -61,6 +65,7 @@ const commentUseCases = [
     ...commentUseCases,
     BlogsService,
     BlogsRepository,
+    BlogsPostgresRepository,
     BlogsQwRepository,
     BlogMapper,
     PostsService,

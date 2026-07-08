@@ -31,7 +31,6 @@ export class RegistrationUserUseCase implements ICommandHandler<
       CreateUserCommand,
       UserResponseDto
     >(new CreateUserCommand(command.dto));
-
     const user = await this.userPostRepo.findById(userDto.id);
     if (!user) {
       throw new DomainException({

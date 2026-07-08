@@ -14,13 +14,12 @@ import {
 } from '../modules/blogger-platform/posts/domain/post.entity';
 import { Module } from '@nestjs/common';
 import {
-  User,
-  UserSchema,
-} from '../modules/user-accounts/domain/users/mongo/user.entity';
-import {
   Like,
   LikeSchema,
 } from '../modules/blogger-platform/likes/domain/like.entity';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Session } from '../modules/user-accounts/domain/sessions/session.entity';
+import { UserPostgres } from '../modules/user-accounts/domain/users/postgresql/user.postgres.entity';
 
 @Module({
   imports: [
@@ -28,9 +27,9 @@ import {
       { name: Blog.name, schema: BlogSchema },
       { name: Post.name, schema: PostSchema },
       { name: Comment.name, schema: CommentSchema },
-      { name: User.name, schema: UserSchema },
       { name: Like.name, schema: LikeSchema },
     ]),
+    TypeOrmModule.forFeature([UserPostgres, Session]),
   ],
   controllers: [TestingController],
 })
