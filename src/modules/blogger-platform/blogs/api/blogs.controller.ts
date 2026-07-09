@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
   Put,
   Query,
@@ -48,14 +49,14 @@ export class BlogsController {
     private postsService: PostsService,
   ) {}
 
-  // ❌ GET BLOG BY ID
+  // ✅ GET BLOG BY ID
   @ApiOperation({ summary: 'Returns blog by id' })
   @ApiOkResponse({ type: BlogResponseDto, description: 'Returns blog' })
   @ApiNotFoundResponse({ description: 'Blog not found' })
   @HttpCode(HttpStatus.OK)
   @Get('/:id')
   async getOneBlog(
-    @Param('id', ParseObjectIdPipe) id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ): Promise<BlogResponseDto> {
     return await this.blogsService.findById(id);
   }

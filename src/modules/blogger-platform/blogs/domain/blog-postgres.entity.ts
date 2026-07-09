@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { CreateBlogRequestDto } from '../dto/create-blog.request.dto';
 
-@Entity()
+@Entity({ name: 'blogs' })
 export class BlogsPostgres {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -23,10 +23,11 @@ export class BlogsPostgres {
   description: string;
 
   @Column({
-    name: 'websiteUrl',
+    name: 'website_url',
     type: 'varchar',
     length: 100,
     unique: false,
+    nullable: true,
   })
   websiteUrl: string;
 

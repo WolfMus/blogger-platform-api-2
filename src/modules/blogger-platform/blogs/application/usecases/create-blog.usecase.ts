@@ -1,9 +1,8 @@
 import { BlogResponseDto } from '../../dto/blog-response.dto';
 import { CreateBlogRequestDto } from '../../dto/create-blog.request.dto';
-import { BlogMapper } from '../../dto/mapper/blog.response.mapper';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BlogsPostgres } from '../../domain/blog-postgres.entity';
-import { BlogsPostgresRepository } from '../../infrastructure/postgres/blogs.repository';
+import { BlogsPostgresRepository } from '../../infrastructure/postgres/blogs-postgres.repository';
 
 export class CreateBlogCommand {
   constructor(public dto: CreateBlogRequestDto) {}
@@ -11,10 +10,7 @@ export class CreateBlogCommand {
 
 @CommandHandler(CreateBlogCommand)
 export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
-  constructor(
-    private blogsRepo: BlogsPostgresRepository,
-    private blogsMapper: BlogMapper,
-  ) {}
+  constructor(private blogsRepo: BlogsPostgresRepository) {}
 
   async execute(command: CreateBlogCommand): Promise<BlogResponseDto> {
     const blog = BlogsPostgres.createInstance(command.dto);

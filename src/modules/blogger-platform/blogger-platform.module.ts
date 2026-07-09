@@ -32,7 +32,8 @@ import { UserAccountsModule } from '../user-accounts/user-accounts.module';
 import { LikePostUseCase } from './posts/application/usecases/like-post.usecase';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BlogsPostgres } from './blogs/domain/blog-postgres.entity';
-import { BlogsPostgresRepository } from './blogs/infrastructure/postgres/blogs.repository';
+import { BlogsPostgresRepository } from './blogs/infrastructure/postgres/blogs-postgres.repository';
+import { BlogsPostgresQwRepository } from './blogs/infrastructure/postgres/query/blogs-query-postgres.repository';
 
 const blogUseCases = [CreateBlogUseCase, UpdateBlogUseCase, DeleteBlogUseCase];
 const postUseCases = [
@@ -67,6 +68,7 @@ const commentUseCases = [
     BlogsRepository,
     BlogsPostgresRepository,
     BlogsQwRepository,
+    BlogsPostgresQwRepository,
     BlogMapper,
     PostsService,
     PostsRepository,

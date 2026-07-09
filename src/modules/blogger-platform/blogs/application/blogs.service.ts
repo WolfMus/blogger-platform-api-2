@@ -8,16 +8,18 @@ import {
   DomainException,
   Extension,
 } from '../../../../core/exceptions/domain-exception';
+import { BlogsPostgresQwRepository } from '../infrastructure/postgres/query/blogs-query-postgres.repository';
 
 @Injectable()
 export class BlogsService {
   constructor(
     private blogsQueryRepo: BlogsQwRepository,
+    private blogsPostgresQueryRepo: BlogsPostgresQwRepository,
     private blogsMapper: BlogMapper,
   ) {}
 
   async findById(id: string): Promise<BlogResponseDto> {
-    const blog = await this.blogsQueryRepo.findById(id);
+    const blog = await this.blogsPostgresQueryRepo.findById(id);
     if (!blog) {
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,

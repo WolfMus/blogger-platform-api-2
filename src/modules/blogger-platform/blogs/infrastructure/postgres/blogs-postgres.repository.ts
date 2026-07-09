@@ -1,7 +1,6 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { DomainException, Extension } from '../../../../../core/exceptions/domain-exception';
 import { BlogsPostgres } from '../../domain/blog-postgres.entity';
 import { BlogResponseDto } from '../../dto/blog-response.dto';
 
@@ -14,11 +13,11 @@ export class BlogsPostgresRepository {
     private blogsRepo: Repository<BlogsPostgres>,
   ) {}
 
-  // async findById(id: string): Promise<BlogDocument | null> {
-  //   const blog = await this.BlogModel.findById(id);
-  //   if (!blog) return null;
-  //   return blog;
-  // }
+  async findById(id: string): Promise<BlogsPostgres | null> {
+    const blog = await this.blogsRepo.findOne({ where: { id } });
+    if (!blog) return null;
+    return blog;
+  }
 
   async create(blog: BlogsPostgres): Promise<BlogResponseDto> {
     const row: BlogResponseDto = await this.dataSource.query(
@@ -55,15 +54,18 @@ export class BlogsPostgresRepository {
     return;
   }
 
-  // async delete(id: number): Promise<void> {
-  //   const deletedBlog = await this.BlogModel.findByIdAndDelete(id);
-  //   if (deletedBlog === null) {
-  //     throw new DomainException({
-  //       code: HttpStatus.NOT_FOUND,
-  //       message: 'Not Found',
-  //       extensions: [new Extension('Blog Not Found', 'id')],
-  //     });
-  //   }
-  //   return;
-  // }
+  async deleteById(id: number): Promise<void | null> {
+    const row = await this.dataSource.query<{ id: string }>(
+      `
+      DELETE 
+      FROM public.users
+	    WHERE id = $1
+      RETURNING id;
+      `,
+      [id],
+    );
+
+    if (row[1] === 0) return null;
+    else return;
+  }
 }
