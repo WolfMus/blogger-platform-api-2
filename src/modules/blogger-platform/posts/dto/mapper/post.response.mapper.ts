@@ -1,23 +1,42 @@
 import { Injectable } from '@nestjs/common';
-import {
-  LikeStatus,
-  NewestLikes,
-  PostDocument,
-} from '../../domain/post.entity';
+import { LikeStatus, NewestLikes } from '../../domain/post.entity';
 import { PostResponseDto } from '../post.response.dto';
 import { PaginationInput } from '../../../../../core/dto/pagination.request.dto';
 import { PaginatedPostResponseDto } from '../post-paginated-view.response.dto';
 import { PostLikesAgg } from '../../../likes/infrastructure/likes.repository';
+import { PostViewDto } from '../post.view-model.dto';
 
 @Injectable()
 export class PostMapper {
-  toResponseView(
-    post: PostDocument,
+  toResponseDtoView(
+    post: PostViewDto,
     newestLikes: NewestLikes[] = [],
     likeStatus: LikeStatus = LikeStatus.None,
   ): PostResponseDto {
     return {
-      id: post._id.toString(),
+      id: post.id.toString(),
+      title: post.title,
+      shortDescription: post.shortDescription,
+      content: post.content,
+      blogId: post.blogId,
+      blogName: post.blogName,
+      createdAt: post.createdAt,
+      extendedLikesInfo: {
+        likesCount: post.likesCount,
+        dislikesCount: post.dislikesCount,
+        myStatus: likeStatus,
+        newestLikes: newestLikes,
+      },
+    };
+  }
+
+  toResponseView(
+    post: PostResponseDto,
+    newestLikes: NewestLikes[] = [],
+    likeStatus: LikeStatus = LikeStatus.None,
+  ): PostResponseDto {
+    return {
+      id: post.id.toString(),
       title: post.title,
       shortDescription: post.shortDescription,
       content: post.content,
@@ -34,7 +53,7 @@ export class PostMapper {
   }
 
   toResponsePaginatedView(
-    posts: PostDocument[],
+    posts: PostResponseDto[],
     paginationInput: PaginationInput,
     totalCount: number,
     likes: PostLikesAgg[] = [],
@@ -49,12 +68,12 @@ export class PostMapper {
       totalCount: totalCount,
       items: posts.map((post) => {
         const postLikes =
-          likes.find((l) => l._id.toString() === post._id.toString())
+          likes.find((l) => l._id.toString() === post.id.toString())
             ?.newestLikes || [];
         if (!statusMap) {
           return this.toResponseView(post, postLikes);
         }
-        const likeStatus = statusMap[post._id.toString()];
+        const likeStatus = statusMap[post.id.toString()];
         return this.toResponseView(post, postLikes, likeStatus);
       }),
     };

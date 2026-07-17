@@ -34,11 +34,21 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { BlogsPostgres } from './blogs/domain/blog-postgres.entity';
 import { BlogsPostgresRepository } from './blogs/infrastructure/postgres/blogs-postgres.repository';
 import { BlogsPostgresQwRepository } from './blogs/infrastructure/postgres/query/blogs-query-postgres.repository';
+import { SuperAdminBlogsController } from './blogs/api/blogs-sa.controller';
+import { PostsPostgresRepository } from './posts/infrastructure/postgres/posts-postgres.repository';
+import { PostsQwPostgresRepository } from './posts/infrastructure/postgres/posts-query-postgres.repository';
+import { PostsPostgres } from './posts/domain/post-postgres.entity';
+import { UpdatePostByBlogIdUseCase } from './posts/application/usecases/update-post-by-blogid.usecase copy';
 
-const blogUseCases = [CreateBlogUseCase, UpdateBlogUseCase, DeleteBlogUseCase];
+const blogUseCases = [
+  CreateBlogUseCase,
+  UpdateBlogUseCase,
+  DeleteBlogUseCase,
+];
 const postUseCases = [
   CreatePostUseCase,
   UpdatePostUseCase,
+  UpdatePostByBlogIdUseCase,
   DeletePostUseCase,
   LikePostUseCase,
 ];
@@ -50,7 +60,7 @@ const commentUseCases = [
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([BlogsPostgres]),
+    TypeOrmModule.forFeature([BlogsPostgres, PostsPostgres]),
     MongooseModule.forFeature([
       { name: Blog.name, schema: BlogSchema },
       { name: Post.name, schema: PostSchema },
@@ -59,7 +69,12 @@ const commentUseCases = [
     ]),
     UserAccountsModule,
   ],
-  controllers: [BlogsController, PostsController, CommentsController],
+  controllers: [
+    BlogsController,
+    SuperAdminBlogsController,
+    PostsController,
+    CommentsController,
+  ],
   providers: [
     ...blogUseCases,
     ...postUseCases,
@@ -72,7 +87,9 @@ const commentUseCases = [
     BlogMapper,
     PostsService,
     PostsRepository,
+    PostsPostgresRepository,
     PostsQwRepository,
+    PostsQwPostgresRepository,
     PostMapper,
     CommentsService,
     CommentsRepository,

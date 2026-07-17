@@ -5,6 +5,7 @@ import {
   NewestLikes,
   PostDocument,
 } from '../domain/post.entity';
+import { PostsPostgres } from '../domain/post-postgres.entity';
 
 @ApiSchema({ name: 'PostResponseDto' })
 export class PostResponseDto {
@@ -53,6 +54,28 @@ export class PostResponseDto {
       extendedLikesInfo: {
         likesCount: post.extendedLikesInfo.likesCount,
         dislikesCount: post.extendedLikesInfo.dislikesCount,
+        myStatus: likeStatus,
+        newestLikes: newestLikes,
+      },
+    };
+  }
+
+  static mapToViewPostgres(
+    post: PostsPostgres,
+    newestLikes: NewestLikes[] = [],
+    likeStatus: LikeStatus = LikeStatus.None,
+  ): PostResponseDto {
+    return {
+      id: post.id.toString(),
+      title: post.title,
+      shortDescription: post.shortDescription,
+      content: post.content,
+      blogId: post.blogId,
+      blogName: post.blogName,
+      createdAt: post.createdAt,
+      extendedLikesInfo: {
+        likesCount: post.likesCount,
+        dislikesCount: post.dislikesCount,
         myStatus: likeStatus,
         newestLikes: newestLikes,
       },

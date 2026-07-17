@@ -14,6 +14,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserPostgres } from './modules/user-accounts/domain/users/postgresql/user.postgres.entity';
 import { Session } from './modules/user-accounts/domain/sessions/session.entity';
 import { BlogsPostgres } from './modules/blogger-platform/blogs/domain/blog-postgres.entity';
+import { PostsPostgres } from './modules/blogger-platform/posts/domain/post-postgres.entity';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { BlogsPostgres } from './modules/blogger-platform/blogs/domain/blog-post
       username: 'postgres',
       password: 'severe',
       database: 'BloggerPlatformAPII',
-      entities: [UserPostgres, Session, BlogsPostgres],
+      entities: [UserPostgres, Session, BlogsPostgres, PostsPostgres],
       synchronize: true,
     }),
     ConfigModule.forRoot({ isGlobal: true }),

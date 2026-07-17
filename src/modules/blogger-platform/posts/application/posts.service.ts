@@ -1,34 +1,22 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import {
-  LikeStatus,
-  NewestLikes,
-  Post,
-  type PostModelType,
-} from '../domain/post.entity';
-import {
-  CreatePostForBlogRequestDto,
-  CreatePostRequestDto,
-} from '../dto/create-post.request.dto';
-import { PostsRepository } from '../infrastructure/posts.repository';
+import { LikeStatus, NewestLikes } from '../domain/post.entity';
 import { PostMapper } from '../dto/mapper/post.response.mapper';
 import { PostResponseDto } from '../dto/post.response.dto';
 import { PaginationInput } from '../../../../core/dto/pagination.request.dto';
 import { PaginatedPostResponseDto } from '../dto/post-paginated-view.response.dto';
-import { PostsQwRepository } from '../infrastructure/posts-query.repository';
 import {
   DomainException,
   Extension,
 } from '../../../../core/exceptions/domain-exception';
 import { LikesRepository } from '../../likes/infrastructure/likes.repository';
+import { PostsQwPostgresRepository } from '../infrastructure/postgres/posts-query-postgres.repository';
+import { PostsPostgresRepository } from '../infrastructure/postgres/posts-postgres.repository';
 
 @Injectable()
 export class PostsService {
   constructor(
-    @InjectModel(Post.name)
-    private PostModel: PostModelType,
-    private postsRepo: PostsRepository,
-    private postsQueryRepo: PostsQwRepository,
+    private postsPostgresRepo: PostsPostgresRepository,
+    private postsQueryPostRepo: PostsQwPostgresRepository,
     private postMapper: PostMapper,
     private likesRepo: LikesRepository,
   ) {}
@@ -39,11 +27,12 @@ export class PostsService {
   ): Promise<PaginatedPostResponseDto> {
     // Получение постов и totalCount
     const { posts, totalCount } =
-      await this.postsQueryRepo.findAll(paginationInput);
+      await this.postsQueryPostRepo.findAll(paginationInput);
+    const postsMapped = posts.map((p) => this.postMapper.toResponseDtoView(p));
 
     // Сбор ID постов для поиска лайков
-    const postsIds = posts.map((post) => {
-      return post._id.toString();
+    const postsIds = postsMapped.map((post) => {
+      return post.id.toString();
     });
 
     // Получение последних 3 лайков для каждого поста
@@ -59,7 +48,7 @@ export class PostsService {
 
       if (!statuses) {
         return this.postMapper.toResponsePaginatedView(
-          posts,
+          postsMapped,
           paginationInput,
           totalCount,
           likes,
@@ -72,7 +61,7 @@ export class PostsService {
 
       // Возврат со статусами пользователей
       return this.postMapper.toResponsePaginatedView(
-        posts,
+        postsMapped,
         paginationInput,
         totalCount,
         likes,
@@ -82,7 +71,7 @@ export class PostsService {
 
     // Возврат без статусов пользователя
     return this.postMapper.toResponsePaginatedView(
-      posts,
+      postsMapped,
       paginationInput,
       totalCount,
       likes,
@@ -95,14 +84,15 @@ export class PostsService {
     userId: string,
   ): Promise<PaginatedPostResponseDto> {
     // Получение постов и totalCount
-    const { posts, totalCount } = await this.postsQueryRepo.findAllByBlogId(
+    const { posts, totalCount } = await this.postsQueryPostRepo.findAllByBlogId(
       paginationInput,
       blogId,
     );
+    const postsMapped = posts.map((p) => this.postMapper.toResponseDtoView(p));
 
     // Сбор ID постов для поиска лайков
-    const postsIds = posts.map((post) => {
-      return post._id.toString();
+    const postsIds = postsMapped.map((post) => {
+      return post.id.toString();
     });
 
     // Получение последних 3 лайков для каждого поста
@@ -118,7 +108,7 @@ export class PostsService {
 
       if (!statuses) {
         return this.postMapper.toResponsePaginatedView(
-          posts,
+          postsMapped,
           paginationInput,
           totalCount,
           likes,
@@ -131,7 +121,7 @@ export class PostsService {
 
       // Возврат со статусами пользователей
       return this.postMapper.toResponsePaginatedView(
-        posts,
+        postsMapped,
         paginationInput,
         totalCount,
         likes,
@@ -141,7 +131,7 @@ export class PostsService {
 
     // Возврат без статусов пользователя
     return this.postMapper.toResponsePaginatedView(
-      posts,
+      postsMapped,
       paginationInput,
       totalCount,
       likes,
@@ -150,7 +140,7 @@ export class PostsService {
 
   async findById(id: string, userId: string | null): Promise<PostResponseDto> {
     // Существование поста
-    const post = await this.postsRepo.findById(id);
+    const post = await this.postsPostgresRepo.findById(id);
     if (!post) {
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,
@@ -184,26 +174,26 @@ export class PostsService {
     );
   }
 
-  async create(
-    dto: CreatePostRequestDto,
-    blogName: string,
-  ): Promise<PostResponseDto> {
-    const post = this.PostModel.createInstance(dto, blogName);
-    await this.postsRepo.save(post);
-    return this.postMapper.toResponseView(post);
-  }
+  // async create(
+  //   dto: CreatePostRequestDto,
+  //   blogName: string,
+  // ): Promise<PostResponseDto> {
+  //   const post = PostsPostgres.createInstance(dto, blogName);
+  //   await this.postsPostgresRepo.save(post);
+  //   return this.postMapper.toResponseView(post);
+  // }
 
-  async createForBlog(
-    dto: CreatePostForBlogRequestDto,
-    blogId: string,
-    blogName: string,
-  ): Promise<PostResponseDto> {
-    const postData: CreatePostRequestDto = {
-      ...dto,
-      blogId,
-    };
-    const post = this.PostModel.createInstance(postData, blogName);
-    await this.postsRepo.save(post);
-    return this.postMapper.toResponseView(post);
-  }
+  // async createForBlog(
+  //   dto: CreatePostForBlogRequestDto,
+  //   blogId: string,
+  //   blogName: string,
+  // ): Promise<PostResponseDto> {
+  //   const postData: CreatePostRequestDto = {
+  //     ...dto,
+  //     blogId,
+  //   };
+  //   const post = PostsPostgres.createInstance(postData, blogName);
+  //   await this.postsPostgresRepo.save(post);
+  //   return this.postMapper.toResponseView(post);
+  // }
 }

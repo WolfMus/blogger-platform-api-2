@@ -61,9 +61,6 @@ export class UserPostRepository {
 	      OFFSET $${params.length + 2};
     `;
 
-    console.log(usersQuery);
-    console.log('toSnakeCase(sortBy):', this.toSnakeCase(sortBy)); // должен быть 'login'
-
     const usersParam = [...params, pageSize, offset];
     const totalQuery = `
       SELECT COUNT(*) as total_count

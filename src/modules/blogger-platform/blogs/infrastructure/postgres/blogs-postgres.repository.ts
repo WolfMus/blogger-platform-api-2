@@ -58,7 +58,7 @@ export class BlogsPostgresRepository {
     const row = await this.dataSource.query<{ id: string }>(
       `
       DELETE 
-      FROM public.users
+      FROM public.blogs
 	    WHERE id = $1
       RETURNING id;
       `,

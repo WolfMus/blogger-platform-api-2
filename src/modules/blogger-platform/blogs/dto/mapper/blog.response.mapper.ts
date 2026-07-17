@@ -1,12 +1,11 @@
 import { PaginationInput } from '../../../../../core/dto/pagination.request.dto';
-import { BlogDocument } from '../../domain/blog.entity';
 import { BlogResponseDto } from '../blog-response.dto';
 import { PaginatedBlogResponseDto } from '../blog-paginated-view.response.dto';
 
 export class BlogMapper {
-  toResponseView(blog: BlogDocument): BlogResponseDto {
+  toResponseView(blog: BlogResponseDto): BlogResponseDto {
     return {
-      id: blog._id.toString(),
+      id: blog.id.toString(),
       name: blog.name,
       description: blog.description,
       websiteUrl: blog.websiteUrl,
@@ -16,7 +15,7 @@ export class BlogMapper {
   }
 
   toResponsePaginatedView(
-    blogs: BlogDocument[],
+    blogs: BlogResponseDto[],
     paginationInput: PaginationInput,
     totalCount: number,
   ): PaginatedBlogResponseDto {

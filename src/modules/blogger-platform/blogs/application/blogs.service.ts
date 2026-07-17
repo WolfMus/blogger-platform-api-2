@@ -34,7 +34,7 @@ export class BlogsService {
     paginationInput: BlogPaginationRequest,
   ): Promise<PaginatedBlogResponseDto> {
     const { blogs, totalCount } =
-      await this.blogsQueryRepo.findAll(paginationInput);
+      await this.blogsPostgresQueryRepo.findAll(paginationInput);
     return this.blogsMapper.toResponsePaginatedView(
       blogs,
       paginationInput,
