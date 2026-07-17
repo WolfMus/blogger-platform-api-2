@@ -39,9 +39,10 @@ import { CreatePostCommand } from '../../posts/application/usecases/create-post.
 import { BasicAuthGuard } from '../../../user-accounts/guards/basic/basic-auth.guard';
 import { OptionalJwtAuthGuard } from '../../../user-accounts/guards/bearer/optional-jwt-auth.guard';
 import type { Request } from 'express';
-import { UpdatePostByBlogIdCommand } from '../../posts/application/usecases/update-post-by-blogid.usecase copy';
+import { UpdatePostByBlogIdCommand } from '../../posts/application/usecases/update-post-by-blogid.usecase';
+import { DeletePostByBlogIdCommand } from '../../posts/application/usecases/delete-post-by-blogid.usecase';
 
-@ApiTags('Blogs')
+@ApiTags('Super Admin')
 @Controller('sa/blogs')
 export class SuperAdminBlogsController {
   constructor(
@@ -55,6 +56,7 @@ export class SuperAdminBlogsController {
   @ApiOperation({ summary: 'Returns blogs with pagination' })
   @ApiOkResponse({ type: PaginatedBlogResponseDto, description: 'Success' })
   @HttpCode(HttpStatus.OK)
+  @UseGuards(BasicAuthGuard)
   @Get()
   async getAllBlogs(
     @Query() paginationInput: BlogPaginationRequest,
@@ -155,7 +157,7 @@ export class SuperAdminBlogsController {
     );
   }
 
-  // ✅ UPDATE POST BY POSTID AND BLOGID
+  // ✅ UPDATE POST BY BLOG_ID
   @ApiOperation({ summary: 'Update blog by id' })
   @ApiNoContentResponse({ description: 'No Content' })
   @ApiNotFoundResponse({ description: 'Post Not Found' })
@@ -169,6 +171,22 @@ export class SuperAdminBlogsController {
   ): Promise<void> {
     return this.commandBus.execute<UpdatePostByBlogIdCommand, void>(
       new UpdatePostByBlogIdCommand(dto, postId, blogId),
+    );
+  }
+
+  // ✅ DELETE POST BY BLOG_ID
+  @ApiOperation({ summary: 'Delete post by id' })
+  @ApiNoContentResponse({ description: 'No content' })
+  @ApiNotFoundResponse({ description: 'Post Not Found' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(BasicAuthGuard)
+  @Delete('/:blogId/posts/:postId')
+  async deletePost(
+    @Param('postId', ParseUUIDPipe) postId: string,
+    @Param('blogId', ParseUUIDPipe) blogId: string,
+  ): Promise<void> {
+    return this.commandBus.execute<DeletePostByBlogIdCommand, void>(
+      new DeletePostByBlogIdCommand(postId, blogId),
     );
   }
 }

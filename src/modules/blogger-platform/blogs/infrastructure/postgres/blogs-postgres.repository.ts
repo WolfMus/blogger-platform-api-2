@@ -20,7 +20,7 @@ export class BlogsPostgresRepository {
   }
 
   async create(blog: BlogsPostgres): Promise<BlogResponseDto> {
-    const row: BlogResponseDto = await this.dataSource.query(
+    const row: BlogResponseDto[] = await this.dataSource.query(
       `
         INSERT INTO public.blogs(
           name,
@@ -45,8 +45,7 @@ export class BlogsPostgresRepository {
         blog.createdAt,
       ],
     );
-
-    return row;
+    return row[0];
   }
 
   async save(blog: BlogsPostgres): Promise<void> {

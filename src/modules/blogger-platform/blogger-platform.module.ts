@@ -38,7 +38,8 @@ import { SuperAdminBlogsController } from './blogs/api/blogs-sa.controller';
 import { PostsPostgresRepository } from './posts/infrastructure/postgres/posts-postgres.repository';
 import { PostsQwPostgresRepository } from './posts/infrastructure/postgres/posts-query-postgres.repository';
 import { PostsPostgres } from './posts/domain/post-postgres.entity';
-import { UpdatePostByBlogIdUseCase } from './posts/application/usecases/update-post-by-blogid.usecase copy';
+import { UpdatePostByBlogIdUseCase } from './posts/application/usecases/update-post-by-blogid.usecase';
+import { DeletePostByBlogIdUseCase } from './posts/application/usecases/delete-post-by-blogid.usecase';
 
 const blogUseCases = [
   CreateBlogUseCase,
@@ -50,6 +51,7 @@ const postUseCases = [
   UpdatePostUseCase,
   UpdatePostByBlogIdUseCase,
   DeletePostUseCase,
+  DeletePostByBlogIdUseCase,
   LikePostUseCase,
 ];
 const commentUseCases = [

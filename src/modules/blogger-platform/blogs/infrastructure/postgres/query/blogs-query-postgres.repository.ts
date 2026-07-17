@@ -51,6 +51,9 @@ export class BlogsPostgresQwRepository {
       conditions.push(`name ILIKE $${params.length}`);
     }
 
+    const where =
+      conditions.length > 0 ? `WHERE ${conditions.join(' OR ')}` : '';
+
     const blogsQuery = `
         SELECT
         id,
@@ -60,7 +63,7 @@ export class BlogsPostgresQwRepository {
         created_at as "createdAt",
         is_membership as "isMembership"
           FROM blogs
-            ${conditions[0]}
+            ${where}
             ORDER BY ${this.toSnakeCase(sortBy)} ${sortDirection.toUpperCase()}
             LIMIT $${params.length + 1}
             OFFSET $${params.length + 2};
@@ -70,7 +73,7 @@ export class BlogsPostgresQwRepository {
     const totalQuery = `
         SELECT COUNT(*) as total_count
         FROM blogs
-        ${conditions[0]}
+        ${where}
         `;
     const totalParams = [...params];
 

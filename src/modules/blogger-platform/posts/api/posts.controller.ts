@@ -51,18 +51,18 @@ export class PostsController {
   ) {}
 
   // CREATE POST
-  @ApiOperation({ summary: 'Returns created post' })
-  @ApiOkResponse({ type: PostResponseDto, description: 'Post created' })
-  @HttpCode(HttpStatus.CREATED)
-  @UseGuards(BasicAuthGuard)
-  @Post()
-  async createPost(
-    @Body() dto: CreatePostRequestDto,
-  ): Promise<PostResponseDto> {
-    return this.commandBus.execute<CreatePostCommand, PostResponseDto>(
-      new CreatePostCommand(dto),
-    );
-  }
+  // @ApiOperation({ summary: 'Returns created post' })
+  // @ApiOkResponse({ type: PostResponseDto, description: 'Post created' })
+  // @HttpCode(HttpStatus.CREATED)
+  // @UseGuards(BasicAuthGuard)
+  // @Post()
+  // async createPost(
+  //   @Body() dto: CreatePostRequestDto,
+  // ): Promise<PostResponseDto> {
+  //   return this.commandBus.execute<CreatePostCommand, PostResponseDto>(
+  //     new CreatePostCommand(dto),
+  //   );
+  // }
 
   // FIND POST BY ID
   @ApiOperation({ summary: 'Return blog by id' })
@@ -101,33 +101,33 @@ export class PostsController {
   }
 
   // UPDATE POST BY ID
-  @ApiOperation({ summary: 'Update blog by id' })
-  @ApiNoContentResponse({ description: 'No Content' })
-  @ApiNotFoundResponse({ description: 'Post Not Found' })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(BasicAuthGuard)
-  @Put('/:id')
-  async updatePost(
-    @Param('id') id: string,
-    @Body() dto: CreatePostRequestDto,
-  ): Promise<void> {
-    return this.commandBus.execute<UpdatePostCommand, void>(
-      new UpdatePostCommand(dto, id),
-    );
-  }
+  // @ApiOperation({ summary: 'Update blog by id' })
+  // @ApiNoContentResponse({ description: 'No Content' })
+  // @ApiNotFoundResponse({ description: 'Post Not Found' })
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // @UseGuards(BasicAuthGuard)
+  // @Put('/:id')
+  // async updatePost(
+  //   @Param('id') id: string,
+  //   @Body() dto: CreatePostRequestDto,
+  // ): Promise<void> {
+  //   return this.commandBus.execute<UpdatePostCommand, void>(
+  //     new UpdatePostCommand(dto, id),
+  //   );
+  // }
 
   // DELETE POST
-  @ApiOperation({ summary: 'Delete post by id' })
-  @ApiNoContentResponse({ description: 'No content' })
-  @ApiNotFoundResponse({ description: 'Post Not Found' })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(BasicAuthGuard)
-  @Delete('/:id')
-  async deletePost(@Param('id') id: string): Promise<void> {
-    return this.commandBus.execute<DeletePostCommand, void>(
-      new DeletePostCommand(id),
-    );
-  }
+  // @ApiOperation({ summary: 'Delete post by id' })
+  // @ApiNoContentResponse({ description: 'No content' })
+  // @ApiNotFoundResponse({ description: 'Post Not Found' })
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // @UseGuards(BasicAuthGuard)
+  // @Delete('/:id')
+  // async deletePost(@Param('id') id: string): Promise<void> {
+  //   return this.commandBus.execute<DeletePostCommand, void>(
+  //     new DeletePostCommand(id),
+  //   );
+  // }
 
   // LIKE/DISLIKE POST
   @HttpCode(HttpStatus.NO_CONTENT)

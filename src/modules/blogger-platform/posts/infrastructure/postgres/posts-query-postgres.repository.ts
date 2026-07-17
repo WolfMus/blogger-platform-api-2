@@ -62,7 +62,6 @@ export class PostsQwPostgresRepository {
     const totalQuery = `
         SELECT COUNT(*) as total_count
         FROM posts
-        WHERE blog_id = $1
         `;
 
     const [posts, totalCount] = await Promise.all([

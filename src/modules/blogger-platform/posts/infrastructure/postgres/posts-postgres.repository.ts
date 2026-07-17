@@ -65,6 +65,25 @@ export class PostsPostgresRepository {
     else return;
   }
 
+  async deleteByPostIdAndBlogId(
+    postId: string,
+    blogId: string,
+  ): Promise<boolean> {
+    const row = await this.dataSource.query<{ id: string }>(
+      `
+      DELETE 
+      FROM public.posts
+	    WHERE id = $1 AND blog_id = $2
+      RETURNING id;
+      `,
+      [postId, blogId],
+    );
+    if (row[1] == 1) {
+      return true;
+    }
+    return false;
+  }
+
   // async changeCounts(
   //   deltaLike: number,
   //   deltaDislike: number,
