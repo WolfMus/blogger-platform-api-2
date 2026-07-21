@@ -2,11 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { LikeStatus } from '../../posts/domain/post.entity';
 import { HydratedDocument, Model } from 'mongoose';
 import { CreateLikeEntityDto } from './dto/create-likes.entity.dto';
-
-export enum EntityType {
-  Post = 'Post',
-  Comment = 'Comment',
-}
+import { EntityType } from '../types/entity-type.enum';
 
 @Schema({ collection: 'likes' })
 export class Like {

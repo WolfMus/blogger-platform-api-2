@@ -6,14 +6,11 @@ import {
   Extension,
 } from '../../../../../core/exceptions/domain-exception';
 import { HttpStatus } from '@nestjs/common';
-import {
-  EntityType,
-  Like,
-  type LikeModelType,
-} from '../../../likes/domain/like.entity';
+import { Like, type LikeModelType } from '../../../likes/domain/like.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { LikesRepository } from '../../../likes/infrastructure/likes.repository';
 import { LikeRequestDto } from '../../../likes/dto/like.request.dto';
+import { EntityType } from '../../../likes/types/entity-type.enum';
 
 export class LikeCommentCommand {
   constructor(

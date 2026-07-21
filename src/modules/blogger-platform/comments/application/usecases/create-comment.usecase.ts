@@ -1,17 +1,16 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CommentResponseDto } from '../../dto/comment.response.dto';
-import { PostsQwRepository } from '../../../posts/infrastructure/posts-query.repository';
 import {
   DomainException,
   Extension,
 } from '../../../../../core/exceptions/domain-exception';
 import { HttpStatus } from '@nestjs/common';
 import { CreateCommentEntityDto } from '../../dto/create-comment.entity.dto';
-import { Comment, type CommentModelType } from '../../domain/comment.entity';
-import { InjectModel } from '@nestjs/mongoose';
-import { CommentsRepository } from '../../infrastructure/comments.repository';
 import { CommentMapper } from '../../dto/mapper/comment.response.mapper';
 import { CreateCommentRequestDto } from '../../dto/create-comment.request.dto';
+import { PostsQwPostgresRepository } from '../../../posts/infrastructure/postgres/posts-query-postgres.repository';
+import { CommentPostgres } from '../../domain/comment-postgres';
+import { CommentsPostgresRepository } from '../../infrastructure/comments-postgres.repository';
 
 export class CreateCommentCommand {
   constructor(
@@ -27,11 +26,9 @@ export class CreateCommentUseCase implements ICommandHandler<
   CommentResponseDto
 > {
   constructor(
-    @InjectModel(Comment.name)
-    private CommentModel: CommentModelType,
-    private commentRepo: CommentsRepository,
-    private postQueryRepo: PostsQwRepository,
     private commentMapper: CommentMapper,
+    private commentRepo: CommentsPostgresRepository,
+    private postQueryRepo: PostsQwPostgresRepository,
   ) {}
   async execute(command: CreateCommentCommand): Promise<CommentResponseDto> {
     // Пост существует?
@@ -40,7 +37,7 @@ export class CreateCommentUseCase implements ICommandHandler<
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,
         message: 'Not Found',
-        extensions: [new Extension('Comment', 'Comment Not Found')],
+        extensions: [new Extension('Post Not Found', 'id')],
       });
     }
 
@@ -52,14 +49,14 @@ export class CreateCommentUseCase implements ICommandHandler<
     };
 
     // Создание комментария
-    const comment = this.CommentModel.createInstance(
+    const comment = CommentPostgres.createInstance(
       createCommentDto,
       command.postId,
     );
 
     // Сохранение
-    await this.commentRepo.save(comment);
+    const commentCreated = await this.commentRepo.create(comment);
 
-    return this.commentMapper.toResponseView(comment);
+    return this.commentMapper.toResponsePostgresView(commentCreated);
   }
 }

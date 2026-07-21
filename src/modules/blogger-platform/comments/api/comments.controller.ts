@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Put,
   Req,
   UseGuards,
@@ -38,7 +39,7 @@ export class CommentsController {
     private commandBus: CommandBus,
   ) {}
 
-  // FIND COMMENT BY ID
+  // ✅ FIND COMMENT BY ID
   @ApiOperation({ summary: 'Returns comment by id' })
   @ApiOkResponse({ type: CommentResponseDto, description: 'Success' })
   @ApiNotFoundResponse({ description: 'Comment Not Found' })
@@ -46,14 +47,14 @@ export class CommentsController {
   @UseGuards(OptionalJwtAuthGuard)
   @Get('/:id')
   async getOne(
-    @Param('id', ParseObjectIdPipe) id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Req() req: Request,
   ): Promise<CommentResponseDto> {
     const userInfo = req.user as { userId: string; login: string };
     return await this.commentsService.findById(id, userInfo.userId);
   }
 
-  // UPDATE COMMENT
+  // ✅ UPDATE COMMENT
   @ApiOperation({ summary: 'Update comment by id' })
   @ApiOkResponse({ description: 'No Content' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
@@ -66,7 +67,7 @@ export class CommentsController {
   @Put('/:id')
   async update(
     @Req() req: Request,
-    @Param('id', ParseObjectIdPipe) id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CreateCommentRequestDto,
   ): Promise<void> {
     const userInfo = req.user as { userId: string; login: string };
@@ -75,7 +76,7 @@ export class CommentsController {
     );
   }
 
-  // DELETE COMMENT
+  // ✅ DELETE COMMENT
   @ApiOperation({ summary: 'Delete comment by id' })
   @ApiOkResponse({ description: 'No Content' })
   @ApiNotFoundResponse({ description: 'Comment Not Found' })
@@ -84,13 +85,13 @@ export class CommentsController {
   @Delete('/:id')
   async delete(
     @Req() req: Request,
-    @Param('id', ParseObjectIdPipe) id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ): Promise<void> {
     const userInfo = req.user as { userId: string; login: string };
     return await this.commentsService.delete(id, userInfo.userId);
   }
 
-  // LIKE/DISLIKE COMMMENT
+  // ❌ LIKE/DISLIKE COMMMENT
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
   @Put('/:commentId/like-status')

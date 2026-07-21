@@ -40,12 +40,11 @@ import { PostsQwPostgresRepository } from './posts/infrastructure/postgres/posts
 import { PostsPostgres } from './posts/domain/post-postgres.entity';
 import { UpdatePostByBlogIdUseCase } from './posts/application/usecases/update-post-by-blogid.usecase';
 import { DeletePostByBlogIdUseCase } from './posts/application/usecases/delete-post-by-blogid.usecase';
+import { CommentPostgres } from './comments/domain/comment-postgres';
+import { CommentsPostgresRepository } from './comments/infrastructure/comments-postgres.repository';
+import { LikePostgres } from './likes/domain/like-sql.entity';
 
-const blogUseCases = [
-  CreateBlogUseCase,
-  UpdateBlogUseCase,
-  DeleteBlogUseCase,
-];
+const blogUseCases = [CreateBlogUseCase, UpdateBlogUseCase, DeleteBlogUseCase];
 const postUseCases = [
   CreatePostUseCase,
   UpdatePostUseCase,
@@ -62,7 +61,12 @@ const commentUseCases = [
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([BlogsPostgres, PostsPostgres]),
+    TypeOrmModule.forFeature([
+      BlogsPostgres,
+      PostsPostgres,
+      CommentPostgres,
+      LikePostgres,
+    ]),
     MongooseModule.forFeature([
       { name: Blog.name, schema: BlogSchema },
       { name: Post.name, schema: PostSchema },
@@ -95,6 +99,7 @@ const commentUseCases = [
     PostMapper,
     CommentsService,
     CommentsRepository,
+    CommentsPostgresRepository,
     CommentMapper,
     LikesRepository,
   ],

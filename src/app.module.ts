@@ -15,6 +15,8 @@ import { UserPostgres } from './modules/user-accounts/domain/users/postgresql/us
 import { Session } from './modules/user-accounts/domain/sessions/session.entity';
 import { BlogsPostgres } from './modules/blogger-platform/blogs/domain/blog-postgres.entity';
 import { PostsPostgres } from './modules/blogger-platform/posts/domain/post-postgres.entity';
+import { CommentPostgres } from './modules/blogger-platform/comments/domain/comment-postgres';
+import { LikePostgres } from './modules/blogger-platform/likes/domain/like-sql.entity';
 
 @Module({
   imports: [
@@ -25,7 +27,14 @@ import { PostsPostgres } from './modules/blogger-platform/posts/domain/post-post
       username: 'postgres',
       password: 'severe',
       database: 'BloggerPlatformAPII',
-      entities: [UserPostgres, Session, BlogsPostgres, PostsPostgres],
+      entities: [
+        UserPostgres,
+        Session,
+        BlogsPostgres,
+        PostsPostgres,
+        CommentPostgres,
+        LikePostgres,
+      ],
       synchronize: true,
     }),
     ConfigModule.forRoot({ isGlobal: true }),

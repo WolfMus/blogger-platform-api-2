@@ -1,5 +1,5 @@
 import { LikeStatus } from '../../../posts/domain/post.entity';
-import { EntityType } from '../like.entity';
+import { EntityType } from '../../types/entity-type.enum';
 
 export class CreateLikeEntityDto {
   entityId: string;

@@ -1,11 +1,11 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CommentsRepository } from '../../infrastructure/comments.repository';
 import {
   DomainException,
   Extension,
 } from '../../../../../core/exceptions/domain-exception';
 import { HttpStatus } from '@nestjs/common';
 import { CreateCommentRequestDto } from '../../dto/create-comment.request.dto';
+import { CommentsPostgresRepository } from '../../infrastructure/comments-postgres.repository';
 
 export class UpdateCommentCommand {
   constructor(
@@ -20,7 +20,7 @@ export class UpdateCommentUseCase implements ICommandHandler<
   UpdateCommentCommand,
   void
 > {
-  constructor(private commentRepo: CommentsRepository) {}
+  constructor(private commentRepo: CommentsPostgresRepository) {}
   async execute(command: UpdateCommentCommand): Promise<void> {
     // Существует ли комментарий
     const comment = await this.commentRepo.findById(command.id);
@@ -32,7 +32,7 @@ export class UpdateCommentUseCase implements ICommandHandler<
       });
     }
     // Твои ли комментарий
-    if (comment.commentatorInfo.userId !== command.userInfo.userId) {
+    if (comment.userId !== command.userInfo.userId) {
       throw new DomainException({
         code: HttpStatus.FORBIDDEN,
         message: 'Forbidden',

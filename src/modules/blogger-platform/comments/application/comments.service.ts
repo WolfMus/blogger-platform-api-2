@@ -11,21 +11,25 @@ import {
 import { LikesRepository } from '../../likes/infrastructure/likes.repository';
 import { LikeStatus } from '../../posts/domain/post.entity';
 import { PostsRepository } from '../../posts/infrastructure/posts.repository';
+import { PostsPostgresRepository } from '../../posts/infrastructure/postgres/posts-postgres.repository';
+import { CommentsPostgresRepository } from '../infrastructure/comments-postgres.repository';
 
 @Injectable()
 export class CommentsService {
   constructor(
     private commentsRepo: CommentsRepository,
+    private commentsPostgresRepo: CommentsPostgresRepository,
     private commentMapper: CommentMapper,
     private likesRepo: LikesRepository,
     private postsRepo: PostsRepository,
+    private postsPostgresRepo: PostsPostgresRepository,
   ) {}
 
   async findById(
     id: string,
     userId: string | null,
   ): Promise<CommentResponseDto> {
-    const comment = await this.commentsRepo.findById(id);
+    const comment = await this.commentsPostgresRepo.findById(id);
     if (!comment) {
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,
@@ -34,14 +38,14 @@ export class CommentsService {
       });
     }
     if (!userId) {
-      return this.commentMapper.toResponseView(comment);
+      return this.commentMapper.toResponsePostgresView(comment);
     }
 
     const like = await this.likesRepo.findByEntityIdAndUserId(id, userId);
     if (!like) {
-      return this.commentMapper.toResponseView(comment);
+      return this.commentMapper.toResponsePostgresView(comment);
     }
-    return this.commentMapper.toResponseView(comment, like.likeStatus);
+    return this.commentMapper.toResponsePostgresView(comment, like.likeStatus);
   }
 
   async findAll(
@@ -56,12 +60,12 @@ export class CommentsService {
     );
   }
 
-  async findAllForPost(
+  async findAllByPostId(
     paginationInput: PaginationInput,
     postId: string,
     userId: string | null = null,
   ): Promise<PaginatedCommentResponseDto> {
-    const post = await this.postsRepo.findById(postId);
+    const post = await this.postsPostgresRepo.findById(postId);
     if (!post) {
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,
@@ -69,10 +73,8 @@ export class CommentsService {
         extensions: [new Extension('Post not found', 'postId')],
       });
     }
-    const { comments, totalCount } = await this.commentsRepo.findAllForPost(
-      paginationInput,
-      postId,
-    );
+    const { comments, totalCount } =
+      await this.commentsPostgresRepo.findAllByPostId(paginationInput, postId);
 
     if (!comments) {
       throw new DomainException({
@@ -83,7 +85,7 @@ export class CommentsService {
     }
 
     if (!userId) {
-      return this.commentMapper.toResponsePaginatedView(
+      return this.commentMapper.toResponsePaginatedPostgresView(
         comments,
         paginationInput,
         totalCount,
@@ -91,21 +93,21 @@ export class CommentsService {
     }
 
     const commentsIds = comments.map((comment) => {
-      return comment._id.toString();
+      return comment.id.toString();
     });
     const statuses = await this.likesRepo.findEntityIdAndLikeStatus(
       commentsIds,
       userId,
     );
     if (!statuses) {
-      return this.commentMapper.toResponsePaginatedView(
+      return this.commentMapper.toResponsePaginatedPostgresView(
         comments,
         paginationInput,
         totalCount,
       );
     }
     const statusMap: Record<string, LikeStatus> = Object.fromEntries(statuses);
-    return this.commentMapper.toResponsePaginatedView(
+    return this.commentMapper.toResponsePaginatedPostgresView(
       comments,
       paginationInput,
       totalCount,
@@ -114,7 +116,7 @@ export class CommentsService {
   }
 
   async delete(id: string, userId: string): Promise<void> {
-    const comment = await this.commentsRepo.findById(id);
+    const comment = await this.commentsPostgresRepo.findById(id);
     if (!comment) {
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,
@@ -122,13 +124,21 @@ export class CommentsService {
         extensions: [new Extension('Comment Not Found', 'id')],
       });
     }
-    if (comment?.commentatorInfo.userId !== userId) {
+    if (comment?.userId !== userId) {
       throw new DomainException({
         code: HttpStatus.FORBIDDEN,
         message: 'Forbidden',
         extensions: [new Extension('Wrong user id', 'userId')],
       });
     }
-    return await this.commentsRepo.delete(id);
+    const commentDeletedId = await this.commentsPostgresRepo.delete(id);
+    if (!commentDeletedId) {
+      throw new DomainException({
+        code: HttpStatus.NOT_FOUND,
+        message: 'Not Found',
+        extensions: [new Extension('Commend Id Not Found', 'id')],
+      });
+    }
+    return;
   }
 }
