@@ -1,5 +1,4 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { LikeStatus } from '../../../posts/domain/post.entity';
 import { CommentsRepository } from '../../infrastructure/comments.repository';
 import {
   DomainException,
@@ -11,6 +10,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { LikesRepository } from '../../../likes/infrastructure/likes.repository';
 import { LikeRequestDto } from '../../../likes/dto/like.request.dto';
 import { EntityType } from '../../../likes/types/entity-type.enum';
+import { LikeStatus } from '../../../../../core/types/like-status.enum';
 
 export class LikeCommentCommand {
   constructor(

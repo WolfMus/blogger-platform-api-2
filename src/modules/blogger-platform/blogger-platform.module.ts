@@ -43,6 +43,7 @@ import { DeletePostByBlogIdUseCase } from './posts/application/usecases/delete-p
 import { CommentPostgres } from './comments/domain/comment-postgres';
 import { CommentsPostgresRepository } from './comments/infrastructure/comments-postgres.repository';
 import { LikePostgres } from './likes/domain/like-sql.entity';
+import { LikesSqlRepository } from './likes/infrastructure/likes-sql.repository';
 
 const blogUseCases = [CreateBlogUseCase, UpdateBlogUseCase, DeleteBlogUseCase];
 const postUseCases = [
@@ -102,6 +103,7 @@ const commentUseCases = [
     CommentsPostgresRepository,
     CommentMapper,
     LikesRepository,
+    LikesSqlRepository,
   ],
 })
 export class BloggerPlatformModule {}

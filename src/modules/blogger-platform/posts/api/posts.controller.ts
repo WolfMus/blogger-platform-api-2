@@ -30,7 +30,6 @@ import { CommentResponseDto } from '../../comments/dto/comment.response.dto';
 import type { Request } from 'express';
 import { CreateCommentCommand } from '../../comments/application/usecases/create-comment.usecase';
 import { OptionalJwtAuthGuard } from '../../../user-accounts/guards/bearer/optional-jwt-auth.guard';
-import { ParseObjectIdPipe } from '@nestjs/mongoose';
 import { LikePostCommand } from '../application/usecases/like-post.usecase';
 import { CreateCommentRequestDto } from '../../comments/dto/create-comment.request.dto';
 import { LikeRequestDto } from '../../likes/dto/like.request.dto';
@@ -50,13 +49,13 @@ export class PostsController {
   @ApiNotFoundResponse({ description: 'Post Not Found' })
   @HttpCode(HttpStatus.OK)
   @UseGuards(OptionalJwtAuthGuard)
-  @Get('/:id')
+  @Get('/:postId')
   async getPost(
-    @Param('id') id: string,
+    @Param('postId') postId: string,
     @Req() req: Request,
   ): Promise<PostResponseDto> {
     const userInfo = req.user as { userId: string; login: string };
-    return await this.postsService.findById(id, userInfo.userId);
+    return await this.postsService.findById(postId, userInfo.userId);
   }
 
   // ✅ FIND ALL POSTS WITH PAGINATION
@@ -80,13 +79,13 @@ export class PostsController {
     return posts;
   }
 
-  // ❌ LIKE/DISLIKE POST
+  // ✅ LIKE/DISLIKE POST
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
   @Put('/:postId/like-status')
   async likePost(
     @Req() req: Request,
-    @Param('postId', ParseObjectIdPipe) postId: string,
+    @Param('postId', ParseUUIDPipe) postId: string,
     @Body() dto: LikeRequestDto,
   ): Promise<void> {
     console.log('like status - ', dto.likeStatus);

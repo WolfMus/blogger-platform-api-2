@@ -6,8 +6,9 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { EntityType } from '../types/entity-type.enum';
-import { LikeStatus } from '../../../../core/types/like-status.enum';
 import { UserPostgres } from '../../../user-accounts/domain/users/postgresql/user.postgres.entity';
+import { CreateLikeEntityDto } from './dto/create-likes.entity.dto';
+import { LikeStatus } from '../../../../core/types/like-status.enum';
 
 @Entity({ name: 'likes' })
 export class LikePostgres {
@@ -39,7 +40,8 @@ export class LikePostgres {
 
   @Column({
     name: 'like_status',
-    type: 'varchar',
+    type: 'enum',
+    enum: LikeStatus,
   })
   likeStatus: LikeStatus;
 
@@ -48,4 +50,20 @@ export class LikePostgres {
     type: 'timestamptz',
   })
   addedAt: Date;
+
+  static createInstance(dto: CreateLikeEntityDto): LikePostgres {
+    const like = new LikePostgres();
+    like.entityId = dto.entityId;
+    like.entityType = dto.entityType;
+    like.user = { id: dto.userId } as UserPostgres;
+    like.userLogin = dto.userLogin;
+    like.likeStatus = dto.likeStatus;
+    like.addedAt = new Date();
+    return like;
+  }
+
+  changeStatus(status: LikeStatus): void {
+    this.likeStatus = status;
+    this.addedAt = new Date();
+  }
 }

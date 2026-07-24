@@ -1,5 +1,5 @@
 import { PaginationInput } from '../../../../../core/dto/pagination.request.dto';
-import { LikeStatus } from '../../../posts/domain/post.entity';
+import { LikeStatus } from '../../../../../core/types/like-status.enum';
 import { CommentPostgres } from '../../domain/comment-postgres';
 import { CommentDocument } from '../../domain/comment.entity';
 import { CommentResponseDto } from '../comment.response.dto';

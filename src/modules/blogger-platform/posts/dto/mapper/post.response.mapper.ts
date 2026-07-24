@@ -3,8 +3,8 @@ import { LikeStatus, NewestLikes } from '../../domain/post.entity';
 import { PostResponseDto } from '../post.response.dto';
 import { PaginationInput } from '../../../../../core/dto/pagination.request.dto';
 import { PaginatedPostResponseDto } from '../post-paginated-view.response.dto';
-import { PostLikesAgg } from '../../../likes/infrastructure/likes.repository';
 import { PostViewDto } from '../post.view-model.dto';
+import { LikeRow } from '../../../likes/infrastructure/types/like-row.type';
 
 @Injectable()
 export class PostMapper {
@@ -56,7 +56,7 @@ export class PostMapper {
     posts: PostResponseDto[],
     paginationInput: PaginationInput,
     totalCount: number,
-    likes: PostLikesAgg[] = [],
+    likes: LikeRow[] = [],
     statusMap: Record<string, LikeStatus> | null = null,
   ): PaginatedPostResponseDto {
     const pageNumber = paginationInput.pageNumber ?? 1;
@@ -67,14 +67,18 @@ export class PostMapper {
       pageSize: +pageSize,
       totalCount: totalCount,
       items: posts.map((post) => {
-        const postLikes =
-          likes.find((l) => l._id.toString() === post.id.toString())
-            ?.newestLikes || [];
+        const newestLikes: NewestLikes[] = likes
+          .filter((l) => l.entityId === post.id)
+          .map((l) => ({
+            addedAt: l.addedAt,
+            userId: l.userId,
+            login: l.userLogin,
+          }));
         if (!statusMap) {
-          return this.toResponseView(post, postLikes);
+          return this.toResponseView(post, newestLikes);
         }
         const likeStatus = statusMap[post.id.toString()];
-        return this.toResponseView(post, postLikes, likeStatus);
+        return this.toResponseView(post, newestLikes, likeStatus);
       }),
     };
   }

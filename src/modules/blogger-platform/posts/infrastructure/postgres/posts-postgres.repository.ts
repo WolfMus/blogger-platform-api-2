@@ -36,8 +36,8 @@ export class PostsPostgresRepository {
       created_at as "createdAt",
       updated_at as "updatedAt",
       blog_name as "blogName"
-      FROM public.posts
-      WHERE id = $1 AND blog_id = $2;
+        FROM public.posts
+        WHERE id = $1 AND blog_id = $2;
       `,
       [postId, blogId],
     );
@@ -84,21 +84,21 @@ export class PostsPostgresRepository {
     return false;
   }
 
-  // async changeCounts(
-  //   deltaLike: number,
-  //   deltaDislike: number,
-  //   id: string,
-  // ): Promise<void> {
-  //   console.log(deltaLike, deltaDislike);
-  //   await this.PostModel.findOneAndUpdate(
-  //     { _id: id },
-  //     {
-  //       $inc: {
-  //         'extendedLikesInfo.likesCount': deltaLike,
-  //         'extendedLikesInfo.dislikesCount': deltaDislike,
-  //       },
-  //     },
-  //   );
-  //   return;
-  // }
+  async changeCounts(
+    deltaLike: number,
+    deltaDislike: number,
+    id: string,
+  ): Promise<boolean> {
+    const rows = await this.dataSource.query<{ id: string }[]>(
+      `
+      UPDATE posts
+        SET likes_count = likes_count + $1,
+            dislikes_count = dislikes_count + $2
+        WHERE id = $3
+        RETURNING id;
+      `,
+      [deltaLike, deltaDislike, id],
+    );
+    return rows.length > 0;
+  }
 }

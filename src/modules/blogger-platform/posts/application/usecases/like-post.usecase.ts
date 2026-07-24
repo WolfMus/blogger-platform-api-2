@@ -1,16 +1,15 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { LikeStatus } from '../../../posts/domain/post.entity';
 import {
   DomainException,
   Extension,
 } from '../../../../../core/exceptions/domain-exception';
 import { HttpStatus } from '@nestjs/common';
-import { Like, type LikeModelType } from '../../../likes/domain/like.entity';
-import { InjectModel } from '@nestjs/mongoose';
-import { LikesRepository } from '../../../likes/infrastructure/likes.repository';
-import { PostsRepository } from '../../infrastructure/posts.repository';
 import { LikeRequestDto } from '../../../likes/dto/like.request.dto';
 import { EntityType } from '../../../likes/types/entity-type.enum';
+import { PostsPostgresRepository } from '../../infrastructure/postgres/posts-postgres.repository';
+import { LikesSqlRepository } from '../../../likes/infrastructure/likes-sql.repository';
+import { LikeStatus } from '../../../../../core/types/like-status.enum';
+import { LikePostgres } from '../../../likes/domain/like-sql.entity';
 
 export class LikePostCommand {
   constructor(
@@ -23,10 +22,8 @@ export class LikePostCommand {
 @CommandHandler(LikePostCommand)
 export class LikePostUseCase implements ICommandHandler<LikePostCommand, void> {
   constructor(
-    @InjectModel(Like.name)
-    private LikeModel: LikeModelType,
-    private likeRepo: LikesRepository,
-    private postRepo: PostsRepository,
+    private likeRepo: LikesSqlRepository,
+    private postRepo: PostsPostgresRepository,
   ) {}
   async execute(command: LikePostCommand): Promise<void> {
     // Поиск поста
@@ -59,7 +56,10 @@ export class LikePostUseCase implements ICommandHandler<LikePostCommand, void> {
       if (like.likeStatus === LikeStatus.Like) deltaLike = -1;
       if (like.likeStatus === LikeStatus.Dislike) deltaDislike = -1;
       like.changeStatus(command.dto.likeStatus);
-      await this.likeRepo.save(like);
+      const updated = await this.likeRepo.update(like);
+      if (!updated) {
+        throw new Error('Not Updated');
+      }
     }
 
     // Новый статус
@@ -67,16 +67,16 @@ export class LikePostUseCase implements ICommandHandler<LikePostCommand, void> {
     if (command.dto.likeStatus === LikeStatus.Dislike) deltaDislike += 1;
 
     if (command.dto.likeStatus === LikeStatus.None) {
-      await this.likeRepo.delete(like!._id.toString());
+      await this.likeRepo.delete(like!.id);
     } else if (!like) {
-      const newLike = this.LikeModel.createInstance({
+      const newLike = LikePostgres.createInstance({
         entityId: command.postId,
         entityType: EntityType.Post,
         userId: command.userInfo.userId,
         userLogin: command.userInfo.login,
         likeStatus: command.dto.likeStatus,
       });
-      await this.likeRepo.save(newLike);
+      await this.likeRepo.create(newLike);
     }
     // Меняем счетчик в БД
     await this.postRepo.changeCounts(deltaLike, deltaDislike, command.postId);
