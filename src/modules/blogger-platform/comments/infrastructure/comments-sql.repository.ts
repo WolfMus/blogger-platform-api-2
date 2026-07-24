@@ -162,16 +162,17 @@ export class CommentsPostgresRepository {
     deltaLike: number,
     deltaDislike: number,
     id: string,
-  ): Promise<void> {
-    await this.CommentModel.findOneAndUpdate(
-      { _id: id },
-      {
-        $inc: {
-          'likesInfo.likesCount': deltaLike,
-          'likesInfo.dislikesCount': deltaDislike,
-        },
-      },
+  ): Promise<boolean> {
+    const rows = await this.dataSource.query<{ id: string }[]>(
+      `
+      UPDATE comments
+        SET likes_count = likes_count + $1,
+            dislikes_count = dislikes_count + $2
+        WHERE id = $3
+        RETURNING id;
+      `,
+      [deltaLike, deltaDislike, id],
     );
-    return;
+    return rows.length > 0;
   }
 }

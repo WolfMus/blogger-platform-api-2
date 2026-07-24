@@ -5,7 +5,7 @@ import {
 } from '../../../../../core/exceptions/domain-exception';
 import { HttpStatus } from '@nestjs/common';
 import { CreateCommentRequestDto } from '../../dto/create-comment.request.dto';
-import { CommentsPostgresRepository } from '../../infrastructure/comments-postgres.repository';
+import { CommentsPostgresRepository } from '../../infrastructure/comments-sql.repository';
 
 export class UpdateCommentCommand {
   constructor(

@@ -41,7 +41,7 @@ import { PostsPostgres } from './posts/domain/post-postgres.entity';
 import { UpdatePostByBlogIdUseCase } from './posts/application/usecases/update-post-by-blogid.usecase';
 import { DeletePostByBlogIdUseCase } from './posts/application/usecases/delete-post-by-blogid.usecase';
 import { CommentPostgres } from './comments/domain/comment-postgres';
-import { CommentsPostgresRepository } from './comments/infrastructure/comments-postgres.repository';
+import { CommentsPostgresRepository } from './comments/infrastructure/comments-sql.repository';
 import { LikePostgres } from './likes/domain/like-sql.entity';
 import { LikesSqlRepository } from './likes/infrastructure/likes-sql.repository';
 

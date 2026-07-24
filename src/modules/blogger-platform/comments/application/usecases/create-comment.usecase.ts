@@ -10,7 +10,7 @@ import { CommentMapper } from '../../dto/mapper/comment.response.mapper';
 import { CreateCommentRequestDto } from '../../dto/create-comment.request.dto';
 import { PostsQwPostgresRepository } from '../../../posts/infrastructure/postgres/posts-query-postgres.repository';
 import { CommentPostgres } from '../../domain/comment-postgres';
-import { CommentsPostgresRepository } from '../../infrastructure/comments-postgres.repository';
+import { CommentsPostgresRepository } from '../../infrastructure/comments-sql.repository';
 
 export class CreateCommentCommand {
   constructor(

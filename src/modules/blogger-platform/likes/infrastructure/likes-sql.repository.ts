@@ -183,47 +183,4 @@ export class LikesSqlRepository {
     console.log(rows);
     return rows;
   }
-
-  async findNewestLikesForPosts(
-    postIds: string[],
-  ): Promise<PostLikesAgg[] | []> {
-    const likes = await this.LikeModel.aggregate<PostLikesAgg>([
-      // Шаг 1: Фильтруем только лайки для нужных нам постов
-      {
-        $match: {
-          entityId: { $in: postIds },
-          likeStatus: LikeStatus.Like,
-        },
-      },
-      // Шаг 2: Сортируем все лайки от самых новых к старым
-      {
-        $sort: {
-          addedAt: -1,
-        },
-      },
-      // Шаг 3: Группируем лайки по каждому посту
-      {
-        $group: {
-          _id: '$entityId',
-          // $push сохраняет порядок сортировки, полученный на Шаге 2
-          allLikes: {
-            $push: {
-              addedAt: '$addedAt',
-              userId: '$userId',
-              login: '$userLogin',
-            },
-          },
-        },
-      },
-      // Шаг 4: Обрезаем массив, оставляя строго первые 3 лайка
-      {
-        $project: {
-          _id: 1,
-          newestLikes: { $slice: ['$allLikes', 3] },
-        },
-      },
-    ]);
-    if (!likes) return [];
-    return likes;
-  }
 }

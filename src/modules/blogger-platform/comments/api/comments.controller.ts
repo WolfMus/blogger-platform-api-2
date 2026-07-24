@@ -21,7 +21,6 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { ParseObjectIdPipe } from '@nestjs/mongoose';
 import { JwtAuthGuard } from '../../../user-accounts/guards/bearer/jwt-auth.guard';
 import { CommandBus } from '@nestjs/cqrs';
 import { UpdateCommentCommand } from '../application/usecases/update-comment.usecase';
@@ -39,7 +38,7 @@ export class CommentsController {
     private commandBus: CommandBus,
   ) {}
 
-  // ✅ FIND COMMENT BY ID
+  // ✅❌ FIND COMMENT BY ID
   @ApiOperation({ summary: 'Returns comment by id' })
   @ApiOkResponse({ type: CommentResponseDto, description: 'Success' })
   @ApiNotFoundResponse({ description: 'Comment Not Found' })
@@ -91,13 +90,13 @@ export class CommentsController {
     return await this.commentsService.delete(id, userInfo.userId);
   }
 
-  // ❌ LIKE/DISLIKE COMMMENT
+  // ✅ LIKE/DISLIKE COMMMENT
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
   @Put('/:commentId/like-status')
   async likeComment(
     @Req() req: Request,
-    @Param('commentId', ParseObjectIdPipe) commentId: string,
+    @Param('commentId', ParseUUIDPipe) commentId: string,
     @Body() dto: LikeRequestDto,
   ): Promise<void> {
     const userInfo = req.user as { userId: string; login: string };

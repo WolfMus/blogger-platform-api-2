@@ -12,7 +12,7 @@ import { LikesRepository } from '../../likes/infrastructure/likes.repository';
 import { LikeStatus } from '../../posts/domain/post.entity';
 import { PostsRepository } from '../../posts/infrastructure/posts.repository';
 import { PostsPostgresRepository } from '../../posts/infrastructure/postgres/posts-postgres.repository';
-import { CommentsPostgresRepository } from '../infrastructure/comments-postgres.repository';
+import { CommentsPostgresRepository } from '../infrastructure/comments-sql.repository';
 
 @Injectable()
 export class CommentsService {

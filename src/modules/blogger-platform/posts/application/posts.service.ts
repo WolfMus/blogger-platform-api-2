@@ -173,27 +173,4 @@ export class PostsService {
       isLiked.likeStatus,
     );
   }
-
-  // async create(
-  //   dto: CreatePostRequestDto,
-  //   blogName: string,
-  // ): Promise<PostResponseDto> {
-  //   const post = PostsPostgres.createInstance(dto, blogName);
-  //   await this.postsPostgresRepo.save(post);
-  //   return this.postMapper.toResponseView(post);
-  // }
-
-  // async createForBlog(
-  //   dto: CreatePostForBlogRequestDto,
-  //   blogId: string,
-  //   blogName: string,
-  // ): Promise<PostResponseDto> {
-  //   const postData: CreatePostRequestDto = {
-  //     ...dto,
-  //     blogId,
-  //   };
-  //   const post = PostsPostgres.createInstance(postData, blogName);
-  //   await this.postsPostgresRepo.save(post);
-  //   return this.postMapper.toResponseView(post);
-  // }
 }
