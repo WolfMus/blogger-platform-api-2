@@ -146,7 +146,7 @@ export class LikesSqlRepository {
           user_login as "userLogin",
           added_at as "addedAt"
         FROM likes
-        WHERE entity_id = $1
+        WHERE entity_id = $1 AND like_status = 'Like'
         ORDER BY added_at DESC
         LIMIT 3;
       `,

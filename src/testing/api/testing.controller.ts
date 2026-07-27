@@ -38,7 +38,9 @@ export class TestingController {
     await this.CommentModel.deleteMany();
     await this.LikeModel.deleteMany();
 
-    await this.dataSource.query('TRUNCATE users, session, blogs, posts;');
+    await this.dataSource.query(
+      'TRUNCATE users, session, blogs, posts, likes, comments;',
+    );
 
     return;
   }

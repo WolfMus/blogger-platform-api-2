@@ -96,7 +96,7 @@ export class PostsController {
   }
 
   // ======== COMMENTS ========
-  // ✅❌ GET ALL COMMENTS BY POSTID
+  // ✅ GET ALL COMMENTS BY POSTID
   @ApiOperation({
     summary: 'Returns all comments for specific post with pagination',
   })

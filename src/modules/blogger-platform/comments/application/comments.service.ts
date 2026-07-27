@@ -10,9 +10,9 @@ import {
 } from '../../../../core/exceptions/domain-exception';
 import { LikesRepository } from '../../likes/infrastructure/likes.repository';
 import { LikeStatus } from '../../posts/domain/post.entity';
-import { PostsRepository } from '../../posts/infrastructure/posts.repository';
 import { PostsPostgresRepository } from '../../posts/infrastructure/postgres/posts-postgres.repository';
 import { CommentsPostgresRepository } from '../infrastructure/comments-sql.repository';
+import { LikesSqlRepository } from '../../likes/infrastructure/likes-sql.repository';
 
 @Injectable()
 export class CommentsService {
@@ -21,7 +21,7 @@ export class CommentsService {
     private commentsPostgresRepo: CommentsPostgresRepository,
     private commentMapper: CommentMapper,
     private likesRepo: LikesRepository,
-    private postsRepo: PostsRepository,
+    private likesSqlRepo: LikesSqlRepository,
     private postsPostgresRepo: PostsPostgresRepository,
   ) {}
 
@@ -41,7 +41,7 @@ export class CommentsService {
       return this.commentMapper.toResponsePostgresView(comment);
     }
 
-    const like = await this.likesRepo.findByEntityIdAndUserId(id, userId);
+    const like = await this.likesSqlRepo.findByEntityIdAndUserId(id, userId);
     if (!like) {
       return this.commentMapper.toResponsePostgresView(comment);
     }
@@ -95,7 +95,7 @@ export class CommentsService {
     const commentsIds = comments.map((comment) => {
       return comment.id.toString();
     });
-    const statuses = await this.likesRepo.findEntityIdAndLikeStatus(
+    const statuses = await this.likesSqlRepo.findLikeStatuses(
       commentsIds,
       userId,
     );

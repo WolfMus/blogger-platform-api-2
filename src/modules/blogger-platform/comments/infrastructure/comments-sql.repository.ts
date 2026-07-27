@@ -129,7 +129,6 @@ export class CommentsPostgresRepository {
       ],
     );
 
-    console.log(row);
     return row[0];
   }
 

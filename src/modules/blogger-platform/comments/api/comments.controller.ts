@@ -38,19 +38,19 @@ export class CommentsController {
     private commandBus: CommandBus,
   ) {}
 
-  // ✅❌ FIND COMMENT BY ID
+  // ✅ FIND COMMENT BY ID
   @ApiOperation({ summary: 'Returns comment by id' })
   @ApiOkResponse({ type: CommentResponseDto, description: 'Success' })
   @ApiNotFoundResponse({ description: 'Comment Not Found' })
   @HttpCode(HttpStatus.OK)
   @UseGuards(OptionalJwtAuthGuard)
-  @Get('/:id')
+  @Get('/:commentId')
   async getOne(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('commentId', ParseUUIDPipe) commentId: string,
     @Req() req: Request,
   ): Promise<CommentResponseDto> {
     const userInfo = req.user as { userId: string; login: string };
-    return await this.commentsService.findById(id, userInfo.userId);
+    return await this.commentsService.findById(commentId, userInfo.userId);
   }
 
   // ✅ UPDATE COMMENT
@@ -63,15 +63,15 @@ export class CommentsController {
   @ApiNotFoundResponse({ description: 'Comment Not Found' })
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
-  @Put('/:id')
+  @Put('/:commentId')
   async update(
     @Req() req: Request,
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('commentId', ParseUUIDPipe) commentId: string,
     @Body() dto: CreateCommentRequestDto,
   ): Promise<void> {
     const userInfo = req.user as { userId: string; login: string };
     return await this.commandBus.execute<UpdateCommentCommand, void>(
-      new UpdateCommentCommand(id, dto, userInfo),
+      new UpdateCommentCommand(commentId, dto, userInfo),
     );
   }
 
@@ -81,13 +81,13 @@ export class CommentsController {
   @ApiNotFoundResponse({ description: 'Comment Not Found' })
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
-  @Delete('/:id')
+  @Delete('/:commentId')
   async delete(
     @Req() req: Request,
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('commentId', ParseUUIDPipe) commentId: string,
   ): Promise<void> {
     const userInfo = req.user as { userId: string; login: string };
-    return await this.commentsService.delete(id, userInfo.userId);
+    return await this.commentsService.delete(commentId, userInfo.userId);
   }
 
   // ✅ LIKE/DISLIKE COMMMENT
