@@ -1,13 +1,12 @@
 import { CreateUserDomainDto } from '../dto/create-user.domain.dto';
 import { randomUUID } from 'node:crypto';
 import { add } from 'date-fns';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToOne } from 'typeorm';
+import { BaseDbEntity } from '../../../../../core/db/entities/base-db.entity';
+import { Session } from '../../sessions/session.entity';
 
 @Entity({ name: 'users' })
-export class UserPostgres {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class UserPostgres extends BaseDbEntity {
   @Column({
     name: 'login',
     type: 'varchar',
@@ -32,17 +31,11 @@ export class UserPostgres {
   passwordHash: string;
 
   @Column({
-    name: 'created_at',
-    type: 'timestamptz',
+    name: 'is_confirmed',
+    type: 'boolean',
+    default: false,
   })
-  createdAt: Date;
-
-  @Column({
-    name: 'updated_at',
-    type: 'timestamptz',
-    nullable: true,
-  })
-  updatedAt: Date | null;
+  isConfirmed: boolean;
 
   @Column({
     name: 'recovery_code',
@@ -60,13 +53,6 @@ export class UserPostgres {
   recoveryCodeExpireDate: Date | null;
 
   @Column({
-    name: 'is_confirmed',
-    type: 'boolean',
-    default: false,
-  })
-  isConfirmed: boolean;
-
-  @Column({
     name: 'confirmation_code',
     type: 'varchar',
     nullable: true,
@@ -81,12 +67,16 @@ export class UserPostgres {
   })
   confirmationCodeExpireDate: Date | null;
 
+  @OneToOne(() => Session, (session) => session.user, {
+    cascade: true,
+  })
+  session: Session;
+
   static createInstance(dto: CreateUserDomainDto) {
     const user = new UserPostgres();
     user.login = dto.login;
     user.email = dto.email;
     user.passwordHash = dto.passwordHash;
-    user.createdAt = new Date();
     return user;
   }
 
@@ -95,14 +85,12 @@ export class UserPostgres {
     this.confirmationCodeExpireDate = add(new Date(), {
       minutes: 5,
     });
-    this.updatedAt = new Date();
   }
 
   changeAccoutConfirmation(): void {
     this.isConfirmed = true;
     this.confirmationCode = null;
     this.confirmationCodeExpireDate = null;
-    this.updatedAt = new Date();
   }
 
   setRecoveryCode(): void {
@@ -110,13 +98,11 @@ export class UserPostgres {
     this.recoveryCodeExpireDate = add(new Date(), {
       minutes: 5,
     });
-    this.updatedAt = new Date();
   }
 
   setNewPassword(password: string): void {
     this.passwordHash = password;
     this.recoveryCode = null;
     this.recoveryCodeExpireDate = null;
-    this.updatedAt = new Date();
   }
 }

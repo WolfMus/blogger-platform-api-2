@@ -1,6 +1,13 @@
 import { ApiSchema } from '@nestjs/swagger';
 import { CreateSessionDto } from './dto/create-session.domain.dto';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { UserPostgres } from '../users/postgresql/user.postgres.entity';
 
 @ApiSchema({ name: 'Sessions' })
 @Entity({ name: 'session' })
@@ -8,13 +15,19 @@ export class Session {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({
-    name: 'user_id',
-    type: 'uuid',
+  @OneToOne(() => UserPostgres, (user) => user.id, {
     nullable: false,
-    unique: false,
   })
-  userId: string;
+  @JoinColumn({ name: 'user_id' })
+  user: UserPostgres;
+
+  // @Column({
+  //   name: 'user_id',
+  //   type: 'uuid',
+  //   nullable: false,
+  //   unique: false,
+  // })
+  // userId: string;
 
   @Column({
     name: 'refresh_token',
@@ -66,7 +79,8 @@ export class Session {
 
   static createInstance(dto: CreateSessionDto): Session {
     const session = new Session();
-    session.userId = dto.userId;
+    session.user.id = dto.userId;
+    // session.userId = dto.userId;
     session.refreshToken = dto.refreshToken;
     session.tokenVersion = dto.tokenVersion;
     session.title = dto.title;

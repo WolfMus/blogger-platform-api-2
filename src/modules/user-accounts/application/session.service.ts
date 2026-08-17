@@ -34,7 +34,7 @@ export class SessionService {
         extensions: [new Extension('Session not found', deviceId)],
       });
     }
-    if (session.userId.toString() !== userId) {
+    if (session.user.id !== userId) {
       throw new DomainException({
         code: HttpStatus.FORBIDDEN,
         message: `User with ID ${userId} does not have permission to delete session with device ID ${deviceId}`,
