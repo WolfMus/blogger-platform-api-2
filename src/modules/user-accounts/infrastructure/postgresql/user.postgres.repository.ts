@@ -116,6 +116,17 @@ export class UserPostRepository {
     return null;
   }
 
+  async findByLoginAndEmail(
+    login: string,
+    email: string,
+  ): Promise<UserPostgres | null> {
+    const user = await this.userRepo.findOne({
+      where: { login: login, email: email },
+      relations: { session: true },
+    });
+    return user;
+  }
+
   async findByLoginOrEmail(loginOrEmail: string): Promise<UserPostgres | null> {
     const row: UserPostgres[] = await this.dataSource.query(
       `

@@ -26,15 +26,19 @@ export class CreateUserUseCase implements ICommandHandler<
   ) {}
   async execute(command: CreateUserCommand): Promise<UserPostgresResponseDto> {
     // user exists?
-    const isExist = await this.userRepo.isExistByLoginAndEmail(
+    // const isExist = await this.userRepo.isExistByLoginAndEmail(
+    //   command.dto.login,
+    //   command.dto.email,
+    // );
+    const user = await this.userRepo.findByLoginAndEmail(
       command.dto.login,
       command.dto.email,
     );
-    if (isExist) {
+    if (user) {
       throw new DomainException({
         code: HttpStatus.BAD_REQUEST,
         message: 'Exists',
-        extensions: [new Extension('User exist', isExist)],
+        extensions: [new Extension('User exist', 'login or email')],
       });
     }
 
@@ -49,10 +53,10 @@ export class CreateUserUseCase implements ICommandHandler<
     };
 
     // create user instance
-    const user = UserPostgres.createInstance(createUserData);
+    const newUser = UserPostgres.createInstance(createUserData);
 
     // save user
-    const userResponse = await this.userRepo.create(user);
+    const userResponse = await this.userRepo.create(newUser);
     return userResponse;
   }
 }
