@@ -33,12 +33,6 @@ export class LikePostgres {
   user: UserPostgres;
 
   @Column({
-    name: 'user_login',
-    type: 'varchar',
-  })
-  userLogin: string;
-
-  @Column({
     name: 'like_status',
     type: 'enum',
     enum: LikeStatus,
@@ -51,14 +45,15 @@ export class LikePostgres {
   })
   addedAt: Date;
 
-  static createInstance(dto: CreateLikeEntityDto): LikePostgres {
+  static createInstance(
+    dto: CreateLikeEntityDto,
+    user: UserPostgres,
+  ): LikePostgres {
     const like = new LikePostgres();
     like.entityId = dto.entityId;
     like.entityType = dto.entityType;
-    like.user = { id: dto.userId } as UserPostgres;
-    like.userLogin = dto.userLogin;
+    like.user = user;
     like.likeStatus = dto.likeStatus;
-    like.addedAt = new Date();
     return like;
   }
 

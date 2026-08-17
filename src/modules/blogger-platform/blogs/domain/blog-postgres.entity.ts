@@ -1,11 +1,10 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { CreateBlogRequestDto } from '../dto/create-blog.request.dto';
+import { BaseDbEntity } from '../../../../core/db/entities/base-db.entity';
+import { PostsPostgres } from '../../posts/domain/post-postgres.entity';
 
 @Entity({ name: 'blogs' })
-export class BlogsPostgres {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class BlogsPostgres extends BaseDbEntity {
   @Column({
     name: 'name',
     type: 'varchar',
@@ -32,31 +31,19 @@ export class BlogsPostgres {
   websiteUrl: string;
 
   @Column({
-    name: 'created_at',
-    type: 'timestamptz',
-  })
-  createdAt: Date;
-
-  @Column({
-    name: 'updated_at',
-    type: 'timestamptz',
-    nullable: true,
-  })
-  updatedAt: Date | null;
-
-  @Column({
     name: 'is_membership',
     type: 'boolean',
   })
   isMembership: boolean;
+
+  @OneToMany(() => PostsPostgres, (post) => post.blog)
+  posts: PostsPostgres[];
 
   static createInstance(dto: CreateBlogRequestDto): BlogsPostgres {
     const blog = new BlogsPostgres();
     blog.name = dto.name;
     blog.description = dto.description;
     blog.websiteUrl = dto.websiteUrl;
-    blog.createdAt = new Date();
-    blog.updatedAt = null;
     blog.isMembership = false;
     return blog;
   }
@@ -65,6 +52,5 @@ export class BlogsPostgres {
     this.name = dto.name;
     this.description = dto.description;
     this.websiteUrl = dto.websiteUrl;
-    this.updatedAt = new Date();
   }
 }

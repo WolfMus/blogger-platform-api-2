@@ -1,8 +1,11 @@
+import { BaseDbEntity } from '../../../../core/db/entities/base-db.entity';
+import { BlogsPostgres } from '../../blogs/domain/blog-postgres.entity';
+import { CommentPostgres } from '../../comments/domain/comment-postgres';
 import {
   CreatePostForBlogRequestDto,
   CreatePostRequestDto,
 } from '../dto/create-post.request.dto';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
 export enum LikeStatus {
   None = 'None',
@@ -11,10 +14,7 @@ export enum LikeStatus {
 }
 
 @Entity({ name: 'posts' })
-export class PostsPostgres {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class PostsPostgres extends BaseDbEntity {
   @Column({
     name: 'title',
     type: 'varchar',
@@ -40,31 +40,6 @@ export class PostsPostgres {
   content: string;
 
   @Column({
-    name: 'blog_id',
-    type: 'uuid',
-  })
-  blogId: string;
-
-  @Column({
-    name: 'blog_name',
-    type: 'varchar',
-  })
-  blogName: string;
-
-  @Column({
-    name: 'created_at',
-    type: 'timestamptz',
-  })
-  createdAt: Date;
-
-  @Column({
-    name: 'updated_at',
-    type: 'timestamptz',
-    nullable: true,
-  })
-  updatedAt: Date;
-
-  @Column({
     name: 'likes_count',
     type: 'integer',
     default: 0,
@@ -78,17 +53,22 @@ export class PostsPostgres {
   })
   dislikesCount: number;
 
+  @ManyToOne(() => BlogsPostgres, (blog) => blog.id)
+  @JoinColumn({ name: 'blog_id' })
+  blog: BlogsPostgres;
+
+  @OneToMany(() => CommentPostgres, (comment) => comment.post)
+  comments: CommentPostgres[];
+
   static createInstance(
     dto: CreatePostRequestDto,
-    blogName: string,
+    blog: BlogsPostgres,
   ): PostsPostgres {
     const post = new PostsPostgres();
     post.title = dto.title;
     post.shortDescription = dto.shortDescription;
     post.content = dto.content;
-    post.blogId = dto.blogId;
-    post.blogName = blogName;
-    post.createdAt = new Date();
+    post.blog = blog;
     post.likesCount = 0;
     post.dislikesCount = 0;
     return post;

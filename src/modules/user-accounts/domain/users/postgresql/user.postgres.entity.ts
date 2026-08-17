@@ -1,9 +1,10 @@
 import { CreateUserDomainDto } from '../dto/create-user.domain.dto';
 import { randomUUID } from 'node:crypto';
 import { add } from 'date-fns';
-import { Column, Entity, OneToOne } from 'typeorm';
+import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 import { BaseDbEntity } from '../../../../../core/db/entities/base-db.entity';
 import { Session } from '../../sessions/session.entity';
+import { CommentPostgres } from '../../../../blogger-platform/comments/domain/comment-postgres';
 
 @Entity({ name: 'users' })
 export class UserPostgres extends BaseDbEntity {
@@ -71,6 +72,9 @@ export class UserPostgres extends BaseDbEntity {
     cascade: true,
   })
   session: Session;
+
+  @OneToMany(() => CommentPostgres, (comment) => comment.user)
+  comments: CommentPostgres[];
 
   static createInstance(dto: CreateUserDomainDto) {
     const user = new UserPostgres();

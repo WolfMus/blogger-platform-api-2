@@ -11,13 +11,20 @@ import { DomainExceptionFilter } from './core/exceptions/filters/domain-exceptio
 import { CqrsModule } from '@nestjs/cqrs';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserPostgres } from './modules/user-accounts/domain/users/postgresql/user.postgres.entity';
-import { Session } from './modules/user-accounts/domain/sessions/session.entity';
-import { BlogsPostgres } from './modules/blogger-platform/blogs/domain/blog-postgres.entity';
-import { PostsPostgres } from './modules/blogger-platform/posts/domain/post-postgres.entity';
-import { CommentPostgres } from './modules/blogger-platform/comments/domain/comment-postgres';
-import { LikePostgres } from './modules/blogger-platform/likes/domain/like-sql.entity';
-
+// import { UserPostgres } from './modules/user-accounts/domain/users/postgresql/user.postgres.entity';
+// import { Session } from './modules/user-accounts/domain/sessions/session.entity';
+// import { BlogsPostgres } from './modules/blogger-platform/blogs/domain/blog-postgres.entity';
+// import { PostsPostgres } from './modules/blogger-platform/posts/domain/post-postgres.entity';
+// import { CommentPostgres } from './modules/blogger-platform/comments/domain/comment-postgres';
+// import { LikePostgres } from './modules/blogger-platform/likes/domain/like-sql.entity';
+      // entities: [
+      //   UserPostgres,
+      //   Session,
+      //   BlogsPostgres,
+      //   PostsPostgres,
+      //   CommentPostgres,
+      //   LikePostgres,
+      // ],
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -27,15 +34,9 @@ import { LikePostgres } from './modules/blogger-platform/likes/domain/like-sql.e
       username: 'postgres',
       password: 'severe',
       database: 'BloggerPlatformAPII',
-      entities: [
-        UserPostgres,
-        Session,
-        BlogsPostgres,
-        PostsPostgres,
-        CommentPostgres,
-        LikePostgres,
-      ],
       synchronize: true,
+      autoLoadEntities: true,
+      logging: true,
     }),
     ConfigModule.forRoot({ isGlobal: true }),
     CqrsModule.forRoot(),
