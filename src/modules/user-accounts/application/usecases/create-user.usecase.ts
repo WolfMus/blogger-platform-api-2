@@ -26,10 +26,6 @@ export class CreateUserUseCase implements ICommandHandler<
   ) {}
   async execute(command: CreateUserCommand): Promise<UserPostgresResponseDto> {
     // user exists?
-    // const isExist = await this.userRepo.isExistByLoginAndEmail(
-    //   command.dto.login,
-    //   command.dto.email,
-    // );
     const user = await this.userRepo.findByLoginAndEmail(
       command.dto.login,
       command.dto.email,
@@ -56,7 +52,7 @@ export class CreateUserUseCase implements ICommandHandler<
     const newUser = UserPostgres.createInstance(createUserData);
 
     // save user
-    const userResponse = await this.userRepo.create(newUser);
-    return userResponse;
+    const savedUser = await this.userRepo.save(newUser);
+    return savedUser as UserPostgresResponseDto;
   }
 }

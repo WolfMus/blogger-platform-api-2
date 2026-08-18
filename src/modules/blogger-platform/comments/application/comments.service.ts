@@ -124,7 +124,7 @@ export class CommentsService {
         extensions: [new Extension('Comment Not Found', 'id')],
       });
     }
-    if (comment?.userId !== userId) {
+    if (comment.user.id !== userId) {
       throw new DomainException({
         code: HttpStatus.FORBIDDEN,
         message: 'Forbidden',

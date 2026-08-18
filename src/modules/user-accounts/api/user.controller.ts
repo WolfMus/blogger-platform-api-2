@@ -57,7 +57,6 @@ export class UserController {
   async createUser(
     @Body() dto: CreateUserRequestDto,
   ): Promise<UserPostgresResponseDto> {
-    console.log(dto);
     return await this.commandBus.execute<
       CreateUserCommand,
       UserPostgresResponseDto
