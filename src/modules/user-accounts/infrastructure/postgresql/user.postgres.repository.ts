@@ -23,7 +23,9 @@ export class UserPostRepository {
     return;
   }
 
-  async findAll(pagination: UserPaginationRequest) {
+  async findAll(
+    pagination: UserPaginationRequest,
+  ): Promise<{ users: UserPostgres[]; totalCount: number }> {
     const sortBy = pagination.sortBy ?? 'createdAt';
     const sortDirection =
       pagination.sortDirection === SortDirection.Asc
@@ -84,12 +86,9 @@ export class UserPostRepository {
     return user;
   }
 
-  async findByLoginOrEmail(
-    login: string,
-    email: string,
-  ): Promise<UserPostgres | null> {
+  async findByLoginOrEmail(loginOrEmail: string): Promise<UserPostgres | null> {
     const user = await this.userRepo.findOne({
-      where: [{ login: login }, { email: email }],
+      where: [{ login: loginOrEmail }, { email: loginOrEmail }],
       relations: { session: true },
     });
     return user;

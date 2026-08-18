@@ -33,7 +33,7 @@ export class UserService {
   }
 
   async delete(id: string): Promise<void> {
-    const deleted = await this.userPostgresRepo.deleteById(id);
+    const deleted = await this.userPostgresRepo.delete(id);
     if (deleted === null) {
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,

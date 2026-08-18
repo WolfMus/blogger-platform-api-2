@@ -21,14 +21,6 @@ export class Session {
   @JoinColumn({ name: 'user_id' })
   user: UserPostgres;
 
-  // @Column({
-  //   name: 'user_id',
-  //   type: 'uuid',
-  //   nullable: false,
-  //   unique: false,
-  // })
-  // userId: string;
-
   @Column({
     name: 'refresh_token',
     type: 'varchar',
@@ -77,10 +69,9 @@ export class Session {
   })
   lastActiveDate: Date; // Date of the last generating of refresh/access tokens
 
-  static createInstance(dto: CreateSessionDto): Session {
+  static createInstance(dto: CreateSessionDto, user: UserPostgres): Session {
     const session = new Session();
-    session.user.id = dto.userId;
-    // session.userId = dto.userId;
+    session.user = user;
     session.refreshToken = dto.refreshToken;
     session.tokenVersion = dto.tokenVersion;
     session.title = dto.title;

@@ -19,7 +19,7 @@ export class SendRecoveryCodeUseClass implements ICommandHandler<
   async execute(command: SendRecoveryCodeCommand): Promise<void> {
     // find user by email
     // if user not found - return no content exception
-    const user = await this.userPostRepo.findByEmail(command.email);
+    const user = await this.userPostRepo.findByLoginOrEmail(command.email);
     if (!user) {
       return;
     }

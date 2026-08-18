@@ -23,7 +23,7 @@ export class ResendConfirmationCodeUseCase implements ICommandHandler<
 
   async execute(command: ResendConfirmationCodeCommand): Promise<void> {
     // find user by email
-    const user = await this.userPostRepo.findByEmail(command.email);
+    const user = await this.userPostRepo.findByLoginOrEmail(command.email);
     if (!user) {
       throw new DomainException({
         code: HttpStatus.BAD_REQUEST,

@@ -50,6 +50,7 @@ export class ConfirmRegistrationUseClass implements ICommandHandler<
     user.changeAccoutConfirmation();
 
     // save user
-    return await this.userPostRepo.save(user);
+    await this.userPostRepo.save(user);
+    return;
   }
 }

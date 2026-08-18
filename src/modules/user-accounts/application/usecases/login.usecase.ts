@@ -81,14 +81,13 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
       },
     );
     const createSessionDto: CreateSessionDto = {
-      userId: user.id.toString(),
       refreshToken: refreshToken,
       tokenVersion: tokenVersion,
       title: command.deviceInfo.title,
       ip: command.deviceInfo.ip,
       deviceId: deviceId,
     };
-    const session = Session.createInstance(createSessionDto);
+    const session = Session.createInstance(createSessionDto, user);
     await this.sessionRepo.save(session);
 
     // create access token
