@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { LikeStatus, NewestLikes } from '../../domain/post.entity';
+import { LikeStatus, Post } from '../../domain/post.entity';
 import { PostResponseDto } from '../post.response.dto';
 import { PaginationInput } from '../../../../../core/dto/pagination.request.dto';
 import { PaginatedPostResponseDto } from '../post-paginated-view.response.dto';
 import { PostViewDto } from '../post.view-model.dto';
 import { LikeRow } from '../../../likes/infrastructure/types/like-row.type';
+import { NewestLikes } from '../../../likes/dto/newest-likes.dto';
 
 @Injectable()
 export class PostMapper {
@@ -31,7 +32,7 @@ export class PostMapper {
   }
 
   toResponseView(
-    post: PostResponseDto,
+    post: Post,
     newestLikes: NewestLikes[] = [],
     likeStatus: LikeStatus = LikeStatus.None,
   ): PostResponseDto {
@@ -40,12 +41,12 @@ export class PostMapper {
       title: post.title,
       shortDescription: post.shortDescription,
       content: post.content,
-      blogId: post.blogId,
-      blogName: post.blogName,
+      blogId: post.blog.id,
+      blogName: post.blog.name,
       createdAt: post.createdAt,
       extendedLikesInfo: {
-        likesCount: post.extendedLikesInfo.likesCount,
-        dislikesCount: post.extendedLikesInfo.dislikesCount,
+        likesCount: post.likesCount,
+        dislikesCount: post.dislikesCount,
         myStatus: likeStatus,
         newestLikes: newestLikes,
       },
@@ -53,7 +54,7 @@ export class PostMapper {
   }
 
   toResponsePaginatedView(
-    posts: PostResponseDto[],
+    posts: Post[],
     paginationInput: PaginationInput,
     totalCount: number,
     likes: LikeRow[] = [],

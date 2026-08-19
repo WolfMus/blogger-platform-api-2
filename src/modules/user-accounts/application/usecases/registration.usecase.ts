@@ -8,7 +8,7 @@ import {
   DomainException,
   Extension,
 } from '../../../../core/exceptions/domain-exception';
-import { UserPostRepository } from '../../infrastructure/postgresql/user.postgres.repository';
+import { UserRepository } from '../../infrastructure/postgresql/user.sql.repository';
 
 export class RegistrationUserCommand {
   constructor(public dto: CreateUserRequestDto) {}
@@ -22,7 +22,7 @@ export class RegistrationUserUseCase implements ICommandHandler<
   constructor(
     private emailService: EmailService,
     private commandBus: CommandBus,
-    private userPostRepo: UserPostRepository,
+    private userRepo: UserRepository,
   ) {}
 
   async execute(command: RegistrationUserCommand): Promise<void> {
@@ -31,7 +31,7 @@ export class RegistrationUserUseCase implements ICommandHandler<
       CreateUserCommand,
       UserResponseDto
     >(new CreateUserCommand(command.dto));
-    const user = await this.userPostRepo.findById(userDto.id);
+    const user = await this.userRepo.findById(userDto.id);
     if (!user) {
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,
@@ -41,7 +41,7 @@ export class RegistrationUserUseCase implements ICommandHandler<
     }
     // create confirmation code and expires date
     user.setConfirmationCode();
-    await this.userPostRepo.save(user);
+    await this.userRepo.save(user);
 
     // send confirmation code on user's email
     await this.emailService.sendConfirmationEmail(

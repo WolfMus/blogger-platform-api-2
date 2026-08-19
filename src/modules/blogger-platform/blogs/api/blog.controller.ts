@@ -9,7 +9,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { BlogsService } from '../application/blogs.service';
+import { BlogService } from '../application/blog.service';
 import { PaginationInput } from '../../../../core/dto/pagination.request.dto';
 import { BlogResponseDto } from '../dto/blog-response.dto';
 import {
@@ -18,7 +18,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { PostsService } from '../../posts/application/posts.service';
+import { PostService } from '../../posts/application/post.service';
 import { PaginatedBlogResponseDto } from '../dto/blog-paginated-view.response.dto';
 import { PaginatedPostResponseDto } from '../../posts/dto/post-paginated-view.response.dto';
 import { BlogPaginationRequest } from '../dto/blog-pagination.request.dto';
@@ -28,11 +28,11 @@ import type { Request } from 'express';
 
 @ApiTags('Blogs')
 @Controller('blogs')
-export class BlogsController {
+export class BlogController {
   constructor(
     private commandBus: CommandBus,
-    private blogsService: BlogsService,
-    private postsService: PostsService,
+    private BlogService: BlogService,
+    private PostService: PostService,
   ) {}
 
   // ✅ GET BLOG BY ID
@@ -44,7 +44,7 @@ export class BlogsController {
   async getOneBlog(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<BlogResponseDto> {
-    return await this.blogsService.findById(id);
+    return await this.BlogService.findById(id);
   }
 
   // ✅ GET BLOGS WITH PAGINATION
@@ -55,7 +55,7 @@ export class BlogsController {
   async getAllBlogs(
     @Query() paginationInput: BlogPaginationRequest,
   ): Promise<PaginatedBlogResponseDto> {
-    const blogs = await this.blogsService.findAll(paginationInput);
+    const blogs = await this.BlogService.findAll(paginationInput);
     return blogs;
   }
 
@@ -75,8 +75,8 @@ export class BlogsController {
     @Req() req: Request,
   ): Promise<PaginatedPostResponseDto> {
     const userInfo = req.user as { userId: string; login: string };
-    await this.blogsService.findById(blogId);
-    const posts = await this.postsService.findAllByBlogId(
+    await this.BlogService.findById(blogId);
+    const posts = await this.PostService.findAllByBlogId(
       paginationInput,
       blogId,
       userInfo.userId,

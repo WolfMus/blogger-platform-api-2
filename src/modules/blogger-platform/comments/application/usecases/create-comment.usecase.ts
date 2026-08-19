@@ -8,9 +8,10 @@ import { HttpStatus } from '@nestjs/common';
 import { CreateCommentEntityDto } from '../../dto/create-comment.entity.dto';
 import { CommentMapper } from '../../dto/mapper/comment.response.mapper';
 import { CreateCommentRequestDto } from '../../dto/create-comment.request.dto';
-import { PostsQwPostgresRepository } from '../../../posts/infrastructure/postgres/posts-query-postgres.repository';
-import { CommentPostgres } from '../../domain/comment-postgres';
-import { CommentsPostgresRepository } from '../../infrastructure/comments-sql.repository';
+import { Comment } from '../../domain/comment.entity';
+import { CommentRepository } from '../../infrastructure/comment.repository';
+import { UserRepository } from '../../../../user-accounts/infrastructure/postgresql/user.sql.repository';
+import { PostRepository } from '../../../posts/infrastructure/post.repository';
 
 export class CreateCommentCommand {
   constructor(
@@ -27,17 +28,28 @@ export class CreateCommentUseCase implements ICommandHandler<
 > {
   constructor(
     private commentMapper: CommentMapper,
-    private commentRepo: CommentsPostgresRepository,
-    private postQueryRepo: PostsQwPostgresRepository,
+    private commentRepo: CommentRepository,
+    private postRepo: PostRepository,
+    private userRepo: UserRepository,
   ) {}
   async execute(command: CreateCommentCommand): Promise<CommentResponseDto> {
     // Пост существует?
-    const post = await this.postQueryRepo.findById(command.postId);
+    const post = await this.postRepo.findById(command.postId);
     if (!post) {
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,
         message: 'Not Found',
         extensions: [new Extension('Post Not Found', 'id')],
+      });
+    }
+
+    // Пользователь существует?
+    const user = await this.userRepo.findById(command.userInfo.userId);
+    if (!user) {
+      throw new DomainException({
+        code: HttpStatus.NOT_FOUND,
+        message: 'Not Found',
+        extensions: [new Extension('User Not Found', 'id')],
       });
     }
 
@@ -49,13 +61,13 @@ export class CreateCommentUseCase implements ICommandHandler<
     };
 
     // Создание комментария
-    const comment = CommentPostgres.createInstance(
-      createCommentDto,
-      command.postId,
-    );
+    const comment = Comment.createInstance(createCommentDto, user, post);
 
     // Сохранение
-    const commentCreated = await this.commentRepo.create(comment);
+    const commentCreated = await this.commentRepo.save(comment);
+    if (!commentCreated) {
+      throw new Error('Comment Was Not Saved');
+    }
 
     return this.commentMapper.toResponsePostgresView(commentCreated);
   }

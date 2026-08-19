@@ -4,10 +4,10 @@ import { add } from 'date-fns';
 import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 import { BaseDbEntity } from '../../../../../core/db/entities/base-db.entity';
 import { Session } from '../../sessions/session.entity';
-import { CommentPostgres } from '../../../../blogger-platform/comments/domain/comment-postgres';
+import { Comment } from '../../../../blogger-platform/comments/domain/comment.entity';
 
 @Entity({ name: 'users' })
-export class UserPostgres extends BaseDbEntity {
+export class User extends BaseDbEntity {
   @Column({
     name: 'login',
     type: 'varchar',
@@ -73,11 +73,11 @@ export class UserPostgres extends BaseDbEntity {
   })
   session: Session;
 
-  @OneToMany(() => CommentPostgres, (comment) => comment.user)
-  comments: CommentPostgres[];
+  @OneToMany(() => Comment, (comment) => comment.user)
+  comments: Comment[];
 
   static createInstance(dto: CreateUserDomainDto) {
-    const user = new UserPostgres();
+    const user = new User();
     user.login = dto.login;
     user.email = dto.email;
     user.passwordHash = dto.passwordHash;

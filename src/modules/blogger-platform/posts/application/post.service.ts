@@ -7,21 +7,19 @@ import {
   DomainException,
   Extension,
 } from '../../../../core/exceptions/domain-exception';
-import { LikesRepository } from '../../likes/infrastructure/likes.repository';
-import { PostsQwPostgresRepository } from '../infrastructure/postgres/posts-query-postgres.repository';
-import { PostsPostgresRepository } from '../infrastructure/postgres/posts-postgres.repository';
-import { LikesSqlRepository } from '../../likes/infrastructure/likes-sql.repository';
+import { PostRepository } from '../infrastructure/post.repository';
+import { LikeRepository } from '../../likes/infrastructure/like.repository';
 import { LikeStatus } from '../../../../core/types/like-status.enum';
-import { NewestLikes } from '../domain/post.entity';
+import { PostQwRepository } from '../infrastructure/post-query.repository';
+import { NewestLikes } from '../../likes/dto/newest-likes.dto';
 
 @Injectable()
-export class PostsService {
+export class PostService {
   constructor(
-    private postsSqlRepo: PostsPostgresRepository,
-    private postsQuerySqlRepo: PostsQwPostgresRepository,
+    private postRepo: PostRepository,
+    private postQueryRepo: PostQwRepository,
     private postMapper: PostMapper,
-    private likesRepo: LikesRepository,
-    private likesSqlRepo: LikesSqlRepository,
+    private likeRepo: LikeRepository,
   ) {}
 
   async findAll(
@@ -30,28 +28,24 @@ export class PostsService {
   ): Promise<PaginatedPostResponseDto> {
     // Получение постов и totalCount
     const { posts, totalCount } =
-      await this.postsQuerySqlRepo.findAll(paginationInput);
-    const postsMapped = posts.map((p) => this.postMapper.toResponseDtoView(p));
+      await this.postQueryRepo.findAll(paginationInput);
 
     // Сбор ID постов для поиска лайков
-    const postsIds = postsMapped.map((post) => {
+    const postsIds = posts.map((post) => {
       return post.id;
     });
 
     // Получение последних 3 лайков для каждого поста
-    const likes = await this.likesSqlRepo.findNewestLikesByEntityIds(postsIds);
+    const likes = await this.likeRepo.findNewestLikesByEntityIds(postsIds);
 
     // Проверка userId в JWT
     if (userId) {
       // Статусы лайков текущего пользователя
-      const statuses = await this.likesSqlRepo.findLikeStatuses(
-        postsIds,
-        userId,
-      );
+      const statuses = await this.likeRepo.findLikeStatuses(postsIds, userId);
       console.log('statuses: ', statuses);
       if (!statuses) {
         return this.postMapper.toResponsePaginatedView(
-          postsMapped,
+          posts,
           paginationInput,
           totalCount,
           likes,
@@ -64,7 +58,7 @@ export class PostsService {
 
       // Возврат со статусами пользователей
       return this.postMapper.toResponsePaginatedView(
-        postsMapped,
+        posts,
         paginationInput,
         totalCount,
         likes,
@@ -74,7 +68,7 @@ export class PostsService {
 
     // Возврат без статусов пользователя
     return this.postMapper.toResponsePaginatedView(
-      postsMapped,
+      posts,
       paginationInput,
       totalCount,
       likes,
@@ -87,31 +81,27 @@ export class PostsService {
     userId: string,
   ): Promise<PaginatedPostResponseDto> {
     // Получение постов и totalCount
-    const { posts, totalCount } = await this.postsQuerySqlRepo.findAllByBlogId(
+    const { posts, totalCount } = await this.postQueryRepo.findAllByBlogId(
       paginationInput,
       blogId,
     );
-    const postsMapped = posts.map((p) => this.postMapper.toResponseDtoView(p));
 
     // Сбор ID постов для поиска лайков
-    const postsIds = postsMapped.map((post) => {
+    const postsIds = posts.map((post) => {
       return post.id.toString();
     });
 
     // Получение последних 3 лайков для каждого поста
-    const likes = await this.likesSqlRepo.findNewestLikesByEntityIds(postsIds);
+    const likes = await this.likeRepo.findNewestLikesByEntityIds(postsIds);
 
     // Проверка userId в JWT
     if (userId) {
       // Статусы лайков текущего пользователя
-      const statuses = await this.likesSqlRepo.findLikeStatuses(
-        postsIds,
-        userId,
-      );
+      const statuses = await this.likeRepo.findLikeStatuses(postsIds, userId);
 
       if (!statuses) {
         return this.postMapper.toResponsePaginatedView(
-          postsMapped,
+          posts,
           paginationInput,
           totalCount,
           likes,
@@ -124,7 +114,7 @@ export class PostsService {
 
       // Возврат со статусами пользователей
       return this.postMapper.toResponsePaginatedView(
-        postsMapped,
+        posts,
         paginationInput,
         totalCount,
         likes,
@@ -134,7 +124,7 @@ export class PostsService {
 
     // Возврат без статусов пользователя
     return this.postMapper.toResponsePaginatedView(
-      postsMapped,
+      posts,
       paginationInput,
       totalCount,
       likes,
@@ -143,7 +133,7 @@ export class PostsService {
 
   async findById(id: string, userId: string | null): Promise<PostResponseDto> {
     // Существование поста
-    const post = await this.postsSqlRepo.findById(id);
+    const post = await this.postRepo.findById(id);
     if (!post) {
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,
@@ -152,7 +142,7 @@ export class PostsService {
       });
     }
     // Последние 3 лайка
-    const likes = await this.likesSqlRepo.findNewestLikesByEntityId(id);
+    const likes = await this.likeRepo.findNewestLikesByEntityId(id);
     const newestLikes: NewestLikes[] = likes.map((l) => ({
       addedAt: l.addedAt,
       userId: l.userId,
@@ -162,7 +152,7 @@ export class PostsService {
     if (!userId)
       return this.postMapper.toResponseView(post, newestLikes, LikeStatus.None);
     // Статус лайка для поста
-    const isLiked = await this.likesSqlRepo.findByEntityIdAndUserId(id, userId);
+    const isLiked = await this.likeRepo.findByEntityIdAndUserId(id, userId);
     if (!isLiked) {
       return this.postMapper.toResponseView(post, newestLikes, LikeStatus.None);
     }

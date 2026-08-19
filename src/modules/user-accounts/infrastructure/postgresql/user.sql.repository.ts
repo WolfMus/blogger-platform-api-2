@@ -1,16 +1,16 @@
 import { FindOptionsWhere, ILike, Repository } from 'typeorm';
-import { UserPostgres } from '../../domain/users/postgresql/user.postgres.entity';
+import { User } from '../../domain/users/postgresql/user.postgres.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserPaginationRequest } from '../../dto/user-pagination.request.dto';
 import { SortDirection } from '../../../../core/dto/pagination.request.dto';
 
-export class UserPostRepository {
+export class UserRepository {
   constructor(
-    @InjectRepository(UserPostgres)
-    private userRepo: Repository<UserPostgres>,
+    @InjectRepository(User)
+    private userRepo: Repository<User>,
   ) {}
 
-  async save(user: UserPostgres): Promise<UserPostgres | null> {
+  async save(user: User): Promise<User | null> {
     const saved = await this.userRepo.save(user);
     return saved;
   }
@@ -25,7 +25,7 @@ export class UserPostRepository {
 
   async findAll(
     pagination: UserPaginationRequest,
-  ): Promise<{ users: UserPostgres[]; totalCount: number }> {
+  ): Promise<{ users: User[]; totalCount: number }> {
     const sortBy = pagination.sortBy ?? 'createdAt';
     const sortDirection =
       pagination.sortDirection === SortDirection.Asc
@@ -34,7 +34,7 @@ export class UserPostRepository {
     const pageNumber = pagination.pageNumber ?? 1;
     const pageSize = pagination.pageSize ?? 10;
     const offset = (pageNumber - 1) * pageSize;
-    const where: FindOptionsWhere<UserPostgres>[] = [];
+    const where: FindOptionsWhere<User>[] = [];
 
     if (pagination.searchLoginTerm) {
       where.push({
@@ -61,7 +61,7 @@ export class UserPostRepository {
     };
   }
 
-  async findById(id: string): Promise<UserPostgres | null> {
+  async findById(id: string): Promise<User | null> {
     const user = await this.userRepo.findOne({ where: { id } });
     if (!user) return null;
     return user;
@@ -69,7 +69,7 @@ export class UserPostRepository {
 
   async findByConfirmationCode(
     confirmationCode: string,
-  ): Promise<UserPostgres | null> {
+  ): Promise<User | null> {
     const user = await this.userRepo.findOne({ where: { confirmationCode } });
     if (!user) return null;
     return user;
@@ -78,7 +78,7 @@ export class UserPostRepository {
   async findByLoginAndEmail(
     login: string,
     email: string,
-  ): Promise<UserPostgres | null> {
+  ): Promise<User | null> {
     const user = await this.userRepo.findOne({
       where: { login: login, email: email },
       relations: { session: true },
@@ -86,7 +86,7 @@ export class UserPostRepository {
     return user;
   }
 
-  async findByLoginOrEmail(loginOrEmail: string): Promise<UserPostgres | null> {
+  async findByLoginOrEmail(loginOrEmail: string): Promise<User | null> {
     const user = await this.userRepo.findOne({
       where: [{ login: loginOrEmail }, { email: loginOrEmail }],
       relations: { session: true },
@@ -94,7 +94,7 @@ export class UserPostRepository {
     return user;
   }
 
-  async findByRecoveryCode(recoveryCode: string): Promise<UserPostgres | null> {
+  async findByRecoveryCode(recoveryCode: string): Promise<User | null> {
     const user = await this.userRepo.findOne({
       where: { recoveryCode: recoveryCode },
       relations: { session: true },

@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { CryptoService } from './crypto.service';
-import { UserPostRepository } from '../infrastructure/postgresql/user.postgres.repository';
+import { UserRepository } from '../infrastructure/postgresql/user.sql.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private userPostRepo: UserPostRepository,
+    private userRepo: UserRepository,
     private cryptoService: CryptoService,
   ) {}
 
@@ -13,7 +13,7 @@ export class AuthService {
     loginOrEmail: string,
     pass: string,
   ): Promise<{ id: string } | null> {
-    const user = await this.userPostRepo.findByLoginOrEmail(loginOrEmail);
+    const user = await this.userRepo.findByLoginOrEmail(loginOrEmail);
     if (!user) {
       return null;
     }

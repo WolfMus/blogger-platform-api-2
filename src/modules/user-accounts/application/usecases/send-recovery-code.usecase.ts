@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { EmailService } from '../../../notifications/applications/email.service';
-import { UserPostRepository } from '../../infrastructure/postgresql/user.postgres.repository';
+import { UserRepository } from '../../infrastructure/postgresql/user.sql.repository';
 
 export class SendRecoveryCodeCommand {
   constructor(public email: string) {}
@@ -12,14 +12,14 @@ export class SendRecoveryCodeUseClass implements ICommandHandler<
   void
 > {
   constructor(
-    private userPostRepo: UserPostRepository,
+    private userRepo: UserRepository,
     private emailService: EmailService,
   ) {}
 
   async execute(command: SendRecoveryCodeCommand): Promise<void> {
     // find user by email
     // if user not found - return no content exception
-    const user = await this.userPostRepo.findByLoginOrEmail(command.email);
+    const user = await this.userRepo.findByLoginOrEmail(command.email);
     if (!user) {
       return;
     }
@@ -28,7 +28,7 @@ export class SendRecoveryCodeUseClass implements ICommandHandler<
     user.setRecoveryCode();
 
     // save user
-    await this.userPostRepo.save(user);
+    await this.userRepo.save(user);
 
     // send recovery code on user's email
     await this.emailService.sendPasswordRecoveryEmail(

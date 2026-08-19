@@ -2,24 +2,22 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { BlogMapper } from '../dto/mapper/blog.response.mapper';
 import { PaginatedBlogResponseDto } from '../dto/blog-paginated-view.response.dto';
 import { BlogPaginationRequest } from '../dto/blog-pagination.request.dto';
-import { BlogsQwRepository } from '../infrastructure/query/blogs-query.repository';
 import { BlogResponseDto } from '../dto/blog-response.dto';
 import {
   DomainException,
   Extension,
 } from '../../../../core/exceptions/domain-exception';
-import { BlogsPostgresQwRepository } from '../infrastructure/postgres/query/blogs-query-postgres.repository';
+import { BlogQwRepository } from '../infrastructure/query/blog-query.repository';
 
 @Injectable()
-export class BlogsService {
+export class BlogService {
   constructor(
-    private blogsQueryRepo: BlogsQwRepository,
-    private blogsPostgresQueryRepo: BlogsPostgresQwRepository,
-    private blogsMapper: BlogMapper,
+    private BlogQueryRepo: BlogQwRepository,
+    private blogMapper: BlogMapper,
   ) {}
 
   async findById(id: string): Promise<BlogResponseDto> {
-    const blog = await this.blogsPostgresQueryRepo.findById(id);
+    const blog = await this.BlogQueryRepo.findById(id);
     if (!blog) {
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,
@@ -34,8 +32,8 @@ export class BlogsService {
     paginationInput: BlogPaginationRequest,
   ): Promise<PaginatedBlogResponseDto> {
     const { blogs, totalCount } =
-      await this.blogsPostgresQueryRepo.findAll(paginationInput);
-    return this.blogsMapper.toResponsePaginatedView(
+      await this.BlogQueryRepo.findAll(paginationInput);
+    return this.blogMapper.toResponsePaginatedView(
       blogs,
       paginationInput,
       totalCount,

@@ -4,7 +4,7 @@ import {
   DomainException,
   Extension,
 } from '../../../../core/exceptions/domain-exception';
-import { UserPostRepository } from '../../infrastructure/postgresql/user.postgres.repository';
+import { UserRepository } from '../../infrastructure/postgresql/user.sql.repository';
 
 export class ConfirmRegistrationCommand {
   constructor(public code: string) {}
@@ -15,11 +15,11 @@ export class ConfirmRegistrationUseClass implements ICommandHandler<
   ConfirmRegistrationCommand,
   void
 > {
-  constructor(private userPostRepo: UserPostRepository) {}
+  constructor(private userRepo: UserRepository) {}
 
   async execute(command: ConfirmRegistrationCommand): Promise<void> {
     // find user by confirmation code
-    const user = await this.userPostRepo.findByConfirmationCode(command.code);
+    const user = await this.userRepo.findByConfirmationCode(command.code);
     if (!user) {
       throw new DomainException({
         code: HttpStatus.BAD_REQUEST,
@@ -50,7 +50,7 @@ export class ConfirmRegistrationUseClass implements ICommandHandler<
     user.changeAccoutConfirmation();
 
     // save user
-    await this.userPostRepo.save(user);
+    await this.userRepo.save(user);
     return;
   }
 }

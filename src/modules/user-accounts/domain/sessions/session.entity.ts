@@ -7,7 +7,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { UserPostgres } from '../users/postgresql/user.postgres.entity';
+import { User } from '../users/postgresql/user.postgres.entity';
 
 @ApiSchema({ name: 'Sessions' })
 @Entity({ name: 'session' })
@@ -15,11 +15,11 @@ export class Session {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToOne(() => UserPostgres, (user) => user.id, {
+  @OneToOne(() => User, (user) => user.id, {
     nullable: false,
   })
   @JoinColumn({ name: 'user_id' })
-  user: UserPostgres;
+  user: User;
 
   @Column({
     name: 'refresh_token',
@@ -69,7 +69,7 @@ export class Session {
   })
   lastActiveDate: Date; // Date of the last generating of refresh/access tokens
 
-  static createInstance(dto: CreateSessionDto, user: UserPostgres): Session {
+  static createInstance(dto: CreateSessionDto, user: User): Session {
     const session = new Session();
     session.user = user;
     session.refreshToken = dto.refreshToken;

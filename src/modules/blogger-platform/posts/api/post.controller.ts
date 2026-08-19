@@ -18,12 +18,12 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { PostsService } from '../application/posts.service';
+import { PostService } from '../application/post.service';
 import { PostResponseDto } from '../dto/post.response.dto';
 import { PaginationInput } from '../../../../core/dto/pagination.request.dto';
 import { PaginatedPostResponseDto } from '../dto/post-paginated-view.response.dto';
 import { PaginatedCommentResponseDto } from '../../comments/dto/paginated-comment.response.dto';
-import { CommentsService } from '../../comments/application/comments.service';
+import { CommentService } from '../../comments/application/comment.service';
 import { CommandBus } from '@nestjs/cqrs';
 import { JwtAuthGuard } from '../../../user-accounts/guards/bearer/jwt-auth.guard';
 import { CommentResponseDto } from '../../comments/dto/comment.response.dto';
@@ -36,11 +36,11 @@ import { LikeRequestDto } from '../../likes/dto/like.request.dto';
 
 @ApiTags('Posts')
 @Controller('posts')
-export class PostsController {
+export class PostController {
   constructor(
     private commandBus: CommandBus,
-    private postsService: PostsService,
-    private commentsService: CommentsService,
+    private PostService: PostService,
+    private CommentService: CommentService,
   ) {}
 
   // ✅ FIND POST BY ID
@@ -55,7 +55,7 @@ export class PostsController {
     @Req() req: Request,
   ): Promise<PostResponseDto> {
     const userInfo = req.user as { userId: string; login: string };
-    return await this.postsService.findById(postId, userInfo.userId);
+    return await this.PostService.findById(postId, userInfo.userId);
   }
 
   // ✅ FIND ALL POSTS WITH PAGINATION
@@ -72,7 +72,7 @@ export class PostsController {
     @Req() req: Request,
   ): Promise<PaginatedPostResponseDto> {
     const userInfo = req.user as { userId: string; login: string };
-    const posts = await this.postsService.findAll(
+    const posts = await this.PostService.findAll(
       paginationInput,
       userInfo.userId,
     );
@@ -113,7 +113,7 @@ export class PostsController {
     @Req() req: Request,
   ): Promise<PaginatedCommentResponseDto> {
     const userInfo = req.user as { userId: string; login: string };
-    return await this.commentsService.findAllByPostId(
+    return await this.CommentService.findAllByPostId(
       paginationInput,
       postId,
       userInfo.userId,

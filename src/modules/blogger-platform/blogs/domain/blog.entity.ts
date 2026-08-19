@@ -1,73 +1,56 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Model } from 'mongoose';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { CreateBlogRequestDto } from '../dto/create-blog.request.dto';
-import { ApiProperty, ApiSchema } from '@nestjs/swagger';
-@ApiSchema({
-  name: 'Blog Entity',
-})
-@Schema({ collection: 'blogs' })
-export class Blog {
-  @ApiProperty({ example: 'Pineapple', description: 'Blogs name' })
-  @Prop({ type: String, required: true })
+import { BaseDbEntity } from '../../../../core/db/entities/base-db.entity';
+import { Post } from '../../posts/domain/post.entity';
+
+@Entity({ name: 'blogs' })
+export class Blog extends BaseDbEntity {
+  @Column({
+    name: 'name',
+    type: 'varchar',
+    length: 15,
+    unique: false,
+  })
   name: string;
 
-  @ApiProperty({
-    example: 'This blog is about pineapples',
-    description: 'Blogs description',
+  @Column({
+    name: 'description',
+    type: 'varchar',
+    length: 500,
+    unique: false,
   })
-  @Prop({ type: String, required: true })
   description: string;
 
-  @ApiProperty({
-    example: 'https://pineapples.by',
-    description: 'Website URL',
+  @Column({
+    name: 'website_url',
+    type: 'varchar',
+    length: 100,
+    unique: false,
+    nullable: true,
   })
-  @Prop({ type: String, required: true })
   websiteUrl: string;
 
-  @ApiProperty({
-    description: 'Сreation date',
+  @Column({
+    name: 'is_membership',
+    type: 'boolean',
   })
-  @Prop({ type: Date, required: true })
-  createdAt: Date;
-
-  @ApiProperty({
-    description: 'Update date',
-  })
-  @Prop({ type: Date, nullable: true })
-  updatedAt: Date | null;
-
-  @ApiProperty({
-    description: 'Membership status',
-  })
-  @Prop({ type: Boolean, required: true, default: false })
   isMembership: boolean;
 
-  static createInstance(dto: CreateBlogRequestDto): BlogDocument {
-    const blog = new this();
+  @OneToMany(() => Post, (post) => post.blog)
+  posts: Post[];
+
+  static createInstance(dto: CreateBlogRequestDto): Blog {
+    const blog = new Blog();
     blog.name = dto.name;
     blog.description = dto.description;
     blog.websiteUrl = dto.websiteUrl;
-    blog.createdAt = new Date();
-    blog.updatedAt = null;
-    return blog as BlogDocument;
+    blog.isMembership = false;
+    return blog;
   }
 
   updateBlog(dto: CreateBlogRequestDto): void {
     this.name = dto.name;
     this.description = dto.description;
     this.websiteUrl = dto.websiteUrl;
-    this.updatedAt = new Date();
   }
 }
-
-export const BlogSchema = SchemaFactory.createForClass(Blog);
-
-// регистрирует методы сущности в схеме
-BlogSchema.loadClass(Blog);
-
-// типизация документа
-export type BlogDocument = HydratedDocument<Blog>;
-
-// типизация модели + статические методы
-export type BlogModelType = Model<BlogDocument> & typeof Blog;

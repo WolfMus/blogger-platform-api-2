@@ -5,7 +5,7 @@ import {
   Extension,
 } from '../../../../../core/exceptions/domain-exception';
 import { HttpStatus } from '@nestjs/common';
-import { BlogsPostgresRepository } from '../../infrastructure/postgres/blogs-postgres.repository';
+import { BlogRepository } from '../../infrastructure/blog.repository';
 
 export class UpdateBlogCommand {
   constructor(
@@ -16,10 +16,10 @@ export class UpdateBlogCommand {
 
 @CommandHandler(UpdateBlogCommand)
 export class UpdateBlogUseCase implements ICommandHandler<UpdateBlogCommand> {
-  constructor(private blogsRepo: BlogsPostgresRepository) {}
+  constructor(private blogRepo: BlogRepository) {}
 
   async execute(command: UpdateBlogCommand): Promise<void> {
-    const blog = await this.blogsRepo.findById(command.id);
+    const blog = await this.blogRepo.findById(command.id);
     if (!blog) {
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,
@@ -28,7 +28,7 @@ export class UpdateBlogUseCase implements ICommandHandler<UpdateBlogCommand> {
       });
     }
     blog.updateBlog(command.dto);
-    await this.blogsRepo.save(blog);
+    await this.blogRepo.save(blog);
     return;
   }
 }

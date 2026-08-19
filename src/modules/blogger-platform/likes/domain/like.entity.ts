@@ -1,47 +1,61 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { LikeStatus } from '../../posts/domain/post.entity';
-import { HydratedDocument, Model } from 'mongoose';
-import { CreateLikeEntityDto } from './dto/create-likes.entity.dto';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { EntityType } from '../types/entity-type.enum';
+import { User } from '../../../user-accounts/domain/users/postgresql/user.postgres.entity';
+import { CreateLikeEntityDto } from './dto/create-likes.entity.dto';
+import { LikeStatus } from '../../../../core/types/like-status.enum';
 
-@Schema({ collection: 'likes' })
+@Entity({ name: 'likes' })
 export class Like {
-  @Prop({ type: String, required: true })
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({
+    name: 'entity_id',
+    type: 'uuid',
+  })
   entityId: string;
-  @Prop({ type: String, enum: EntityType, required: true })
+
+  @Column({
+    name: 'entity_type',
+    type: 'enum',
+    enum: EntityType,
+  })
   entityType: EntityType;
-  @Prop({ type: String, required: true })
-  userId: string;
-  @Prop({ type: String, required: true })
-  userLogin: string;
-  @Prop({ type: String, enum: LikeStatus, required: true })
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+
+  @Column({
+    name: 'like_status',
+    type: 'enum',
+    enum: LikeStatus,
+  })
   likeStatus: LikeStatus;
-  @Prop({ type: Date, required: true })
+
+  @Column({
+    name: 'added_at',
+    type: 'timestamptz',
+  })
   addedAt: Date;
 
-  static createInstance(dto: CreateLikeEntityDto): LikeDocument {
-    const like = new this();
+  static createInstance(dto: CreateLikeEntityDto, user: User): Like {
+    const like = new Like();
     like.entityId = dto.entityId;
     like.entityType = dto.entityType;
-    like.userId = dto.userId;
-    like.userLogin = dto.userLogin;
+    like.user = user;
     like.likeStatus = dto.likeStatus;
-    like.addedAt = new Date();
-    return like as LikeDocument;
+    return like;
   }
 
   changeStatus(status: LikeStatus): void {
     this.likeStatus = status;
+    this.addedAt = new Date();
   }
 }
-
-export const LikeSchema = SchemaFactory.createForClass(Like);
-
-// регистрирует методы сущности в схеме
-LikeSchema.loadClass(Like);
-
-// типизация документа
-export type LikeDocument = HydratedDocument<Like>;
-
-// типизация модели + статические методы
-export type LikeModelType = Model<LikeDocument> & typeof Like;

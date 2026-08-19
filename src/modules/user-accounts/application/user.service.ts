@@ -1,30 +1,24 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { UserRepository } from '../infrastructure/user.repository';
 import { UserMapper } from '../dto/mapper/user.mapper';
 import { PaginatedUserResponseDto } from '../dto/post-paginated-view.response.dto';
 import { UserPaginationRequest } from '../dto/user-pagination.request.dto';
-import { UserQwRepository } from '../infrastructure/user-query.repository';
 import {
   DomainException,
   Extension,
 } from '../../../core/exceptions/domain-exception';
-import { UserPostRepository } from '../infrastructure/postgresql/user.postgres.repository';
+import { UserRepository } from '../infrastructure/postgresql/user.sql.repository';
 
 @Injectable()
 export class UserService {
   constructor(
-    private userPostgresRepo: UserPostRepository,
     private userRepo: UserRepository,
-    private userPostRepo: UserPostRepository,
-    private userQueryRepo: UserQwRepository,
     private userMapper: UserMapper,
   ) {}
 
   async findAll(
     pagination: UserPaginationRequest,
   ): Promise<PaginatedUserResponseDto> {
-    const { users, totalCount } =
-      await this.userPostgresRepo.findAll(pagination);
+    const { users, totalCount } = await this.userRepo.findAll(pagination);
     return this.userMapper.toPaginatedResponseView(
       users,
       totalCount,
@@ -33,7 +27,7 @@ export class UserService {
   }
 
   async delete(id: string): Promise<void> {
-    const deleted = await this.userPostgresRepo.delete(id);
+    const deleted = await this.userRepo.delete(id);
     if (deleted === null) {
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,
@@ -49,7 +43,7 @@ export class UserService {
     login: string;
     userId: string;
   }> {
-    const user = await this.userPostRepo.findById(userId);
+    const user = await this.userRepo.findById(userId);
     if (!user) {
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,

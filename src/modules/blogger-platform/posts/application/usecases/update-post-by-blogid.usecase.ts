@@ -5,7 +5,7 @@ import {
   DomainException,
   Extension,
 } from '../../../../../core/exceptions/domain-exception';
-import { PostsPostgresRepository } from '../../infrastructure/postgres/posts-postgres.repository';
+import { PostRepository } from '../../infrastructure/post.repository';
 
 export class UpdatePostByBlogIdCommand {
   constructor(
@@ -20,7 +20,7 @@ export class UpdatePostByBlogIdUseCase implements ICommandHandler<
   UpdatePostByBlogIdCommand,
   void
 > {
-  constructor(private postsRepo: PostsPostgresRepository) {}
+  constructor(private postsRepo: PostRepository) {}
 
   async execute(command: UpdatePostByBlogIdCommand): Promise<void> {
     const post = await this.postsRepo.findByPostIdAndBlogId(

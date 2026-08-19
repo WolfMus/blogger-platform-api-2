@@ -7,9 +7,10 @@ import { HttpStatus } from '@nestjs/common';
 import { LikeRequestDto } from '../../../likes/dto/like.request.dto';
 import { EntityType } from '../../../likes/types/entity-type.enum';
 import { LikeStatus } from '../../../../../core/types/like-status.enum';
-import { LikesSqlRepository } from '../../../likes/infrastructure/likes-sql.repository';
-import { LikePostgres } from '../../../likes/domain/like-sql.entity';
-import { CommentsPostgresRepository } from '../../infrastructure/comments-sql.repository';
+import { Like } from '../../../likes/domain/like.entity';
+import { LikeRepository } from '../../../likes/infrastructure/like.repository';
+import { CommentRepository } from '../../infrastructure/comment.repository';
+import { UserRepository } from '../../../../user-accounts/infrastructure/postgresql/user.sql.repository';
 
 export class LikeCommentCommand {
   constructor(
@@ -25,8 +26,9 @@ export class LikeCommentUseCase implements ICommandHandler<
   void
 > {
   constructor(
-    private likeRepo: LikesSqlRepository,
-    private commentRepo: CommentsPostgresRepository,
+    private likeRepo: LikeRepository,
+    private commentRepo: CommentRepository,
+    private userRepo: UserRepository,
   ) {}
   async execute(command: LikeCommentCommand): Promise<void> {
     // Поиск комментария
@@ -35,7 +37,17 @@ export class LikeCommentUseCase implements ICommandHandler<
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,
         message: 'Not Found',
-        extensions: [new Extension('id', 'Comment Not Found')],
+        extensions: [new Extension('Comment Not Found', 'id')],
+      });
+    }
+
+    // Поиск пользователя
+    const user = await this.userRepo.findById(command.userInfo.userId);
+    if (!user) {
+      throw new DomainException({
+        code: HttpStatus.NOT_FOUND,
+        message: 'Not Found',
+        extensions: [new Extension('User Not Found', 'id')],
       });
     }
 
@@ -59,9 +71,9 @@ export class LikeCommentUseCase implements ICommandHandler<
       if (like.likeStatus === LikeStatus.Like) deltaLike = -1;
       if (like.likeStatus === LikeStatus.Dislike) deltaDislike = -1;
       like.changeStatus(command.dto.likeStatus);
-      const updated = await this.likeRepo.update(like);
+      const updated = await this.likeRepo.save(like);
       if (!updated) {
-        throw new Error('Not Updated');
+        throw new Error('Like Was Not Updated');
       }
     }
 
@@ -73,14 +85,19 @@ export class LikeCommentUseCase implements ICommandHandler<
     if (command.dto.likeStatus === LikeStatus.None) {
       await this.likeRepo.delete(like!.id);
     } else if (!like) {
-      const newLike = LikePostgres.createInstance({
-        entityId: command.commentId,
-        entityType: EntityType.Comment,
-        userId: command.userInfo.userId,
-        userLogin: command.userInfo.login,
-        likeStatus: command.dto.likeStatus,
-      });
-      await this.likeRepo.create(newLike);
+      const newLike = Like.createInstance(
+        {
+          entityId: command.commentId,
+          entityType: EntityType.Comment,
+          likeStatus: command.dto.likeStatus,
+        },
+        user,
+      );
+      const savedLike = await this.likeRepo.save(newLike);
+      if (!savedLike) {
+        throw new Error('Like Was Not Saved');
+      }
+      return;
     }
     // Меняем счетчик в БД
     const updatedCounts = await this.commentRepo.changeCounts(

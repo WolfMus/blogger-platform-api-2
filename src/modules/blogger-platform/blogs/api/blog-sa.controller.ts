@@ -14,7 +14,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CreateBlogRequestDto } from '../dto/create-blog.request.dto';
-import { BlogsService } from '../application/blogs.service';
+import { BlogService } from '../application/blog.service';
 import { PaginationInput } from '../../../../core/dto/pagination.request.dto';
 import { BlogResponseDto } from '../dto/blog-response.dto';
 import {
@@ -25,7 +25,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { PostsService } from '../../posts/application/posts.service';
+import { PostService } from '../../posts/application/post.service';
 import { PaginatedBlogResponseDto } from '../dto/blog-paginated-view.response.dto';
 import { PaginatedPostResponseDto } from '../../posts/dto/post-paginated-view.response.dto';
 import { PostResponseDto } from '../../posts/dto/post.response.dto';
@@ -44,11 +44,11 @@ import { DeletePostByBlogIdCommand } from '../../posts/application/usecases/dele
 
 @ApiTags('Super Admin')
 @Controller('sa/blogs')
-export class SuperAdminBlogsController {
+export class SuperAdminBlogController {
   constructor(
     private commandBus: CommandBus,
-    private blogsService: BlogsService,
-    private postsService: PostsService,
+    private BlogService: BlogService,
+    private PostService: PostService,
   ) {}
 
   // =========== BLOGS ===========
@@ -61,7 +61,7 @@ export class SuperAdminBlogsController {
   async getAllBlogs(
     @Query() paginationInput: BlogPaginationRequest,
   ): Promise<PaginatedBlogResponseDto> {
-    const blogs = await this.blogsService.findAll(paginationInput);
+    const blogs = await this.BlogService.findAll(paginationInput);
     return blogs;
   }
 
@@ -102,7 +102,7 @@ export class SuperAdminBlogsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(BasicAuthGuard)
   @Delete('/:id')
-  async deleteBlog(@Param('id', ParseUUIDPipe) id: number): Promise<void> {
+  async deleteBlog(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return await this.commandBus.execute<DeleteBlogCommand, void>(
       new DeleteBlogCommand(id),
     );
@@ -124,8 +124,8 @@ export class SuperAdminBlogsController {
     @Req() req: Request,
   ): Promise<PaginatedPostResponseDto> {
     const userInfo = req.user as { userId: string; login: string };
-    await this.blogsService.findById(blogId);
-    const posts = await this.postsService.findAllByBlogId(
+    await this.BlogService.findById(blogId);
+    const posts = await this.PostService.findAllByBlogId(
       paginationInput,
       blogId,
       userInfo.userId,

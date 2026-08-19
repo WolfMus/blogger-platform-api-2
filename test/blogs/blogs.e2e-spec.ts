@@ -7,7 +7,7 @@ import { getConnectionToken } from '@nestjs/mongoose';
 import request from 'supertest';
 import { BlogResponseDto } from '../../src/modules/blogger-platform/blogs/dto/blog-response.dto';
 
-describe('BlogsController (e2e)', () => {
+describe('BlogController (e2e)', () => {
   let app: INestApplication<App>;
   let connection: Connection;
 

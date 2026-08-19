@@ -4,7 +4,7 @@ import {
   Extension,
 } from '../../../../../core/exceptions/domain-exception';
 import { HttpStatus } from '@nestjs/common';
-import { PostsPostgresRepository } from '../../infrastructure/postgres/posts-postgres.repository';
+import { PostRepository } from '../../infrastructure/post.repository';
 export class DeletePostByBlogIdCommand {
   constructor(
     public postId: string,
@@ -16,7 +16,7 @@ export class DeletePostByBlogIdUseCase implements ICommandHandler<
   DeletePostByBlogIdCommand,
   void
 > {
-  constructor(private postsRepo: PostsPostgresRepository) {}
+  constructor(private postsRepo: PostRepository) {}
   async execute(command: DeletePostByBlogIdCommand): Promise<void> {
     const deleted = await this.postsRepo.deleteByPostIdAndBlogId(
       command.postId,

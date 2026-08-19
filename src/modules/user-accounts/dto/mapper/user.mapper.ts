@@ -1,9 +1,8 @@
-import { UserPostgresResponseDto } from '../../infrastructure/postgresql/dto/user.response.dto';
 import { UserPaginationRequest } from '../user-pagination.request.dto';
 import { UserResponseDto } from '../user.response.dto';
 
 export class UserMapper {
-  toResponseView(user: UserPostgresResponseDto): UserResponseDto {
+  toResponseView(user: UserResponseDto): UserResponseDto {
     return {
       id: user.id.toString(),
       login: user.login,
@@ -13,7 +12,7 @@ export class UserMapper {
   }
 
   toPaginatedResponseView(
-    users: UserPostgresResponseDto[],
+    users: UserResponseDto[],
     totalCount: number,
     pagination: UserPaginationRequest,
   ) {

@@ -12,7 +12,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CreateUserRequestDto } from '../dto/input/create-user.request.dto';
-import { UserResponseDto } from '../dto/user.response.dto';
 import { UserService } from '../application/user.service';
 import {
   ApiCreatedResponse,
@@ -26,7 +25,7 @@ import { UserPaginationRequest } from '../dto/user-pagination.request.dto';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateUserCommand } from '../application/usecases/create-user.usecase';
 import { BasicAuthGuard } from '../guards/basic/basic-auth.guard';
-import { UserPostgresResponseDto } from '../infrastructure/postgresql/dto/user.response.dto';
+import { UserResponseDto } from '../dto/user.response.dto';
 
 @UseGuards(BasicAuthGuard)
 @Controller('sa/users')
@@ -56,11 +55,10 @@ export class UserController {
   @Post()
   async createUser(
     @Body() dto: CreateUserRequestDto,
-  ): Promise<UserPostgresResponseDto> {
-    return await this.commandBus.execute<
-      CreateUserCommand,
-      UserPostgresResponseDto
-    >(new CreateUserCommand(dto));
+  ): Promise<UserResponseDto> {
+    return await this.commandBus.execute<CreateUserCommand, UserResponseDto>(
+      new CreateUserCommand(dto),
+    );
   }
 
   // ✅ DELETE USER

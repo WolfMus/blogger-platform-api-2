@@ -1,7 +1,11 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { CreatePostRequestDto } from '../dto/create-post.request.dto';
-import { HydratedDocument, Model } from 'mongoose';
-import { ApiProperty, ApiSchema } from '@nestjs/swagger';
+import { BaseDbEntity } from '../../../../core/db/entities/base-db.entity';
+import { Blog } from '../../blogs/domain/blog.entity';
+import { Comment } from '../../comments/domain/comment.entity';
+import {
+  CreatePostForBlogRequestDto,
+  CreatePostRequestDto,
+} from '../dto/create-post.request.dto';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
 export enum LikeStatus {
   None = 'None',
@@ -9,114 +13,67 @@ export enum LikeStatus {
   Dislike = 'Dislike',
 }
 
-@ApiSchema({ name: 'NewestLikes' })
-@Schema({ _id: false })
-export class NewestLikes {
-  @ApiProperty()
-  @Prop({ type: Date, required: true })
-  addedAt: Date;
-
-  @ApiProperty()
-  @Prop({ type: String, required: true })
-  userId: string;
-
-  @ApiProperty()
-  @Prop({ type: String, required: true })
-  login: string;
-}
-
-@ApiSchema({ name: 'ExtendedLikesInfo' })
-@Schema({ _id: false })
-export class ExtendedLikesInfo {
-  @ApiProperty()
-  @Prop({ type: Number, default: 0 })
-  likesCount: number;
-
-  @ApiProperty()
-  @Prop({ type: Number, default: 0 })
-  dislikesCount: number;
-
-  @ApiProperty()
-  @Prop({ type: String, enum: LikeStatus, default: LikeStatus.None })
-  myStatus: string;
-
-  @ApiProperty({ type: NewestLikes })
-  @Prop({ type: [NewestLikes], default: [] })
-  newestLikes: NewestLikes[];
-}
-
-@ApiSchema({ name: 'Post Entity' })
-@Schema({ collection: 'posts' })
-export class Post {
-  @ApiProperty()
-  @Prop({ type: String, required: true })
+@Entity({ name: 'posts' })
+export class Post extends BaseDbEntity {
+  @Column({
+    name: 'title',
+    type: 'varchar',
+    length: 30,
+    unique: false,
+  })
   title: string;
 
-  @ApiProperty()
-  @Prop({ type: String, required: true })
+  @Column({
+    name: 'shortDescription',
+    type: 'varchar',
+    length: 100,
+    unique: false,
+  })
   shortDescription: string;
 
-  @ApiProperty()
-  @Prop({ type: String, required: true })
+  @Column({
+    name: 'content',
+    type: 'varchar',
+    length: 1000,
+    unique: false,
+  })
   content: string;
 
-  @ApiProperty()
-  @Prop({ type: String, required: true })
-  blogId: string;
+  @Column({
+    name: 'likesCount',
+    type: 'integer',
+    default: 0,
+  })
+  likesCount: number;
 
-  @ApiProperty()
-  @Prop({ type: String, required: true })
-  blogName: string;
+  @Column({
+    name: 'dislikesCount',
+    type: 'integer',
+    default: 0,
+  })
+  dislikesCount: number;
 
-  @ApiProperty()
-  @Prop({ type: Date, required: true })
-  createdAt: Date;
+  @ManyToOne(() => Blog, (blog) => blog.id)
+  @JoinColumn({ name: 'blogId' })
+  blog: Blog;
 
-  @ApiProperty()
-  @Prop({ type: Date, default: null })
-  updatedAt: Date;
+  @OneToMany(() => Comment, (comment) => comment.post)
+  comments: Comment[];
 
-  @ApiProperty({ type: ExtendedLikesInfo })
-  @Prop({ type: ExtendedLikesInfo })
-  extendedLikesInfo: ExtendedLikesInfo;
-
-  static createInstance(
-    dto: CreatePostRequestDto,
-    blogName: string,
-  ): PostDocument {
-    const post = new this();
+  static createInstance(dto: CreatePostRequestDto, blog: Blog): Post {
+    const post = new Post();
     post.title = dto.title;
     post.shortDescription = dto.shortDescription;
     post.content = dto.content;
-    post.blogId = dto.blogId;
-    post.blogName = blogName;
-    post.createdAt = new Date();
-    post.extendedLikesInfo = {
-      likesCount: 0,
-      dislikesCount: 0,
-      myStatus: LikeStatus.None,
-      newestLikes: [],
-    };
-    return post as PostDocument;
+    post.blog = blog;
+    post.likesCount = 0;
+    post.dislikesCount = 0;
+    return post;
   }
 
-  updatePost(dto: CreatePostRequestDto): void {
+  updatePost(dto: CreatePostForBlogRequestDto): void {
     this.title = dto.title;
     this.shortDescription = dto.shortDescription;
     this.content = dto.content;
-    this.blogId = dto.blogId;
-    this.updatedAt = new Date();
-    return;
   }
 }
-
-export const PostSchema = SchemaFactory.createForClass(Post);
-
-// регистрирует методы сущности в схеме
-PostSchema.loadClass(Post);
-
-// типизация документа
-export type PostDocument = HydratedDocument<Post>;
-
-// типизация модели + статические методы
-export type PostModelType = Model<PostDocument> & typeof Post;

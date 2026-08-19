@@ -6,7 +6,7 @@ import {
   Extension,
 } from '../../../../core/exceptions/domain-exception';
 import { CryptoService } from '../crypto.service';
-import { UserPostRepository } from '../../infrastructure/postgresql/user.postgres.repository';
+import { UserRepository } from '../../infrastructure/postgresql/user.sql.repository';
 
 export class ResetPasswordCommand {
   constructor(public dto: NewPasswordDto) {}
@@ -18,13 +18,13 @@ export class ResetPasswordUseCase implements ICommandHandler<
   void
 > {
   constructor(
-    private userPostRepo: UserPostRepository,
+    private userRepo: UserRepository,
     private cryptoService: CryptoService,
   ) {}
 
   async execute(command: ResetPasswordCommand): Promise<void> {
     // find user by recovery code
-    const user = await this.userPostRepo.findByRecoveryCode(
+    const user = await this.userRepo.findByRecoveryCode(
       command.dto.recoveryCode,
     );
     if (!user) {
@@ -52,7 +52,7 @@ export class ResetPasswordUseCase implements ICommandHandler<
     user.setNewPassword(passwordHash);
 
     // save user
-    await this.userPostRepo.save(user);
+    await this.userRepo.save(user);
 
     return;
   }

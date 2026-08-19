@@ -5,7 +5,7 @@ import {
 } from '../../../../../core/exceptions/domain-exception';
 import { HttpStatus } from '@nestjs/common';
 import { CreateCommentRequestDto } from '../../dto/create-comment.request.dto';
-import { CommentsPostgresRepository } from '../../infrastructure/comments-sql.repository';
+import { CommentRepository } from '../../infrastructure/comment.repository';
 
 export class UpdateCommentCommand {
   constructor(
@@ -20,7 +20,7 @@ export class UpdateCommentUseCase implements ICommandHandler<
   UpdateCommentCommand,
   void
 > {
-  constructor(private commentRepo: CommentsPostgresRepository) {}
+  constructor(private commentRepo: CommentRepository) {}
   async execute(command: UpdateCommentCommand): Promise<void> {
     // Существует ли комментарий
     const comment = await this.commentRepo.findById(command.id);
@@ -32,7 +32,7 @@ export class UpdateCommentUseCase implements ICommandHandler<
       });
     }
     // Твои ли комментарий
-    if (comment.userId !== command.userInfo.userId) {
+    if (comment.user.id !== command.userInfo.userId) {
       throw new DomainException({
         code: HttpStatus.FORBIDDEN,
         message: 'Forbidden',
@@ -41,6 +41,10 @@ export class UpdateCommentUseCase implements ICommandHandler<
     }
     // Изменение комментария
     comment.changeContent(command.dto.content);
-    return await this.commentRepo.save(comment);
+    const savedComment = await this.commentRepo.save(comment);
+    if (!savedComment) {
+      throw new Error('Comment Was Not Saved');
+    }
+    return;
   }
 }

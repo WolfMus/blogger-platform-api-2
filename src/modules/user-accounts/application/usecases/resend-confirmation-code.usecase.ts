@@ -5,7 +5,7 @@ import {
   Extension,
 } from '../../../../core/exceptions/domain-exception';
 import { EmailService } from '../../../notifications/applications/email.service';
-import { UserPostRepository } from '../../infrastructure/postgresql/user.postgres.repository';
+import { UserRepository } from '../../infrastructure/postgresql/user.sql.repository';
 
 export class ResendConfirmationCodeCommand {
   constructor(public email: string) {}
@@ -17,13 +17,13 @@ export class ResendConfirmationCodeUseCase implements ICommandHandler<
   void
 > {
   constructor(
-    private userPostRepo: UserPostRepository,
+    private userRepo: UserRepository,
     private emailService: EmailService,
   ) {}
 
   async execute(command: ResendConfirmationCodeCommand): Promise<void> {
     // find user by email
-    const user = await this.userPostRepo.findByLoginOrEmail(command.email);
+    const user = await this.userRepo.findByLoginOrEmail(command.email);
     if (!user) {
       throw new DomainException({
         code: HttpStatus.BAD_REQUEST,
@@ -45,7 +45,7 @@ export class ResendConfirmationCodeUseCase implements ICommandHandler<
     user.setConfirmationCode();
 
     // save user
-    await this.userPostRepo.save(user);
+    await this.userRepo.save(user);
 
     // send confirmation code on user's email
     await this.emailService.sendConfirmationEmail(

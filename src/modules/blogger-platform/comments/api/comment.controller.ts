@@ -12,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CommentResponseDto } from '../dto/comment.response.dto';
-import { CommentsService } from '../application/comments.service';
+import { CommentService } from '../application/comment.service';
 import {
   ApiForbiddenResponse,
   ApiNotFoundResponse,
@@ -32,9 +32,9 @@ import { LikeRequestDto } from '../../likes/dto/like.request.dto';
 
 @ApiTags('Comments')
 @Controller('comments')
-export class CommentsController {
+export class CommentController {
   constructor(
-    private commentsService: CommentsService,
+    private commentService: CommentService,
     private commandBus: CommandBus,
   ) {}
 
@@ -50,7 +50,7 @@ export class CommentsController {
     @Req() req: Request,
   ): Promise<CommentResponseDto> {
     const userInfo = req.user as { userId: string; login: string };
-    return await this.commentsService.findById(commentId, userInfo.userId);
+    return await this.commentService.findById(commentId, userInfo.userId);
   }
 
   // ✅ UPDATE COMMENT
@@ -87,7 +87,7 @@ export class CommentsController {
     @Param('commentId', ParseUUIDPipe) commentId: string,
   ): Promise<void> {
     const userInfo = req.user as { userId: string; login: string };
-    return await this.commentsService.delete(commentId, userInfo.userId);
+    return await this.commentService.delete(commentId, userInfo.userId);
   }
 
   // ✅ LIKE/DISLIKE COMMMENT

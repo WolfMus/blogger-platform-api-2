@@ -1,8 +1,8 @@
 import { BlogResponseDto } from '../../dto/blog-response.dto';
 import { CreateBlogRequestDto } from '../../dto/create-blog.request.dto';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { BlogsPostgres } from '../../domain/blog-postgres.entity';
-import { BlogsPostgresRepository } from '../../infrastructure/postgres/blogs-postgres.repository';
+import { Blog } from '../../domain/blog.entity';
+import { BlogRepository } from '../../infrastructure/blog.repository';
 
 export class CreateBlogCommand {
   constructor(public dto: CreateBlogRequestDto) {}
@@ -10,11 +10,11 @@ export class CreateBlogCommand {
 
 @CommandHandler(CreateBlogCommand)
 export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
-  constructor(private blogsRepo: BlogsPostgresRepository) {}
+  constructor(private blogRepo: BlogRepository) {}
 
   async execute(command: CreateBlogCommand): Promise<BlogResponseDto> {
-    const blog = BlogsPostgres.createInstance(command.dto);
-    const blogResponse = await this.blogsRepo.create(blog);
-    return blogResponse;
+    const blog = Blog.createInstance(command.dto);
+    const savedBlog = await this.blogRepo.save(blog);
+    return savedBlog as BlogResponseDto;
   }
 }

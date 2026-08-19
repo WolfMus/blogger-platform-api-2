@@ -1,36 +1,15 @@
-import { ApiProperty, ApiSchema } from '@nestjs/swagger';
-import {
-  ExtendedLikesInfo,
-  LikeStatus,
-  NewestLikes,
-  PostDocument,
-} from '../domain/post.entity';
-import { PostsPostgres } from '../domain/post-postgres.entity';
+import { LikeStatus } from '../../../../core/types/like-status.enum';
+import { NewestLikes } from '../../likes/dto/newest-likes.dto';
+import { Post } from '../domain/post.entity';
 
-@ApiSchema({ name: 'PostResponseDto' })
 export class PostResponseDto {
-  @ApiProperty()
   id: string;
-
-  @ApiProperty()
   title: string;
-
-  @ApiProperty()
   shortDescription: string;
-
-  @ApiProperty()
   content: string;
-
-  @ApiProperty()
   blogId: string;
-
-  @ApiProperty()
   blogName: string;
-
-  @ApiProperty()
   createdAt: Date;
-
-  @ApiProperty({ type: ExtendedLikesInfo })
   extendedLikesInfo: {
     likesCount: number;
     dislikesCount: number;
@@ -39,29 +18,7 @@ export class PostResponseDto {
   };
 
   static mapToView(
-    post: PostDocument,
-    newestLikes: NewestLikes[] = [],
-    likeStatus: LikeStatus = LikeStatus.None,
-  ): PostResponseDto {
-    return {
-      id: post._id.toString(),
-      title: post.title,
-      shortDescription: post.shortDescription,
-      content: post.content,
-      blogId: post.blogId,
-      blogName: post.blogName,
-      createdAt: post.createdAt,
-      extendedLikesInfo: {
-        likesCount: post.extendedLikesInfo.likesCount,
-        dislikesCount: post.extendedLikesInfo.dislikesCount,
-        myStatus: likeStatus,
-        newestLikes: newestLikes,
-      },
-    };
-  }
-
-  static mapToViewPostgres(
-    post: PostsPostgres,
+    post: Post,
     newestLikes: NewestLikes[] = [],
     likeStatus: LikeStatus = LikeStatus.None,
   ): PostResponseDto {
@@ -70,8 +27,8 @@ export class PostResponseDto {
       title: post.title,
       shortDescription: post.shortDescription,
       content: post.content,
-      blogId: post.blogId,
-      blogName: post.blogName,
+      blogId: post.blog.id,
+      blogName: post.blog.name,
       createdAt: post.createdAt,
       extendedLikesInfo: {
         likesCount: post.likesCount,

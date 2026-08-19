@@ -2,14 +2,14 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateUserRequestDto } from '../../dto/input/create-user.request.dto';
 import { CryptoService } from '../crypto.service';
 import { CreateUserDomainDto } from '../../domain/users/dto/create-user.domain.dto';
-import { UserPostgres } from '../../domain/users/postgresql/user.postgres.entity';
-import { UserPostRepository } from '../../infrastructure/postgresql/user.postgres.repository';
-import { UserPostgresResponseDto } from '../../infrastructure/postgresql/dto/user.response.dto';
+import { User } from '../../domain/users/postgresql/user.postgres.entity';
+import { UserRepository } from '../../infrastructure/postgresql/user.sql.repository';
 import {
   DomainException,
   Extension,
 } from '../../../../core/exceptions/domain-exception';
 import { HttpStatus } from '@nestjs/common';
+import { UserResponseDto } from '../../dto/user.response.dto';
 
 export class CreateUserCommand {
   constructor(public dto: CreateUserRequestDto) {}
@@ -18,13 +18,13 @@ export class CreateUserCommand {
 @CommandHandler(CreateUserCommand)
 export class CreateUserUseCase implements ICommandHandler<
   CreateUserCommand,
-  UserPostgresResponseDto
+  UserResponseDto
 > {
   constructor(
     private cryptoService: CryptoService,
-    private userRepo: UserPostRepository,
+    private userRepo: UserRepository,
   ) {}
-  async execute(command: CreateUserCommand): Promise<UserPostgresResponseDto> {
+  async execute(command: CreateUserCommand): Promise<UserResponseDto> {
     // user exists?
     const user = await this.userRepo.findByLoginAndEmail(
       command.dto.login,
@@ -49,10 +49,10 @@ export class CreateUserUseCase implements ICommandHandler<
     };
 
     // create user instance
-    const newUser = UserPostgres.createInstance(createUserData);
+    const newUser = User.createInstance(createUserData);
 
     // save user
     const savedUser = await this.userRepo.save(newUser);
-    return savedUser as UserPostgresResponseDto;
+    return savedUser as UserResponseDto;
   }
 }

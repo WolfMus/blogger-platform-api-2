@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { PostsRepository } from '../../infrastructure/posts.repository';
+import { PostRepository } from '../../infrastructure/post.repository';
 import {
   DomainException,
   Extension,
@@ -13,9 +13,9 @@ export class DeletePostUseCase implements ICommandHandler<
   DeletePostCommand,
   void
 > {
-  constructor(private postsRepo: PostsRepository) {}
+  constructor(private postRepo: PostRepository) {}
   async execute(command: DeletePostCommand): Promise<void> {
-    const post = await this.postsRepo.delete(command.id);
+    const post = await this.postRepo.deleteById(command.id);
     if (!post) {
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,

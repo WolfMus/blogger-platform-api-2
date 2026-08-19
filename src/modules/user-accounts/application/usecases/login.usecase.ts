@@ -10,7 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Session } from '../../domain/sessions/session.entity';
 import { SessionRepository } from '../../infrastructure/sessions/session.repository';
 import { CryptoService } from '../crypto.service';
-import { UserPostRepository } from '../../infrastructure/postgresql/user.postgres.repository';
+import { UserRepository } from '../../infrastructure/postgresql/user.sql.repository';
 
 export class LoginUserCommand {
   constructor(
@@ -25,14 +25,14 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
     private sessionRepo: SessionRepository,
     private jwtService: JwtService,
     private cryptoService: CryptoService,
-    private userPostRepository: UserPostRepository,
+    private userRepo: UserRepository,
   ) {}
 
   async execute(
     command: LoginUserCommand,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     // find user by login or email
-    const user = await this.userPostRepository.findByLoginOrEmail(
+    const user = await this.userRepo.findByLoginOrEmail(
       command.dto.loginOrEmail,
     );
     if (!user) {

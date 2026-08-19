@@ -1,11 +1,11 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreatePostRequestDto } from '../../dto/create-post.request.dto';
-import { PostsRepository } from '../../infrastructure/posts.repository';
 import { HttpStatus } from '@nestjs/common';
 import {
   DomainException,
   Extension,
 } from '../../../../../core/exceptions/domain-exception';
+import { PostRepository } from '../../infrastructure/post.repository';
 
 export class UpdatePostCommand {
   constructor(
@@ -19,9 +19,9 @@ export class UpdatePostUseCase implements ICommandHandler<
   UpdatePostCommand,
   void
 > {
-  constructor(private postsRepo: PostsRepository) {}
+  constructor(private postRepo: PostRepository) {}
   async execute(command: UpdatePostCommand): Promise<void> {
-    const post = await this.postsRepo.findById(command.id);
+    const post = await this.postRepo.findById(command.id);
     if (!post) {
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,
@@ -30,6 +30,10 @@ export class UpdatePostUseCase implements ICommandHandler<
       });
     }
     post.updatePost(command.dto);
-    return await this.postsRepo.save(post);
+    const savedPost = await this.postRepo.save(post);
+    if (!savedPost) {
+      throw new Error('Post Was Not Saved');
+    }
+    return;
   }
 }

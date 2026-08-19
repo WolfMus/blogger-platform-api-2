@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
 import { UserController } from './api/user.controller';
 import { UserService } from './application/user.service';
-import { UserRepository } from './infrastructure/user.repository';
-import { MongooseModule } from '@nestjs/mongoose';
 import { UserMapper } from './dto/mapper/user.mapper';
 import { AuthController } from './api/auth.controller';
 import { AuthService } from './application/auth.service';
@@ -10,7 +8,6 @@ import { CryptoService } from './application/crypto.service';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { JwtModule } from '@nestjs/jwt';
 import { Session } from './domain/sessions/session.entity';
-import { UserQwRepository } from './infrastructure/user-query.repository';
 import { SessionRepository } from './infrastructure/sessions/session.repository';
 import { LoginUserUseCase } from './application/usecases/login.usecase';
 import { RegistrationUserUseCase } from './application/usecases/registration.usecase';
@@ -29,9 +26,8 @@ import { SessionMapper } from './dto/mapper/session.mapper';
 import { RefreshTokenUseCase } from './application/usecases/session/refresh-token.usecase';
 import { LogoutUseCase } from './application/usecases/logout.usecase';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserPostgres } from './domain/users/postgresql/user.postgres.entity';
-import { UserPostRepository } from './infrastructure/postgresql/user.postgres.repository';
-import { User, UserSchema } from './domain/users/mongo/user.entity';
+import { UserRepository } from './infrastructure/postgresql/user.sql.repository';
+import { User } from './domain/users/postgresql/user.postgres.entity';
 
 const userUseCases = [
   CreateUserUseCase,
@@ -49,8 +45,7 @@ const sessionUseCases = [RefreshTokenUseCase];
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserPostgres, Session]),
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    TypeOrmModule.forFeature([User, Session]),
     NotificationsModule,
     JwtModule.register({
       global: true,
@@ -65,8 +60,6 @@ const sessionUseCases = [RefreshTokenUseCase];
   providers: [
     UserService,
     UserRepository,
-    UserPostRepository,
-    UserQwRepository,
     UserMapper,
     AuthService,
     CryptoService,
