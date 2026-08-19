@@ -26,8 +26,8 @@ import { SessionMapper } from './dto/mapper/session.mapper';
 import { RefreshTokenUseCase } from './application/usecases/session/refresh-token.usecase';
 import { LogoutUseCase } from './application/usecases/logout.usecase';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserRepository } from './infrastructure/postgresql/user.sql.repository';
-import { User } from './domain/users/postgresql/user.postgres.entity';
+import { UserRepository } from './infrastructure/users/user.repository';
+import { User } from './domain/users/user.entity';
 
 const userUseCases = [
   CreateUserUseCase,

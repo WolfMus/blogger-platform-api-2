@@ -10,7 +10,7 @@ import { CommentMapper } from '../../dto/mapper/comment.response.mapper';
 import { CreateCommentRequestDto } from '../../dto/create-comment.request.dto';
 import { Comment } from '../../domain/comment.entity';
 import { CommentRepository } from '../../infrastructure/comment.repository';
-import { UserRepository } from '../../../../user-accounts/infrastructure/postgresql/user.sql.repository';
+import { UserRepository } from '../../../../user-accounts/infrastructure/users/user.repository';
 import { PostRepository } from '../../../posts/infrastructure/post.repository';
 
 export class CreateCommentCommand {

@@ -10,7 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Session } from '../../domain/sessions/session.entity';
 import { SessionRepository } from '../../infrastructure/sessions/session.repository';
 import { CryptoService } from '../crypto.service';
-import { UserRepository } from '../../infrastructure/postgresql/user.sql.repository';
+import { UserRepository } from '../../infrastructure/users/user.repository';
 
 export class LoginUserCommand {
   constructor(

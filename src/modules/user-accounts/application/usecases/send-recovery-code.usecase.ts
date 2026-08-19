@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { EmailService } from '../../../notifications/applications/email.service';
-import { UserRepository } from '../../infrastructure/postgresql/user.sql.repository';
+import { UserRepository } from '../../infrastructure/users/user.repository';
 
 export class SendRecoveryCodeCommand {
   constructor(public email: string) {}

@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { EntityType } from '../types/entity-type.enum';
-import { User } from '../../../user-accounts/domain/users/postgresql/user.postgres.entity';
+import { User } from '../../../user-accounts/domain/users/user.entity';
 import { CreateLikeEntityDto } from './dto/create-likes.entity.dto';
 import { LikeStatus } from '../../../../core/types/like-status.enum';
 

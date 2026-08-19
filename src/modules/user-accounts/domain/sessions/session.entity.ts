@@ -7,7 +7,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { User } from '../users/postgresql/user.postgres.entity';
+import { User } from '../users/user.entity';
 
 @ApiSchema({ name: 'Sessions' })
 @Entity({ name: 'session' })

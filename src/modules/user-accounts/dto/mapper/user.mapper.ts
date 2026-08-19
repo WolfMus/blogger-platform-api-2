@@ -1,8 +1,9 @@
+import { User } from '../../domain/users/user.entity';
 import { UserPaginationRequest } from '../user-pagination.request.dto';
 import { UserResponseDto } from '../user.response.dto';
 
 export class UserMapper {
-  toResponseView(user: UserResponseDto): UserResponseDto {
+  toResponseView(user: User): UserResponseDto {
     return {
       id: user.id.toString(),
       login: user.login,
@@ -12,7 +13,7 @@ export class UserMapper {
   }
 
   toPaginatedResponseView(
-    users: UserResponseDto[],
+    users: User[],
     totalCount: number,
     pagination: UserPaginationRequest,
   ) {

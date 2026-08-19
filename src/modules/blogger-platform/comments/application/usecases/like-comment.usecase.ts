@@ -10,7 +10,7 @@ import { LikeStatus } from '../../../../../core/types/like-status.enum';
 import { Like } from '../../../likes/domain/like.entity';
 import { LikeRepository } from '../../../likes/infrastructure/like.repository';
 import { CommentRepository } from '../../infrastructure/comment.repository';
-import { UserRepository } from '../../../../user-accounts/infrastructure/postgresql/user.sql.repository';
+import { UserRepository } from '../../../../user-accounts/infrastructure/users/user.repository';
 
 export class LikeCommentCommand {
   constructor(

@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Session } from '../modules/user-accounts/domain/sessions/session.entity';
-import { User } from '../modules/user-accounts/domain/users/postgresql/user.postgres.entity';
+import { User } from '../modules/user-accounts/domain/users/user.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, Session])],

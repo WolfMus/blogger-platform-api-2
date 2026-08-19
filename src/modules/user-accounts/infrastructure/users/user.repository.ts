@@ -1,8 +1,8 @@
 import { FindOptionsWhere, ILike, Repository } from 'typeorm';
-import { User } from '../../domain/users/postgresql/user.postgres.entity';
+import { User } from '../../domain/users/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserPaginationRequest } from '../../dto/user-pagination.request.dto';
 import { SortDirection } from '../../../../core/dto/pagination.request.dto';
+import { UserPaginationRequest } from '../../dto/user-pagination.request.dto';
 
 export class UserRepository {
   constructor(
@@ -67,9 +67,7 @@ export class UserRepository {
     return user;
   }
 
-  async findByConfirmationCode(
-    confirmationCode: string,
-  ): Promise<User | null> {
+  async findByConfirmationCode(confirmationCode: string): Promise<User | null> {
     const user = await this.userRepo.findOne({ where: { confirmationCode } });
     if (!user) return null;
     return user;

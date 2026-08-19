@@ -1,10 +1,10 @@
-import { CreateUserDomainDto } from '../dto/create-user.domain.dto';
 import { randomUUID } from 'node:crypto';
 import { add } from 'date-fns';
 import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
-import { BaseDbEntity } from '../../../../../core/db/entities/base-db.entity';
-import { Session } from '../../sessions/session.entity';
-import { Comment } from '../../../../blogger-platform/comments/domain/comment.entity';
+import { BaseDbEntity } from '../../../../core/db/entities/base-db.entity';
+import { Session } from '../sessions/session.entity';
+import { Comment } from '../../../blogger-platform/comments/domain/comment.entity';
+import { CreateUserDomainDto } from './dto/create-user.domain.dto';
 
 @Entity({ name: 'users' })
 export class User extends BaseDbEntity {

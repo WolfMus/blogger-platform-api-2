@@ -1,5 +1,5 @@
 import { BaseDbEntity } from '../../../../core/db/entities/base-db.entity';
-import { User } from '../../../user-accounts/domain/users/postgresql/user.postgres.entity';
+import { User } from '../../../user-accounts/domain/users/user.entity';
 import { Post } from '../../posts/domain/post.entity';
 import { CreateCommentEntityDto } from '../dto/create-comment.entity.dto';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';

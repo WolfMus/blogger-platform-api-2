@@ -1,4 +1,4 @@
-import { User } from '../../../../user-accounts/domain/users/postgresql/user.postgres.entity';
+import { User } from '../../../../user-accounts/domain/users/user.entity';
 import { Like } from '../../domain/like.entity';
 import { LikeRow } from './like-row.type';
 

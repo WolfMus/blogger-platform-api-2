@@ -8,7 +8,7 @@ import {
   DomainException,
   Extension,
 } from '../../../../core/exceptions/domain-exception';
-import { UserRepository } from '../../infrastructure/postgresql/user.sql.repository';
+import { UserRepository } from '../../infrastructure/users/user.repository';
 
 export class RegistrationUserCommand {
   constructor(public dto: CreateUserRequestDto) {}

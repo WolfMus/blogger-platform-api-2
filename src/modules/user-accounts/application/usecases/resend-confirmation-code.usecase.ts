@@ -5,7 +5,7 @@ import {
   Extension,
 } from '../../../../core/exceptions/domain-exception';
 import { EmailService } from '../../../notifications/applications/email.service';
-import { UserRepository } from '../../infrastructure/postgresql/user.sql.repository';
+import { UserRepository } from '../../infrastructure/users/user.repository';
 
 export class ResendConfirmationCodeCommand {
   constructor(public email: string) {}

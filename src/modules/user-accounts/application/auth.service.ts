@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CryptoService } from './crypto.service';
-import { UserRepository } from '../infrastructure/postgresql/user.sql.repository';
+import { UserRepository } from '../infrastructure/users/user.repository';
 
 @Injectable()
 export class AuthService {

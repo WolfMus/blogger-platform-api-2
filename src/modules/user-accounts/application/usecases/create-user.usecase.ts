@@ -2,14 +2,15 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateUserRequestDto } from '../../dto/input/create-user.request.dto';
 import { CryptoService } from '../crypto.service';
 import { CreateUserDomainDto } from '../../domain/users/dto/create-user.domain.dto';
-import { User } from '../../domain/users/postgresql/user.postgres.entity';
-import { UserRepository } from '../../infrastructure/postgresql/user.sql.repository';
+import { UserRepository } from '../../infrastructure/users/user.repository';
 import {
   DomainException,
   Extension,
 } from '../../../../core/exceptions/domain-exception';
 import { HttpStatus } from '@nestjs/common';
 import { UserResponseDto } from '../../dto/user.response.dto';
+import { UserMapper } from '../../dto/mapper/user.mapper';
+import { User } from '../../domain/users/user.entity';
 
 export class CreateUserCommand {
   constructor(public dto: CreateUserRequestDto) {}
@@ -23,6 +24,7 @@ export class CreateUserUseCase implements ICommandHandler<
   constructor(
     private cryptoService: CryptoService,
     private userRepo: UserRepository,
+    private userMapper: UserMapper,
   ) {}
   async execute(command: CreateUserCommand): Promise<UserResponseDto> {
     // user exists?
@@ -53,6 +55,9 @@ export class CreateUserUseCase implements ICommandHandler<
 
     // save user
     const savedUser = await this.userRepo.save(newUser);
-    return savedUser as UserResponseDto;
+    if (!savedUser) {
+      throw new Error('User Was Not Saved');
+    }
+    return this.userMapper.toResponseView(savedUser);
   }
 }
