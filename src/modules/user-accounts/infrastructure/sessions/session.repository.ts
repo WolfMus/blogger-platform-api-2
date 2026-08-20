@@ -1,13 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Session } from '../../domain/sessions/session.entity';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, In, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { In, Repository } from 'typeorm';
 
 @Injectable()
 export class SessionRepository {
   constructor(
-    @InjectDataSource()
-    private dataSoruce: DataSource,
     @InjectRepository(Session)
     private sessionRepo: Repository<Session>,
   ) {}
