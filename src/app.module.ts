@@ -23,7 +23,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       database: 'BloggerPlatformAPII',
       synchronize: true,
       autoLoadEntities: true,
-      logging: true,
+      logging: false,
     }),
     ConfigModule.forRoot({ isGlobal: true }),
     CqrsModule.forRoot(),

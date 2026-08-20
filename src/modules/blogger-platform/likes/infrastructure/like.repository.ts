@@ -126,7 +126,6 @@ export class LikeRepository {
       [entityIds],
     );
     if (!rows.length) return [];
-    console.log(rows);
     return rows;
   }
 }

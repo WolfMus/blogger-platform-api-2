@@ -42,7 +42,6 @@ export class PostService {
     if (userId) {
       // Статусы лайков текущего пользователя
       const statuses = await this.likeRepo.findLikeStatuses(postsIds, userId);
-      console.log('statuses: ', statuses);
       if (!statuses) {
         return this.postMapper.toResponsePaginatedView(
           posts,

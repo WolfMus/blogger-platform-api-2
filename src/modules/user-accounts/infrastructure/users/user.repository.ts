@@ -15,12 +15,9 @@ export class UserRepository {
     return saved;
   }
 
-  async delete(id: string): Promise<void | null> {
-    const deleted = await this.userRepo.delete({ id: id });
-    if (!deleted) {
-      return null;
-    }
-    return;
+  async delete(id: string): Promise<boolean> {
+    const result = await this.userRepo.delete({ id });
+    return result.affected === 1;
   }
 
   async findAll(
@@ -76,12 +73,14 @@ export class UserRepository {
   async findByLoginAndEmail(
     login: string,
     email: string,
-  ): Promise<User | null> {
+  ): Promise<string | null> {
     const user = await this.userRepo.findOne({
-      where: { login: login, email: email },
+      where: [{ login: login }, { email: email }],
       relations: { session: true },
     });
-    return user;
+    if (user && user.login === login) return 'login';
+    if (user && user.email === email) return 'email';
+    return null;
   }
 
   async findByLoginOrEmail(loginOrEmail: string): Promise<User | null> {

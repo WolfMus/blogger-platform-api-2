@@ -36,7 +36,7 @@ export class CreateUserUseCase implements ICommandHandler<
       throw new DomainException({
         code: HttpStatus.BAD_REQUEST,
         message: 'Exists',
-        extensions: [new Extension('User exist', 'login or email')],
+        extensions: [new Extension('User exist', user)],
       });
     }
 

@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { add } from 'date-fns';
-import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { BaseDbEntity } from '../../../../core/db/entities/base-db.entity';
 import { Session } from '../sessions/session.entity';
 import { Comment } from '../../../blogger-platform/comments/domain/comment.entity';
@@ -68,9 +68,7 @@ export class User extends BaseDbEntity {
   })
   confirmationCodeExpireDate: Date | null;
 
-  @OneToOne(() => Session, (session) => session.user, {
-    cascade: true,
-  })
+  @OneToMany(() => Session, (session) => session.user)
   session: Session;
 
   @OneToMany(() => Comment, (comment) => comment.user)

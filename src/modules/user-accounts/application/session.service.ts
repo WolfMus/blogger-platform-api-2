@@ -31,7 +31,7 @@ export class SessionService {
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,
         message: `Session with device ID ${deviceId} not found for user with ID ${userId}`,
-        extensions: [new Extension('Session not found', deviceId)],
+        extensions: [new Extension('Session not found', 'id')],
       });
     }
     if (session.user.id !== userId) {
@@ -41,7 +41,15 @@ export class SessionService {
         extensions: [new Extension('Forbidden', 'userId')],
       });
     }
-    return await this.sessionRepo.delete(session.id);
+    const isDeleted = await this.sessionRepo.delete(session.id);
+    if (!isDeleted) {
+      throw new DomainException({
+        code: HttpStatus.NOT_FOUND,
+        message: 'Session Was Not Deleted',
+        extensions: [new Extension('Not Found', 'id')],
+      });
+    }
+    return;
   }
 
   async terminateAllSessions(userId: string, refreshToken: string) {

@@ -28,7 +28,7 @@ export class UserService {
 
   async delete(id: string): Promise<void> {
     const deleted = await this.userRepo.delete(id);
-    if (deleted === null) {
+    if (!deleted) {
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,
         message: 'Not Found',
