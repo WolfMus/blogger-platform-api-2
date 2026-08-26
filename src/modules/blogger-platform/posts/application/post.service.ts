@@ -36,7 +36,8 @@ export class PostService {
     });
 
     // Получение последних 3 лайков для каждого поста
-    const likes = await this.likeRepo.findNewestLikesByEntityIds(postsIds);
+    // const likes = await this.likeRepo.findNewestLikesByEntityIds(postsIds);
+    const likes = [];
 
     // Проверка userId в JWT
     if (userId) {
@@ -52,8 +53,8 @@ export class PostService {
       }
 
       // Преобразование статусов в Map (массив пар -> объект)
-      const statusMap: Record<string, LikeStatus> =
-        Object.fromEntries(statuses);
+      // const statusMap: Record<string, LikeStatus> =
+      //   Object.fromEntries(statuses);
 
       // Возврат со статусами пользователей
       return this.postMapper.toResponsePaginatedView(
@@ -61,7 +62,7 @@ export class PostService {
         paginationInput,
         totalCount,
         likes,
-        statusMap,
+        statuses,
       );
     }
 
@@ -91,7 +92,8 @@ export class PostService {
     });
 
     // Получение последних 3 лайков для каждого поста
-    const likes = await this.likeRepo.findNewestLikesByEntityIds(postsIds);
+    // const likes = await this.likeRepo.findNewestLikesByEntityIds(postsIds);
+    const likes = [];
 
     // Проверка userId в JWT
     if (userId) {
@@ -108,8 +110,8 @@ export class PostService {
       }
 
       // Преобразование статусов в Map (массив пар -> объект)
-      const statusMap: Record<string, LikeStatus> =
-        Object.fromEntries(statuses);
+      // const statusMap: Record<string, LikeStatus> =
+      //   Object.fromEntries(statuses);
 
       // Возврат со статусами пользователей
       return this.postMapper.toResponsePaginatedView(
@@ -117,7 +119,7 @@ export class PostService {
         paginationInput,
         totalCount,
         likes,
-        statusMap,
+        statuses,
       );
     }
 
@@ -142,10 +144,10 @@ export class PostService {
     }
     // Последние 3 лайка
     const likes = await this.likeRepo.findNewestLikesByEntityId(id);
-    const newestLikes: NewestLikes[] = likes.map((l) => ({
-      addedAt: l.addedAt,
-      userId: l.userId,
-      login: l.userLogin,
+    const newestLikes: NewestLikes[] = likes.map((like) => ({
+      addedAt: like.addedAt,
+      userId: like.user.id,
+      login: like.user.login,
     }));
     // Прверка userId в JWT
     if (!userId)

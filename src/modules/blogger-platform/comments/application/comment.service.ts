@@ -7,7 +7,6 @@ import {
   DomainException,
   Extension,
 } from '../../../../core/exceptions/domain-exception';
-import { LikeStatus } from '../../posts/domain/post.entity';
 import { PostRepository } from '../../posts/infrastructure/post.repository';
 import { CommentRepository } from '../infrastructure/comment.repository';
 import { LikeRepository } from '../../likes/infrastructure/like.repository';
@@ -101,12 +100,12 @@ export class CommentService {
         totalCount,
       );
     }
-    const statusMap: Record<string, LikeStatus> = Object.fromEntries(statuses);
+    // const statusMap: Record<string, LikeStatus> = Object.fromEntries(statuses);
     return this.commentMapper.toResponsePaginatedPostgresView(
       comments,
       paginationInput,
       totalCount,
-      statusMap,
+      statuses,
     );
   }
 

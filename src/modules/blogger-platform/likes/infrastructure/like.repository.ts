@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { LikeStatus } from '../../posts/domain/post.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { LikeRow } from './types/like-row.type';
 import { NewestLikes } from '../dto/newest-likes.dto';
 import { Like } from '../domain/like.entity';
+import { LikeStatus } from '../../../../core/types/like-status.enum';
+import { LikeRow } from './types/like-row.type';
 
 export interface PostLikesAgg {
   _id: string; // or Types.ObjectId if you prefer
@@ -43,66 +43,53 @@ export class LikeRepository {
     if (!like) return null;
     return like;
   }
-  // Можно заменить обычным поиском
-  // async findLikeStatus(
-  //   entityId: string,
-  //   userId: string,
-  // ): Promise<{ myStatus: string } | null> {
-  //   const rows = await this.dataSource.query<{ myStatus: string }[]>(
-  //     `
-  //       SELECT
-  //         like_status as "likeStatus"
-  //       FROM likes
-  //       WHERE entity_id = $1 AND user_id = $2;
-  //     `,
-  //     [entityId, userId],
-  //   );
-  //   if (!rows.length) return null;
-  //   return rows[0];
-  // }
 
   async findLikeStatuses(
     entityIds: string[],
     userId: string,
-  ): Promise<[string, LikeStatus][] | null> {
-    const rows = await this.dataSource.query<
-      {
-        entityId: string;
-        likeStatus: string;
-      }[]
-    >(
-      `
-        SELECT
-          entity_id AS "entityId",
-          like_status AS "likeStatus"
-        FROM likes
-        WHERE entity_id = ANY($1) AND user_id = $2;
-      `,
-      [entityIds, userId],
-    );
-    if (!rows.length) return null;
-    return rows.map((like) => [like.entityId, like.likeStatus as LikeStatus]);
+  ): Promise<Like[] | null> {
+    const a = await this.likeRepo.find({
+      select: {
+        entityId: true,
+        entityType: true,
+      },
+      where: { entityId: In(entityIds), user: { id: userId } },
+    });
+    if (!a) {
+      return null;
+    }
+    return a;
   }
 
-  async findNewestLikesByEntityId(entityId: string): Promise<LikeRow[]> {
-    const rows = await this.dataSource.query<LikeRow[]>(
-      `
-        SELECT
-          user_id as "userId",
-          user_login as "userLogin",
-          added_at as "addedAt"
-        FROM likes
-        WHERE entity_id = $1 AND like_status = 'Like'
-        ORDER BY added_at DESC
-        LIMIT 3;
-      `,
-      [entityId],
-    );
-    if (!rows.length) return [];
-    return rows;
+  async findNewestLikesByEntityId(entityId: string): Promise<Like[]> {
+    const likes = await this.likeRepo.find({
+      where: { entityId: entityId, likeStatus: LikeStatus.Like },
+      order: { addedAt: 'DESC' },
+      take: 3,
+      relations: { user: true },
+    });
+    if (!likes) return [];
+    return likes;
+    // const rows = await this.dataSource.query<LikeRow[]>(
+    //   `
+    //     SELECT
+    //       user_id as "userId",
+    //       user_login as "userLogin",
+    //       added_at as "addedAt"
+    //     FROM likes
+    //     WHERE entity_id = $1 AND like_status = 'Like'
+    //     ORDER BY added_at DESC
+    //     LIMIT 3;
+    //   `,
+    //   [entityId],
+    // );
+    // if (!rows.length) return [];
+    // return rows;
   }
 
-  async findNewestLikesByEntityIds(entityIds: string[]): Promise<LikeRow[]> {
+  async findNewestLikesByEntityIds(
+    entityIds: string[],
+  ): Promise<LikeRow[] | []> {
     const rows = await this.dataSource.query<LikeRow[]>(
       `
         SELECT
@@ -111,7 +98,7 @@ export class LikeRepository {
           user_id as "userId",
           user_login as "userLogin"
         FROM (
-          SELECT 
+          SELECT
             *,
             ROW_NUMBER() OVER (
               PARTITION BY entity_id

@@ -22,7 +22,7 @@ export class DeletePostByBlogIdUseCase implements ICommandHandler<
       command.postId,
       command.blogId,
     );
-    if (!deleted) {
+    if (deleted === null) {
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,
         message: 'Not Found',

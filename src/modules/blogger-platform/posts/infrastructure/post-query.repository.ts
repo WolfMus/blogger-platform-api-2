@@ -26,18 +26,24 @@ export class PostQwRepository {
   ): Promise<{ posts: Post[]; totalCount: number }> {
     const sortBy = pagination.sortBy ?? 'createdAt';
     const sortDirection =
-      pagination.sortDirection === SortDirection.Asc
-        ? SortDirection.Asc
-        : SortDirection.Desc;
+      pagination.sortDirection === SortDirection.Asc ? 'ASC' : 'DESC';
     const pageNumber = pagination.pageNumber ?? 1;
     const pageSize = pagination.pageSize ?? 10;
     const offset = (pageNumber - 1) * pageSize;
 
-    const [posts, totalCount] = await this.postRepo.findAndCount({
-      order: { [sortBy]: sortDirection },
-      skip: offset,
-      take: pageSize,
-    });
+    const queryBuilder = this.postRepo
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.blog', 'blog');
+
+    if (sortBy === 'blogName') {
+      queryBuilder.orderBy('blog.name', sortDirection);
+    } else {
+      queryBuilder.orderBy(`post.${sortBy}`, sortDirection);
+    }
+
+    queryBuilder.skip(offset).take(pageSize);
+
+    const [posts, totalCount] = await queryBuilder.getManyAndCount();
 
     return {
       posts: posts,
@@ -63,6 +69,7 @@ export class PostQwRepository {
       order: { [sortBy]: sortDirection },
       skip: offset,
       take: pageSize,
+      relations: { blog: true },
     });
 
     return {

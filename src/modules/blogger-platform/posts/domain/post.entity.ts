@@ -53,7 +53,7 @@ export class Post extends BaseDbEntity {
   })
   dislikesCount: number;
 
-  @ManyToOne(() => Blog, (blog) => blog.id)
+  @ManyToOne(() => Blog, (blog) => blog.id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'blogId' })
   blog: Blog;
 

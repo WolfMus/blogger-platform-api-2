@@ -23,7 +23,7 @@ export class BlogRepository {
 
   async delete(id: string): Promise<void | null> {
     const deleted = await this.blogRepo.delete({ id: id });
-    if (!deleted) {
+    if (deleted.affected === 0) {
       return null;
     }
     return;

@@ -12,7 +12,10 @@ export class PostRepository {
   ) {}
 
   async findById(id: string): Promise<Post | null> {
-    const post = await this.postRepo.findOne({ where: { id } });
+    const post = await this.postRepo.findOne({
+      where: { id },
+      relations: { blog: true },
+    });
     if (!post) return null;
     return post;
   }
@@ -22,7 +25,11 @@ export class PostRepository {
     blogId: string,
   ): Promise<Post | null> {
     const post = await this.postRepo.findOne({
-      where: { id: postId, blog: { id: blogId } },
+      where: {
+        id: postId,
+        blog: { id: blogId },
+      },
+      relations: { blog: true },
     });
     if (!post) return null;
     return post;
@@ -47,7 +54,8 @@ export class PostRepository {
       id: postId,
       blog: { id: blogId },
     });
-    if (!deleted) return null;
+    console.log(deleted);
+    if (deleted.affected === 0) return null;
     return;
   }
 

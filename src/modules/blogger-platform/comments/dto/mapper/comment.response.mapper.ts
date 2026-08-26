@@ -1,5 +1,6 @@
 import { PaginationInput } from '../../../../../core/dto/pagination.request.dto';
 import { LikeStatus } from '../../../../../core/types/like-status.enum';
+import { Like } from '../../../likes/domain/like.entity';
 import { Comment } from '../../domain/comment.entity';
 import { CommentResponseDto } from '../comment.response.dto';
 import { PaginatedCommentResponseDto } from '../paginated-comment.response.dto';
@@ -29,7 +30,7 @@ export class CommentMapper {
     comments: Comment[],
     paginationInput: PaginationInput,
     totalCount: number,
-    statusMap: Record<string, LikeStatus> | null = null,
+    statusMap: Like[] | null = null,
   ): PaginatedCommentResponseDto {
     const pageNumber = paginationInput.pageNumber ?? 1;
     const pageSize = paginationInput.pageSize ?? 10;
@@ -42,8 +43,11 @@ export class CommentMapper {
         if (!statusMap) {
           return this.toResponsePostgresView(comment);
         }
-        const likeStatus = statusMap[comment.id.toString()];
-        return this.toResponsePostgresView(comment, likeStatus);
+        const a = statusMap.find((status) => {
+          status.id = comment.id;
+        });
+        // const likeStatus = statusMap[comment.id.toString()];
+        return this.toResponsePostgresView(comment, a?.likeStatus);
       }),
     };
   }
