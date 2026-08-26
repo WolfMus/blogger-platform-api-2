@@ -15,6 +15,9 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
   async execute(command: CreateBlogCommand): Promise<BlogResponseDto> {
     const blog = Blog.createInstance(command.dto);
     const savedBlog = await this.blogRepo.save(blog);
-    return savedBlog as BlogResponseDto;
+    if (!savedBlog) {
+      throw new Error('Blog Was Not Saved');
+    }
+    return BlogResponseDto.mapToView(savedBlog);
   }
 }
