@@ -4,7 +4,6 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { NewestLikes } from '../dto/newest-likes.dto';
 import { Like } from '../domain/like.entity';
 import { LikeStatus } from '../../../../core/types/like-status.enum';
-import { LikeRow } from './types/like-row.type';
 
 export interface PostLikesAgg {
   _id: string; // or Types.ObjectId if you prefer
@@ -44,21 +43,12 @@ export class LikeRepository {
     return like;
   }
 
-  async findLikeStatuses(
-    entityIds: string[],
-    userId: string,
-  ): Promise<Like[] | null> {
-    const a = await this.likeRepo.find({
-      select: {
-        entityId: true,
-        entityType: true,
-      },
+  async findLikeStatuses(entityIds: string[], userId: string): Promise<Like[]> {
+    const likes = await this.likeRepo.find({
       where: { entityId: In(entityIds), user: { id: userId } },
+      relations: { user: true },
     });
-    if (!a) {
-      return null;
-    }
-    return a;
+    return likes;
   }
 
   async findNewestLikesByEntityId(entityId: string): Promise<Like[]> {
@@ -70,49 +60,24 @@ export class LikeRepository {
     });
     if (!likes) return [];
     return likes;
-    // const rows = await this.dataSource.query<LikeRow[]>(
-    //   `
-    //     SELECT
-    //       user_id as "userId",
-    //       user_login as "userLogin",
-    //       added_at as "addedAt"
-    //     FROM likes
-    //     WHERE entity_id = $1 AND like_status = 'Like'
-    //     ORDER BY added_at DESC
-    //     LIMIT 3;
-    //   `,
-    //   [entityId],
-    // );
-    // if (!rows.length) return [];
-    // return rows;
   }
 
-  async findNewestLikesByEntityIds(
-    entityIds: string[],
-  ): Promise<LikeRow[] | []> {
-    const rows = await this.dataSource.query<LikeRow[]>(
-      `
-        SELECT
-          entity_id as "entityId",
-          added_at as "addedAt",
-          user_id as "userId",
-          user_login as "userLogin"
-        FROM (
-          SELECT
-            *,
-            ROW_NUMBER() OVER (
-              PARTITION BY entity_id
-              ORDER BY added_at DESC
-            ) AS row_id
-            FROM likes
-            WHERE entity_id = ANY($1)
-              AND like_status = 'Like'
-        ) AS numbers
-        WHERE row_id <= 3;
-      `,
-      [entityIds],
-    );
-    if (!rows.length) return [];
-    return rows;
+  async findNewestLikesByEntityIds(entityIds: string[]): Promise<Like[]> {
+    if (!entityIds.length) return [];
+    const promises = entityIds.map((id) => {
+      return this.likeRepo.find({
+        where: {
+          entityId: id,
+          likeStatus: LikeStatus.Like,
+        },
+        order: {
+          addedAt: 'DESC',
+        },
+        take: 3,
+        relations: { user: true },
+      });
+    });
+    const results = await Promise.all(promises);
+    return results.flat();
   }
 }

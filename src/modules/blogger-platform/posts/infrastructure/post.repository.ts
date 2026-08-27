@@ -13,7 +13,7 @@ export class PostRepository {
 
   async findById(id: string): Promise<Post | null> {
     const post = await this.postRepo.findOne({
-      where: { id },
+      where: { id: id },
       relations: { blog: true },
     });
     if (!post) return null;
@@ -54,7 +54,6 @@ export class PostRepository {
       id: postId,
       blog: { id: blogId },
     });
-    console.log(deleted);
     if (deleted.affected === 0) return null;
     return;
   }

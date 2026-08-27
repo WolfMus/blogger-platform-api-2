@@ -37,8 +37,8 @@ export class AuthController {
 
   // ✅ LOGIN
   @HttpCode(HttpStatus.OK)
-  @UseGuards(ThrottlerGuard, LocalAuthGuard)
-  // @UseGuards(LocalAuthGuard)
+  // @UseGuards(ThrottlerGuard, LocalAuthGuard)
+  @UseGuards(LocalAuthGuard)
   @Post('/login')
   async loginUser(
     @Body() dto: LoginUserRequestDto,
@@ -107,7 +107,7 @@ export class AuthController {
 
   // ✅ REGISTRATION
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(ThrottlerGuard)
+  // @UseGuards(ThrottlerGuard)
   @Post('/registration')
   async registration(@Body() dto: CreateUserRequestDto): Promise<void> {
     return await this.commandBus.execute<RegistrationUserCommand, void>(
@@ -117,7 +117,7 @@ export class AuthController {
 
   // ✅ REGISTRATION-CONFIRMATION
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(ThrottlerGuard)
+  // @UseGuards(ThrottlerGuard)
   @Post('/registration-confirmation')
   async confirmRegistration(@Body('code') code: string): Promise<void> {
     return await this.commandBus.execute<ConfirmRegistrationCommand, void>(
@@ -127,7 +127,7 @@ export class AuthController {
 
   // ✅ REGISTRATION EMAIL RESENDING
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(ThrottlerGuard)
+  // @UseGuards(ThrottlerGuard)
   @Post('/registration-email-resending')
   async resendConfirmationCode(@Body('email') email: string): Promise<void> {
     return await this.commandBus.execute<ResendConfirmationCodeCommand, void>(
@@ -137,7 +137,7 @@ export class AuthController {
 
   // ✅ RECOVERY CODE PASSWORD
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(ThrottlerGuard)
+  // @UseGuards(ThrottlerGuard)
   @Post('/password-recovery')
   async passwordRecovery(@Body('email') email: string): Promise<void> {
     return await this.commandBus.execute<SendRecoveryCodeCommand, void>(
@@ -147,7 +147,7 @@ export class AuthController {
 
   // ✅ NEW PASSWORD
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(ThrottlerGuard)
+  // @UseGuards(ThrottlerGuard)
   @Post('/new-password')
   async newPassword(@Body() dto: NewPasswordDto): Promise<void> {
     return await this.commandBus.execute<ResetPasswordCommand, void>(

@@ -28,10 +28,6 @@ export class Like {
   })
   entityType: EntityType;
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'user_id' })
-  user: User;
-
   @Column({
     name: 'like_status',
     type: 'enum',
@@ -45,12 +41,17 @@ export class Like {
   })
   addedAt: Date;
 
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+
   static createInstance(dto: CreateLikeEntityDto, user: User): Like {
     const like = new Like();
     like.entityId = dto.entityId;
     like.entityType = dto.entityType;
     like.user = user;
     like.likeStatus = dto.likeStatus;
+    like.addedAt = new Date();
     return like;
   }
 

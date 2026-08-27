@@ -89,7 +89,6 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
     };
     const session = Session.createInstance(createSessionDto, user);
     await this.sessionRepo.save(session);
-
     // create access token
     const accessToken = this.jwtService.sign({
       ...payload,

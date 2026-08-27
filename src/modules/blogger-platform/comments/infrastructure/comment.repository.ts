@@ -16,7 +16,10 @@ export class CommentRepository {
   ) {}
 
   async findById(id: string): Promise<Comment | null> {
-    const comment = await this.commentRepo.findOne({ where: { id: id } });
+    const comment = await this.commentRepo.findOne({
+      where: { id: id },
+      relations: { user: true },
+    });
     if (!comment) return null;
     return comment;
   }
@@ -39,6 +42,7 @@ export class CommentRepository {
       order: { [sortBy]: sortDirection },
       skip: offset,
       take: pageSize,
+      relations: { user: true },
     });
 
     return {
@@ -55,7 +59,7 @@ export class CommentRepository {
 
   async delete(id: string): Promise<void | null> {
     const deleted = await this.commentRepo.delete({ id: id });
-    if (!deleted) {
+    if (deleted.affected === 0) {
       return null;
     }
     return;
@@ -70,8 +74,8 @@ export class CommentRepository {
       .createQueryBuilder()
       .update()
       .set({
-        likesCount: () => `"likesCount" + :deltaLike`,
-        dislikesCount: () => `"dislikesCount" + :deltaDislike`,
+        likesCount: () => `"likes_count" + :deltaLike`,
+        dislikesCount: () => `"dislikes_count" + :deltaDislike`,
       })
       .where(`id = :id`)
       .setParameters({

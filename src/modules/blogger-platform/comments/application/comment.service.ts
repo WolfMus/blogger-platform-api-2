@@ -125,12 +125,12 @@ export class CommentService {
         extensions: [new Extension('Wrong user id', 'userId')],
       });
     }
-    const commentDeletedId = await this.commentRepo.delete(id);
-    if (!commentDeletedId) {
+    const commentDeleted = await this.commentRepo.delete(id);
+    if (commentDeleted === null) {
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,
         message: 'Not Found',
-        extensions: [new Extension('Commend Id Not Found', 'id')],
+        extensions: [new Extension('Comment Not Found', 'id')],
       });
     }
     return;

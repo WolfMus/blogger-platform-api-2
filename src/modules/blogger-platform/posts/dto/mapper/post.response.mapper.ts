@@ -58,8 +58,7 @@ export class PostMapper {
     paginationInput: PaginationInput,
     totalCount: number,
     likes: Like[] = [],
-    statusMap: Like[] | null = null,
-    // statusMap: Record<string, LikeStatus> | null = null,
+    statuses: Like[] | null = null,
   ): PaginatedPostResponseDto {
     const pageNumber = paginationInput.pageNumber ?? 1;
     const pageSize = paginationInput.pageSize ?? 10;
@@ -76,14 +75,13 @@ export class PostMapper {
             userId: like.user.id,
             login: like.user.login,
           }));
-        if (!statusMap) {
+        if (!statuses) {
           return this.toResponseView(post, newestLikes);
         }
-        const a = statusMap.find((status) => {
-          status.id = post.id;
-        });
-        // const likeStatus = statusMap[post.id.toString()];
-        return this.toResponseView(post, newestLikes, a?.likeStatus);
+        const userStatus = statuses.find(
+          (status) => status.entityId === post.id,
+        );
+        return this.toResponseView(post, newestLikes, userStatus?.likeStatus);
       }),
     };
   }

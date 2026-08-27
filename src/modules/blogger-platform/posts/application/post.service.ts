@@ -36,8 +36,7 @@ export class PostService {
     });
 
     // Получение последних 3 лайков для каждого поста
-    // const likes = await this.likeRepo.findNewestLikesByEntityIds(postsIds);
-    const likes = [];
+    const likes = await this.likeRepo.findNewestLikesByEntityIds(postsIds);
 
     // Проверка userId в JWT
     if (userId) {
@@ -51,12 +50,17 @@ export class PostService {
           likes,
         );
       }
-
-      // Преобразование статусов в Map (массив пар -> объект)
-      // const statusMap: Record<string, LikeStatus> =
-      //   Object.fromEntries(statuses);
-
-      // Возврат со статусами пользователей
+      statuses.map((s) => {
+        console.log(
+          'id: ' +
+            userId +
+            ' likeStatus: ' +
+            s.likeStatus +
+            ' entityId: ' +
+            s.entityId,
+        );
+      });
+      // Возврат со статусами пользователя
       return this.postMapper.toResponsePaginatedView(
         posts,
         paginationInput,
@@ -92,8 +96,7 @@ export class PostService {
     });
 
     // Получение последних 3 лайков для каждого поста
-    // const likes = await this.likeRepo.findNewestLikesByEntityIds(postsIds);
-    const likes = [];
+    const likes = await this.likeRepo.findNewestLikesByEntityIds(postsIds);
 
     // Проверка userId в JWT
     if (userId) {
@@ -108,10 +111,6 @@ export class PostService {
           likes,
         );
       }
-
-      // Преобразование статусов в Map (массив пар -> объект)
-      // const statusMap: Record<string, LikeStatus> =
-      //   Object.fromEntries(statuses);
 
       // Возврат со статусами пользователей
       return this.postMapper.toResponsePaginatedView(
@@ -149,6 +148,7 @@ export class PostService {
       userId: like.user.id,
       login: like.user.login,
     }));
+
     // Прверка userId в JWT
     if (!userId)
       return this.postMapper.toResponseView(post, newestLikes, LikeStatus.None);
