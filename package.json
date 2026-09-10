@@ -9,6 +9,9 @@
     "enabled": false
   },
   "scripts": {
+    "migration:generate": "typeorm-ts-node-commonjs migration:generate -d typeorm.config.ts migrations/migration",
+    "migration:run": "typeorm-ts-node-commonjs migration:run -d typeorm.config.ts",
+    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d typeorm.config.ts",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",

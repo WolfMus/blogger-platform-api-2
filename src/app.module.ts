@@ -21,7 +21,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       username: 'postgres',
       password: 'severe',
       database: 'BloggerPlatformAPII',
-      synchronize: true,
+      synchronize: false,
       autoLoadEntities: true,
       logging: false,
     }),
