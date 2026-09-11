@@ -15,13 +15,13 @@ export class Comment extends BaseDbEntity {
   })
   content: string;
   @Column({
-    name: 'likes_count',
+    name: 'likesCount',
     type: 'int',
     default: 0,
   })
   likesCount: number;
   @Column({
-    name: 'dislikes_count',
+    name: 'dislikesCount',
     type: 'int',
     default: 0,
   })

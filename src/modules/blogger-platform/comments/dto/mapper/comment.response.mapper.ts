@@ -30,7 +30,7 @@ export class CommentMapper {
     comments: Comment[],
     paginationInput: PaginationInput,
     totalCount: number,
-    statusMap: Like[] | null = null,
+    statuses: Like[] | null = null,
   ): PaginatedCommentResponseDto {
     const pageNumber = paginationInput.pageNumber ?? 1;
     const pageSize = paginationInput.pageSize ?? 10;
@@ -40,14 +40,13 @@ export class CommentMapper {
       pageSize: +pageSize,
       totalCount: totalCount,
       items: comments.map((comment) => {
-        if (!statusMap) {
+        if (!statuses) {
           return this.toResponsePostgresView(comment);
         }
-        const a = statusMap.find((status) => {
-          status.id = comment.id;
-        });
-        // const likeStatus = statusMap[comment.id.toString()];
-        return this.toResponsePostgresView(comment, a?.likeStatus);
+        const userStatus = statuses.find(
+          (status) => status.entityId === comment.id,
+        );
+        return this.toResponsePostgresView(comment, userStatus?.likeStatus);
       }),
     };
   }

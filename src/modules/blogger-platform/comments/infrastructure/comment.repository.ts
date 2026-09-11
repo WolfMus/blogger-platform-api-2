@@ -74,8 +74,8 @@ export class CommentRepository {
       .createQueryBuilder()
       .update()
       .set({
-        likesCount: () => `"likes_count" + :deltaLike`,
-        dislikesCount: () => `"dislikes_count" + :deltaDislike`,
+        likesCount: () => `"likesCount" + :deltaLike`,
+        dislikesCount: () => `"dislikesCount" + :deltaDislike`,
       })
       .where(`id = :id`)
       .setParameters({

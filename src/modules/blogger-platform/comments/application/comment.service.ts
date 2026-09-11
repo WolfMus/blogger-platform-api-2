@@ -43,23 +43,12 @@ export class CommentService {
     return this.commentMapper.toResponsePostgresView(comment, like.likeStatus);
   }
 
-  // async findAll(
-  //   paginationInput: PaginationInput,
-  // ): Promise<PaginatedCommentResponseDto> {
-  //   const { comments, totalCount } =
-  //     await this.commentRepo.findAll(paginationInput);
-  //   return this.commentMapper.toResponsePaginatedView(
-  //     comments,
-  //     paginationInput,
-  //     totalCount,
-  //   );
-  // }
-
   async findAllByPostId(
     paginationInput: PaginationInput,
     postId: string,
     userId: string | null = null,
   ): Promise<PaginatedCommentResponseDto> {
+    // Поиск поста
     const post = await this.postRepo.findById(postId);
     if (!post) {
       throw new DomainException({
@@ -68,11 +57,11 @@ export class CommentService {
         extensions: [new Extension('Post not found', 'postId')],
       });
     }
+    // Поиск комментариев для поста
     const { comments, totalCount } = await this.commentRepo.findAllByPostId(
       paginationInput,
       postId,
     );
-
     if (!comments) {
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,
@@ -81,6 +70,7 @@ export class CommentService {
       });
     }
 
+    // Есть ли пользователь
     if (!userId) {
       return this.commentMapper.toResponsePaginatedPostgresView(
         comments,
@@ -100,7 +90,6 @@ export class CommentService {
         totalCount,
       );
     }
-    // const statusMap: Record<string, LikeStatus> = Object.fromEntries(statuses);
     return this.commentMapper.toResponsePaginatedPostgresView(
       comments,
       paginationInput,

@@ -97,7 +97,6 @@ export class LikeCommentUseCase implements ICommandHandler<
       if (!savedLike) {
         throw new Error('Like Was Not Saved');
       }
-      return;
     }
     // Меняем счетчик в БД
     const updatedCounts = await this.commentRepo.changeCounts(
