@@ -11,6 +11,7 @@ import { DomainExceptionFilter } from './core/exceptions/filters/domain-exceptio
 import { CqrsModule } from '@nestjs/cqrs';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { QuizGameModule } from './modules/quiz-game/quiz-game.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     TestingModule,
     UserAccountsModule,
     NotificationsModule,
+    QuizGameModule,
   ],
   providers: [
     {
