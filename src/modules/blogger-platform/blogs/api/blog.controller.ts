@@ -22,7 +22,6 @@ import { PostService } from '../../posts/application/post.service';
 import { PaginatedBlogResponseDto } from '../dto/blog-paginated-view.response.dto';
 import { PaginatedPostResponseDto } from '../../posts/dto/post-paginated-view.response.dto';
 import { BlogPaginationRequest } from '../dto/blog-pagination.request.dto';
-import { CommandBus } from '@nestjs/cqrs';
 import { OptionalJwtAuthGuard } from '../../../user-accounts/guards/bearer/optional-jwt-auth.guard';
 import type { Request } from 'express';
 
@@ -30,7 +29,6 @@ import type { Request } from 'express';
 @Controller('blogs')
 export class BlogController {
   constructor(
-    private commandBus: CommandBus,
     private BlogService: BlogService,
     private PostService: PostService,
   ) {}

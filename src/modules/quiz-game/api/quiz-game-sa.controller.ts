@@ -2,15 +2,16 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseIntPipe,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
-import { QuizGameService } from '../application/quiz-game.service';
 import { CreateQuestionDto } from '../dto/create-question.dto';
 import { BasicAuthGuard } from '../../user-accounts/guards/basic/basic-auth.guard';
 import { CommandBus } from '@nestjs/cqrs';
@@ -20,13 +21,23 @@ import { UpdateQuestionCommand } from '../application/usecases/update-question.u
 import { DeleteQuestionCommand } from '../application/usecases/delete-question.usecase';
 import { PublishQuestionDto } from '../dto/publish.dto';
 import { PublishQuestionCommand } from '../application/usecases/publish-question.usecase';
+import { QuestionPaginationInput } from '../types/question-pagination-input.type';
+import { FindAllQuestionsCommand } from '../application/usecases/find-all-question.usecase';
 
 @Controller('sa/quiz/questions')
 export class QuizGameController {
-  constructor(
-    private quizGameService: QuizGameService,
-    private commandBus: CommandBus,
-  ) {}
+  constructor(private commandBus: CommandBus) {}
+
+  // Get questions
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(BasicAuthGuard)
+  @Get()
+  async findAllQuestions(@Query() paginationInput: QuestionPaginationInput) {
+    return await this.commandBus.execute<
+      FindAllQuestionsCommand,
+      QuestionViewModel
+    >(new FindAllQuestionsCommand(paginationInput));
+  }
 
   // Create question
   @HttpCode(HttpStatus.CREATED)

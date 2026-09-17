@@ -21,7 +21,6 @@ export class BlogQwRepository {
       .leftJoinAndSelect('blog.posts', 'post')
       .where('blog.id = :id', { id: id })
       .getOne();
-    // const blog = await this.blogRepo.findOne({ where: { id: id } });
     if (!blog) return null;
     return BlogResponseDto.mapToView(blog);
   }
@@ -54,32 +53,5 @@ export class BlogQwRepository {
       blogs,
       totalCount,
     };
-    // const sortBy = pagination.sortBy ?? 'createdAt';
-    // const sortDirection =
-    //   pagination.sortDirection === SortDirection.Asc
-    //     ? SortDirection.Asc
-    //     : SortDirection.Desc;
-    // const pageNumber = pagination.pageNumber ?? 1;
-    // const pageSize = pagination.pageSize ?? 10;
-    // const offset = (pageNumber - 1) * pageSize;
-    // const where: FindOptionsWhere<Blog>[] = [];
-
-    // if (pagination.searchNameTerm) {
-    //   where.push({
-    //     name: ILike(`%${pagination.searchNameTerm}%`),
-    //   });
-    // }
-
-    // const [blogs, totalCount] = await this.blogRepo.findAndCount({
-    //   where: where.length > 0 ? where : undefined,
-    //   order: { [sortBy]: sortDirection },
-    //   skip: offset,
-    //   take: pageSize,
-    // });
-
-    // return {
-    //   blogs: blogs,
-    //   totalCount: totalCount,
-    // };
   }
 }
