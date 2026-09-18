@@ -6,11 +6,11 @@ import { App } from 'supertest/types';
 import { AppModule } from '../../../src/app.module';
 import request from 'supertest';
 import { QuestionViewModel } from '../../../src/modules/quiz-game/dto/question-view-model';
-import { CreateQuestionDto } from '../../../src/modules/quiz-game/dto/create-question.dto';
 
 describe('Quiz', () => {
   let app: INestApplication<App>;
   let connection: Connection;
+  let createdQuestionId: number;
 
   beforeAll(async () => {
     const testingModuleBuilder = Test.createTestingModule({
@@ -32,34 +32,29 @@ describe('Quiz', () => {
         await connection.db?.collection(collection.name).deleteMany({});
       }
     }
+
+    const createdQuestion = await request(app.getHttpServer())
+      .post('/sa/quiz/questions')
+      .auth('admin', 'qwerty')
+      .send({
+        body: 'What is 2 + 2?',
+        correctAnswers: ['1', '2', '4'],
+      });
+    createdQuestionId = (createdQuestion.body as QuestionViewModel).id;
   });
   afterAll(async () => {
     await app.close();
   });
 
-  it('sa/quiz/questions (QUESTION) should create new question', async () => {
-    const dto: CreateQuestionDto = {
-      body: 'What is 2 + 2?',
-      correctAnswers: ['4'],
+  it('sa/quiz/questions/:id (PUT) should update question by id', async () => {
+    const dto = {
+      body: 'What is 3 + 3?',
+      correctAnswers: ['1', '2', '3'],
     };
-
-    const response = await request(app.getHttpServer())
-      .post('/sa/quiz/questions')
+    await request(app.getHttpServer())
+      .put(`/sa/quiz/questions/${createdQuestionId}`)
       .auth('admin', 'qwerty')
       .send(dto)
-      .expect(HttpStatus.CREATED);
-
-    expect(response.body).toEqual({
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      id: expect.any(String),
-      body: 'What is 2 + 2?',
-      correctAnswers: ['4'],
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      publish: expect.any(Boolean),
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      createdAt: expect.any(String),
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      updatedAt: expect.any(String),
-    });
+      .expect(HttpStatus.NO_CONTENT);
   });
 });

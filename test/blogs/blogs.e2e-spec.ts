@@ -37,11 +37,14 @@ describe('BlogController (e2e)', () => {
   });
 
   it('/blogs (POST) should create new blog', async () => {
-    const response = await request(app.getHttpServer()).post('/blogs').send({
-      name: 'newBlog',
-      description: 'description',
-      websiteUrl: 'https://arbuzini.com',
-    });
+    const response = await request(app.getHttpServer())
+      .post('/sa/blogs')
+      .auth('admin', 'qwerty')
+      .send({
+        name: 'newBlog',
+        description: 'description',
+        websiteUrl: 'https://arbuzini.com',
+      });
     expect(response.status).toBe(HttpStatus.CREATED);
     expect(response.body).toHaveProperty('id');
   });
@@ -53,7 +56,8 @@ describe('BlogController (e2e)', () => {
 
   it('/blogs/:id (GET) should return blog by id', async () => {
     const blogPostResponse = await request(app.getHttpServer())
-      .post('/blogs')
+      .post('/sa/blogs')
+      .auth('admin', 'qwerty')
       .send({
         name: 'newBlog',
         description: 'description',
@@ -71,7 +75,8 @@ describe('BlogController (e2e)', () => {
 
   it('/blogs/:id (DELETE) should delete blog by id', async () => {
     const blogPostResponse = await request(app.getHttpServer())
-      .post('/blogs')
+      .post('/sa/blogs')
+      .auth('admin', 'qwerty')
       .send({
         name: 'newBlog',
         description: 'description',
@@ -79,9 +84,9 @@ describe('BlogController (e2e)', () => {
       })
       .expect(HttpStatus.CREATED);
     const blogBody = blogPostResponse.body as BlogResponseDto;
-    const response = await request(app.getHttpServer()).delete(
-      `/blogs/${blogBody.id}`,
-    );
+    const response = await request(app.getHttpServer())
+      .delete(`/sa/blogs/${blogBody.id}`)
+      .auth('admin', 'qwerty');
     expect(response.status).toBe(HttpStatus.NO_CONTENT);
     await request(app.getHttpServer())
       .get(`/blogs/${blogBody.id}`)
@@ -90,7 +95,8 @@ describe('BlogController (e2e)', () => {
 
   it('/blogs/:id (PUT) should update blog by id', async () => {
     const blogPostResponse = await request(app.getHttpServer())
-      .post('/blogs')
+      .post('/sa/blogs')
+      .auth('admin', 'qwerty')
       .send({
         name: 'newBlog',
         description: 'description',
@@ -105,7 +111,8 @@ describe('BlogController (e2e)', () => {
     };
 
     await request(app.getHttpServer())
-      .put(`/blogs/${blogBody.id}`)
+      .put(`/sa/blogs/${blogBody.id}`)
+      .auth('admin', 'qwerty')
       .send(dtoForUpdate)
       .expect(HttpStatus.NO_CONTENT);
 
