@@ -19,7 +19,7 @@ import { CreateQuestionCommand } from '../application/usecases/create-question.u
 import { QuestionViewModel } from '../dto/question-view-model';
 import { UpdateQuestionCommand } from '../application/usecases/update-question.usecase';
 import { DeleteQuestionCommand } from '../application/usecases/delete-question.usecase';
-import { PublishQuestionDto } from '../dto/publish.dto';
+import { PublishQuestionDto } from '../dto/question-publish.dto';
 import { PublishQuestionCommand } from '../application/usecases/publish-question.usecase';
 import { QuestionPaginationInput } from '../types/question-pagination-input.type';
 import { FindAllQuestionsCommand } from '../application/usecases/find-all-question.usecase';

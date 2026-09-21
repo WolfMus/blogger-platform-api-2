@@ -2,15 +2,17 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { CreateQuestionDto } from '../dto/create-question.dto';
+import { GamePlayerAnswers } from './game-answers.entity';
 
 @Entity({ name: 'questions' })
 export class Question {
-  @PrimaryGeneratedColumn('increment')
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({
     name: 'body',
@@ -40,6 +42,9 @@ export class Question {
 
   @UpdateDateColumn({ name: 'updatedAt' })
   updatedAt: Date;
+
+  @OneToMany(() => GamePlayerAnswers, (answer) => answer.question)
+  gamePlayerAnswers: GamePlayerAnswers[];
 
   static createInstance(dto: CreateQuestionDto): Question {
     const question = new Question();

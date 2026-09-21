@@ -7,6 +7,7 @@ import {
   QuestionPaginationInput,
 } from '../types/question-pagination-input.type';
 import { SortDirection } from '../../../core/dto/pagination.request.dto';
+import { QuestionResponseType } from '../types/question-response.type';
 
 @Injectable()
 export class QuestionRepository {
@@ -15,10 +16,23 @@ export class QuestionRepository {
     private questionRepo: Repository<Question>,
   ) {}
 
-  async findById(id: number): Promise<Question | null> {
+  async findById(id: string): Promise<Question | null> {
     const question = await this.questionRepo.findOne({ where: { id } });
     if (!question) return null;
     return question;
+  }
+
+  async findQuestionsForGame(): Promise<QuestionResponseType[]> {
+    const limit = 5;
+    const questions = await this.questionRepo
+      .createQueryBuilder('question')
+      .orderBy('RANDOM()')
+      .limit(limit)
+      .getMany();
+    const questionsResponseView = questions.map((q) => {
+      return { id: q.id, body: q.body };
+    });
+    return questionsResponseView;
   }
 
   async save(question: Question): Promise<Question | null> {
@@ -26,7 +40,7 @@ export class QuestionRepository {
     return saved;
   }
 
-  async delete(id: number): Promise<boolean> {
+  async delete(id: string): Promise<boolean> {
     const deleted = await this.questionRepo.delete({ id: id });
     return deleted.affected === 1;
   }

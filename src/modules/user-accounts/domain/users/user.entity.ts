@@ -5,6 +5,7 @@ import { Session } from '../sessions/session.entity';
 import { Comment } from '../../../blogger-platform/comments/domain/comment.entity';
 import { CreateUserDomainDto } from './dto/create-user.domain.dto';
 import { randomUUID } from 'crypto';
+import { GamePlayer } from '../../../quiz-game/domain/game-players.entity';
 
 @Entity({ name: 'users' })
 export class User extends BaseDbEntity {
@@ -69,10 +70,13 @@ export class User extends BaseDbEntity {
   confirmationCodeExpireDate: Date | null;
 
   @OneToMany(() => Session, (session) => session.user)
-  session: Session;
+  session: Session[]; // добавил []
 
   @OneToMany(() => Comment, (comment) => comment.user)
   comments: Comment[];
+
+  @OneToMany(() => GamePlayer, (player) => player.user)
+  gamePlayers: GamePlayer[];
 
   static createInstance(dto: CreateUserDomainDto) {
     const user = new User();

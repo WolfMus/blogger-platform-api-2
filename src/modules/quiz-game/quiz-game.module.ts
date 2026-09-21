@@ -10,6 +10,8 @@ import { UpdateQuestionUseCase } from './application/usecases/update-question.us
 import { DeleteQuestionUseCase } from './application/usecases/delete-question.usecase';
 import { PublishQuestionUseCase } from './application/usecases/publish-question.usecase';
 import { FindAllQuestionsUseCase } from './application/usecases/find-all-question.usecase';
+import { PairQuizGameController } from './api/pair-quiz-game.controller';
+import { ConnectToPairGameUseCase } from './application/usecases/connection.usecase';
 
 const questionUseCases = [
   CreateQuestionUseCase,
@@ -19,9 +21,16 @@ const questionUseCases = [
   FindAllQuestionsUseCase,
 ];
 
+const pairGameUseCases = [ConnectToPairGameUseCase];
+
 @Module({
   imports: [TypeOrmModule.forFeature([Question]), UserAccountsModule],
-  controllers: [QuizGameController],
-  providers: [...questionUseCases, QuizGameService, QuestionRepository],
+  controllers: [QuizGameController, PairQuizGameController],
+  providers: [
+    ...questionUseCases,
+    ...pairGameUseCases,
+    QuizGameService,
+    QuestionRepository,
+  ],
 })
 export class QuizGameModule {}
