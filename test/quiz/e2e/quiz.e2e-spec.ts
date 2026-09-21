@@ -10,7 +10,7 @@ import { QuestionViewModel } from '../../../src/modules/quiz-game/dto/question-v
 describe('Quiz', () => {
   let app: INestApplication<App>;
   let connection: Connection;
-  let createdQuestionId: number;
+  let createdQuestionId: string;
 
   beforeAll(async () => {
     const testingModuleBuilder = Test.createTestingModule({

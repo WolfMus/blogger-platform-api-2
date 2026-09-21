@@ -9,7 +9,7 @@ import { HttpStatus } from '@nestjs/common';
 
 export class PublishQuestionCommand {
   constructor(
-    public id: number,
+    public id: string,
     public dto: PublishQuestionDto,
   ) {}
 }

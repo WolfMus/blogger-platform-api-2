@@ -26,6 +26,7 @@ export class QuestionRepository {
     const limit = 5;
     const questions = await this.questionRepo
       .createQueryBuilder('question')
+      .where('question.published = True')
       .orderBy('RANDOM()')
       .limit(limit)
       .getMany();

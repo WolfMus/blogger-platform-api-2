@@ -7,7 +7,7 @@ import {
 import { HttpStatus } from '@nestjs/common';
 
 export class DeleteQuestionCommand {
-  constructor(public id: number) {}
+  constructor(public id: string) {}
 }
 
 @CommandHandler(DeleteQuestionCommand)

@@ -6,7 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseIntPipe,
+  ParseUUIDPipe,
   Post,
   Put,
   Query,
@@ -55,7 +55,7 @@ export class QuizGameController {
   @UseGuards(BasicAuthGuard)
   @Put('/:id')
   async updateQuestion(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CreateQuestionDto,
   ) {
     return await this.commandBus.execute<UpdateQuestionCommand, void>(
@@ -67,7 +67,7 @@ export class QuizGameController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(BasicAuthGuard)
   @Delete('/:id')
-  async deleteQuestion(@Param('id', ParseIntPipe) id: number) {
+  async deleteQuestion(@Param('id', ParseUUIDPipe) id: string) {
     return await this.commandBus.execute<DeleteQuestionCommand, void>(
       new DeleteQuestionCommand(id),
     );
@@ -78,7 +78,7 @@ export class QuizGameController {
   @UseGuards(BasicAuthGuard)
   @Put('/:id/publish')
   async publishQuestion(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: PublishQuestionDto,
   ) {
     return await this.commandBus.execute<PublishQuestionCommand, void>(

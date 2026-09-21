@@ -1,6 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { QuestionRepository } from '../../infrastructure/question.repository';
-import { UserRepository } from '../../../user-accounts/infrastructure/users/user.repository';
 import { GamePlayerRepository } from '../../infrastructure/game-player.repository';
 import { GamePlayer } from '../../domain/game-players.entity';
 import {
@@ -11,6 +10,7 @@ import { HttpStatus } from '@nestjs/common';
 import { GameRepository } from '../../infrastructure/game.repository';
 import { QuizGame } from '../../domain/quiz-game.entity';
 import { QuizGameMapper } from '../../dto/mapper/quiz-game.mapper';
+import { GameResponseDto } from '../../dto/game-response.dto';
 
 export class ConnectToPairGameCommand {
   constructor(public userInfo: { userId: string; login: string }) {}
@@ -21,10 +21,11 @@ export class ConnectToPairGameUseCase implements ICommandHandler<ConnectToPairGa
   constructor(
     private questionRepo: QuestionRepository,
     private playerRepo: GamePlayerRepository,
-    private userRepo: UserRepository,
     private gameRepo: GameRepository,
   ) {}
-  async execute(command: ConnectToPairGameCommand): Promise<any> {
+  async execute(
+    command: ConnectToPairGameCommand,
+  ): Promise<GameResponseDto | null> {
     // JWT пропустил пользователя = Он существует
     const userId = command.userInfo.userId;
 
@@ -81,6 +82,8 @@ export class ConnectToPairGameUseCase implements ICommandHandler<ConnectToPairGa
       }
       // Возвращаем ответ
       return QuizGameMapper.toMapView(newGameSaved, player, questions);
-    } // else {}
+    } else {
+      return null;
+    }
   }
 }

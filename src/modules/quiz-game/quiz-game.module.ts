@@ -12,6 +12,11 @@ import { PublishQuestionUseCase } from './application/usecases/publish-question.
 import { FindAllQuestionsUseCase } from './application/usecases/find-all-question.usecase';
 import { PairQuizGameController } from './api/pair-quiz-game.controller';
 import { ConnectToPairGameUseCase } from './application/usecases/connection.usecase';
+import { GameRepository } from './infrastructure/game.repository';
+import { GamePlayerRepository } from './infrastructure/game-player.repository';
+import { QuizGame } from './domain/quiz-game.entity';
+import { GamePlayer } from './domain/game-players.entity';
+import { GamePlayerAnswers } from './domain/game-answers.entity';
 
 const questionUseCases = [
   CreateQuestionUseCase,
@@ -24,13 +29,23 @@ const questionUseCases = [
 const pairGameUseCases = [ConnectToPairGameUseCase];
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Question]), UserAccountsModule],
+  imports: [
+    TypeOrmModule.forFeature([
+      Question,
+      QuizGame,
+      GamePlayer,
+      GamePlayerAnswers,
+    ]),
+    UserAccountsModule,
+  ],
   controllers: [QuizGameController, PairQuizGameController],
   providers: [
     ...questionUseCases,
     ...pairGameUseCases,
     QuizGameService,
     QuestionRepository,
+    GameRepository,
+    GamePlayerRepository,
   ],
 })
 export class QuizGameModule {}

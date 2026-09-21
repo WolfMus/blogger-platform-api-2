@@ -19,6 +19,7 @@ export class GamePlayerRepository {
   async findByUserId(userId: string): Promise<GamePlayer | null> {
     const player = await this.gamePlayerRepo.findOne({
       where: { userId: userId },
+      relations: { user: true },
     });
     if (!player) return null;
     return player;
