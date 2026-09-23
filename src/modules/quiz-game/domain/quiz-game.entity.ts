@@ -60,4 +60,9 @@ export class QuizGame {
   addQuestionIds(questionIds: string[]): void {
     this.questionIds = questionIds;
   }
+
+  changeStatus(status: QuizGameStatusesEnum): void {
+    this.status = status;
+    this.startGameDate = new Date();
+  }
 }

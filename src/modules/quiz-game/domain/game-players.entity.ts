@@ -53,4 +53,8 @@ export class GamePlayer {
     player.quizGame = null;
     return player;
   }
+
+  addQuizGame(quizGame: QuizGame): void {
+    this.quizGame = quizGame;
+  }
 }

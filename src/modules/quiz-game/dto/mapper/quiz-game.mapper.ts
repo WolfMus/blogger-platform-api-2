@@ -23,8 +23,8 @@ export class QuizGameMapper {
       questions: questions,
       status: game.status,
       pairCreatedDate: game.pairCreatedDate,
-      startGameDate: null,
-      finishGameDate: null,
+      startGameDate: game.startGameDate,
+      finishGameDate: game.finishGameDate,
     };
   }
 }

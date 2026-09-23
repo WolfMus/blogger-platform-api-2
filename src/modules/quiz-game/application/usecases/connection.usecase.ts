@@ -11,6 +11,7 @@ import { GameRepository } from '../../infrastructure/game.repository';
 import { QuizGame } from '../../domain/quiz-game.entity';
 import { QuizGameMapper } from '../../dto/mapper/quiz-game.mapper';
 import { GameResponseDto } from '../../dto/game-response.dto';
+import { QuizGameStatusesEnum } from '../../types/quiz-game-status.enum';
 
 export class ConnectToPairGameCommand {
   constructor(public userInfo: { userId: string; login: string }) {}
@@ -80,9 +81,24 @@ export class ConnectToPairGameUseCase implements ICommandHandler<ConnectToPairGa
           extensions: [new Extension('Game Not Saved', 'game')],
         });
       }
-      // Возвращаем ответ
+      // Добавляем игру игроку
+      player.addQuizGame(newGame);
+      await this.playerRepo.save(player);
+
+      // Ответ
       return QuizGameMapper.toMapView(newGameSaved, player, questions);
-    } else {
+    } else { // есть игра
+      // Меняем статус игры
+      pendingGame.changeStatus(QuizGameStatusesEnum.Active);
+      await this.gameRepo.save(pendingGame);
+
+      // Добавляем игру игроку
+      player.addQuizGame(pendingGame);
+      await this.playerRepo.save(player);
+
+      // Получаем вопросы
+
+      // Ответ
       return null;
     }
   }
