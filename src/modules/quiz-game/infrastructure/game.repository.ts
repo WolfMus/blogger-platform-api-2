@@ -12,7 +12,10 @@ export class GameRepository {
   ) {}
 
   async findById(id: string): Promise<QuizGame | null> {
-    const game = await this.gameRepo.findOne({ where: { id } });
+    const game = await this.gameRepo.findOne({
+      where: { id },
+      relations: { gamePlayer: true },
+    });
     if (!game) return null;
     return game;
   }
@@ -25,14 +28,15 @@ export class GameRepository {
       order: {
         pairCreatedDate: 'ASC',
       },
+      relations: { gamePlayer: true },
     });
     return game ? game : null;
   }
 
-  async isActiveGameExist(playerId: string): Promise<boolean> {
+  async isActiveGameExist(userId: string): Promise<boolean> {
     const game = await this.gameRepo.findOne({
       where: {
-        gamePlayer: { id: playerId },
+        gamePlayer: { userId: userId },
         status: In([
           QuizGameStatusesEnum.Active,
           QuizGameStatusesEnum.PendingSecondPlayer,
@@ -42,7 +46,7 @@ export class GameRepository {
     return game ? true : false;
   }
 
-  async save(game: QuizGame): Promise<QuizGame | null> {
+  async save(game: QuizGame): Promise<QuizGame> {
     const saved = await this.gameRepo.save(game);
     return saved;
   }

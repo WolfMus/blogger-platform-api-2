@@ -12,6 +12,8 @@ import { QuizGame } from '../../domain/quiz-game.entity';
 import { QuizGameMapper } from '../../dto/mapper/quiz-game.mapper';
 import { GameResponseDto } from '../../dto/game-response.dto';
 import { QuizGameStatusesEnum } from '../../types/quiz-game-status.enum';
+import { QuestionResponseType } from '../../types/question-response.type';
+import { GamePlayerRoleEnum } from '../../types/player-role.enum';
 
 export class ConnectToPairGameCommand {
   constructor(public userInfo: { userId: string; login: string }) {}
@@ -30,23 +32,12 @@ export class ConnectToPairGameUseCase implements ICommandHandler<ConnectToPairGa
     // JWT пропустил пользователя = Он существует
     const userId = command.userInfo.userId;
 
-    // Ищем игрока по userId
-    // Игрока не существует => Создаем
-    let player = await this.playerRepo.findByUserId(userId);
-    if (!player) {
-      const newPlayer = GamePlayer.createInstance(userId);
-      player = await this.playerRepo.save(newPlayer);
-      if (!player) {
-        throw new DomainException({
-          code: HttpStatus.BAD_GATEWAY,
-          message: 'BAD_GATEWAY',
-          extensions: [new Extension('Player Not Saved', 'player')],
-        });
-      }
-    }
+    // Создаем игрока
+    let player: GamePlayer;
+    player = GamePlayer.createInstance(userId);
 
     // Проверяем есть ли НЕЗАВЕРШЕННЫЕ игры
-    const isActiveGameExist = await this.gameRepo.isActiveGameExist(player.id);
+    const isActiveGameExist = await this.gameRepo.isActiveGameExist(userId);
     if (isActiveGameExist) {
       throw new DomainException({
         code: HttpStatus.FORBIDDEN,
@@ -60,46 +51,90 @@ export class ConnectToPairGameUseCase implements ICommandHandler<ConnectToPairGa
     // Поиск комнаты со статусом PendingSecondPlayer
     const pendingGame = await this.gameRepo.findPendingGame();
 
+    let game: QuizGame;
+    let questions: QuestionResponseType[];
     // Если игры нет => Создаем
     // Если есть => Подключаем
     if (!pendingGame) {
-      // Создаем instance
-      const newGame = QuizGame.createInstance();
-
       // Выбираем 5 случайных вопросов для игры
-      const questions = await this.questionRepo.findQuestionsForGame();
+      questions = await this.questionRepo.findQuestionIdsForGame();
       const questionsIds = questions.map((q) => q.id);
-
+      // Создаем instance
+      game = QuizGame.createInstance();
       // Добавляем вопросы в gameInstance
-      newGame.addQuestionIds(questionsIds);
-      // Сохраняем
-      const newGameSaved = await this.gameRepo.save(newGame);
-      if (!newGameSaved) {
+      game.addQuestionIds(questionsIds);
+      game = await this.gameRepo.save(game);
+      // Добавляем игру игроку
+      player.addQuizGame(game);
+      player = await this.playerRepo.save(player);
+      const thisPlayer = await this.playerRepo.findById(player.id);
+      if (!thisPlayer) {
         throw new DomainException({
-          code: HttpStatus.BAD_GATEWAY,
-          message: 'BAD_GATEWAY',
-          extensions: [new Extension('Game Not Saved', 'game')],
+          code: HttpStatus.NOT_FOUND,
+          message: 'Not Found',
+          extensions: [new Extension('Player Not Found', 'id')],
         });
       }
-      // Добавляем игру игроку
-      player.addQuizGame(newGame);
-      await this.playerRepo.save(player);
 
-      // Ответ
-      return QuizGameMapper.toMapView(newGameSaved, player, questions);
-    } else { // есть игра
+      return QuizGameMapper.toMapViewForFirstPlayer(
+        game,
+        thisPlayer,
+        questions,
+      );
+    } else {
       // Меняем статус игры
       pendingGame.changeStatus(QuizGameStatusesEnum.Active);
-      await this.gameRepo.save(pendingGame);
+      game = await this.gameRepo.save(pendingGame);
+      const thisGame = await this.gameRepo.findById(game.id);
+      if (!thisGame) {
+        throw new DomainException({
+          code: HttpStatus.NOT_FOUND,
+          message: 'Not Found',
+          extensions: [new Extension('Player Not Found', 'id')],
+        });
+      }
+
+      // Поиск вопросов
+      if (!game.questionIds) {
+        throw new DomainException({
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: 'Game has no questions',
+        });
+      }
+      questions = await this.questionRepo.findByIds(game.questionIds);
+      player.changeRole(GamePlayerRoleEnum.Second);
 
       // Добавляем игру игроку
-      player.addQuizGame(pendingGame);
-      await this.playerRepo.save(player);
+      player.addQuizGame(game);
+      player = await this.playerRepo.save(player);
+      const thisPlayer = await this.playerRepo.findById(player.id);
+      if (!thisPlayer) {
+        throw new DomainException({
+          code: HttpStatus.NOT_FOUND,
+          message: 'Not Found',
+          extensions: [new Extension('Player Not Found', 'id')],
+        });
+      }
 
-      // Получаем вопросы
+      // Ищем первого игрока
+      const firstPlayerId = thisGame.gamePlayer.find(
+        (p) => p.role === GamePlayerRoleEnum.First,
+      )?.id;
+      const firstPlayer = await this.playerRepo.findById(firstPlayerId!);
+      if (!firstPlayer) {
+        throw new DomainException({
+          code: HttpStatus.NOT_FOUND,
+          message: 'Not Found',
+          extensions: [new Extension('Player Not Found', 'id')],
+        });
+      }
 
-      // Ответ
-      return null;
+      return QuizGameMapper.toMapViewForSecondPlayer(
+        thisGame,
+        firstPlayer,
+        thisPlayer,
+        questions,
+      );
     }
   }
 }

@@ -22,18 +22,37 @@ export class QuestionRepository {
     return question;
   }
 
-  async findQuestionsForGame(): Promise<QuestionResponseType[]> {
+  async findByIds(ids: string[]): Promise<QuestionResponseType[]> {
+    const raw = await this.questionRepo
+      .createQueryBuilder('q')
+      .select('q.id', 'id')
+      .addSelect('q.body', 'body')
+      .where('q.id IN (:...ids)', { ids })
+      .getRawMany<QuestionResponseType>();
+
+    if (raw.length !== ids.length) {
+      throw new Error('Not All Questions Founded');
+    }
+
+    return raw;
+  }
+
+  async findQuestionIdsForGame(): Promise<QuestionResponseType[]> {
     const limit = 5;
-    const questions = await this.questionRepo
-      .createQueryBuilder('question')
-      .where('question.published = True')
+    const raw = await this.questionRepo
+      .createQueryBuilder('q')
+      .select('q.id', 'id')
+      .addSelect('q.body', 'body')
+      .where('q.published = True')
       .orderBy('RANDOM()')
       .limit(limit)
-      .getMany();
-    const questionsResponseView = questions.map((q) => {
-      return { id: q.id, body: q.body };
-    });
-    return questionsResponseView;
+      .getRawMany<QuestionResponseType>();
+
+    if (raw.length !== limit) {
+      throw new Error('Not All Questions Founded');
+    }
+
+    return raw;
   }
 
   async save(question: Question): Promise<Question | null> {

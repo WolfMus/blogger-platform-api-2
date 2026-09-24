@@ -9,6 +9,7 @@ import {
 import { User } from '../../user-accounts/domain/users/user.entity';
 import { QuizGame } from './quiz-game.entity';
 import { GamePlayerAnswers } from './game-answers.entity';
+import { GamePlayerRoleEnum } from '../types/player-role.enum';
 
 @Entity({ name: 'gamePlayers' })
 export class GamePlayer {
@@ -21,6 +22,14 @@ export class GamePlayer {
     default: 0,
   })
   score: number;
+
+  @Column({
+    name: 'role',
+    type: 'enum',
+    enum: GamePlayerRoleEnum,
+    default: GamePlayerRoleEnum.First,
+  })
+  role: GamePlayerRoleEnum;
 
   @Column({
     name: 'userId',
@@ -56,5 +65,9 @@ export class GamePlayer {
 
   addQuizGame(quizGame: QuizGame): void {
     this.quizGame = quizGame;
+  }
+
+  changeRole(role: GamePlayerRoleEnum): void {
+    this.role = role;
   }
 }

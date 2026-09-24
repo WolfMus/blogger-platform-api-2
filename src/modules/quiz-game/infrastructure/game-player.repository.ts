@@ -11,7 +11,10 @@ export class GamePlayerRepository {
   ) {}
 
   async findById(id: string): Promise<GamePlayer | null> {
-    const player = await this.gamePlayerRepo.findOne({ where: { id } });
+    const player = await this.gamePlayerRepo.findOne({
+      where: { id },
+      relations: { user: true },
+    });
     if (!player) return null;
     return player;
   }
@@ -25,7 +28,7 @@ export class GamePlayerRepository {
     return player;
   }
 
-  async save(player: GamePlayer): Promise<GamePlayer | null> {
+  async save(player: GamePlayer): Promise<GamePlayer> {
     const saved = await this.gamePlayerRepo.save(player);
     return saved;
   }
