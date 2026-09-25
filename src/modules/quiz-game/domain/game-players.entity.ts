@@ -49,7 +49,10 @@ export class GamePlayer {
   })
   quizGameId: string | null;
 
-  @ManyToOne(() => QuizGame, (game) => game.gamePlayer, { nullable: true })
+  @ManyToOne(() => QuizGame, (game) => game.gamePlayer, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'quizGameId' })
   quizGame: QuizGame | null;
 

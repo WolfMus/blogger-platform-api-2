@@ -15,7 +15,7 @@ export class TestingController {
   async deleteAllData(): Promise<void> {
     console.log('‼️ALL CONTENT DELETED‼️');
     await this.dataSource.query(
-      'TRUNCATE users, session, blogs, posts, likes, comments, questions;',
+      'TRUNCATE users, session, blogs, posts, likes, comments, questions, "gamePlayers", "gamePlayerAnswers", questions, "quizGames";',
     );
 
     return;

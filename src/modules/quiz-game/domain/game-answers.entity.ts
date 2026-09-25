@@ -28,7 +28,9 @@ export class GamePlayerAnswers {
   @Column({ name: 'gamePlayerId', type: 'uuid' })
   gamePlayerId: string;
 
-  @ManyToOne(() => GamePlayer, (player) => player.gamePlayerAnswers)
+  @ManyToOne(() => GamePlayer, (player) => player.gamePlayerAnswers, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'gamePlayerId' })
   gamePlayer: GamePlayer;
 

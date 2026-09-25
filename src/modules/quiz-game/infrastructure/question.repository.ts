@@ -37,7 +37,7 @@ export class QuestionRepository {
     return raw;
   }
 
-  async findQuestionIdsForGame(): Promise<QuestionResponseType[]> {
+  async findQuestionsForGame(): Promise<QuestionResponseType[]> {
     const limit = 5;
     const raw = await this.questionRepo
       .createQueryBuilder('q')

@@ -2,6 +2,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { GamePlayer } from '../domain/game-players.entity';
+import { GamePlayerRoleEnum } from '../types/player-role.enum';
 
 @Injectable()
 export class GamePlayerRepository {
@@ -22,6 +23,18 @@ export class GamePlayerRepository {
   async findByUserId(userId: string): Promise<GamePlayer | null> {
     const player = await this.gamePlayerRepo.findOne({
       where: { userId: userId },
+      relations: { user: true },
+    });
+    if (!player) return null;
+    return player;
+  }
+
+  async findByGameIdAndRole(
+    gameId: string,
+    role: GamePlayerRoleEnum,
+  ): Promise<GamePlayer | null> {
+    const player = await this.gamePlayerRepo.findOne({
+      where: { quizGameId: gameId, role: role },
       relations: { user: true },
     });
     if (!player) return null;
