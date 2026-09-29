@@ -1,11 +1,11 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { QuestionRepository } from '../../infrastructure/question.repository';
 import { PublishQuestionDto } from '../../dto/question-publish.dto';
 import {
   DomainException,
   Extension,
 } from '../../../../core/exceptions/domain-exception';
 import { HttpStatus } from '@nestjs/common';
+import { QuestionRepository } from '../../infrastructure/question/question.repository';
 
 export class PublishQuestionCommand {
   constructor(

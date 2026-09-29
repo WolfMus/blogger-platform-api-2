@@ -1,18 +1,20 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { QuestionRepository } from '../../infrastructure/question.repository';
-import { GamePlayerRepository } from '../../infrastructure/game-player.repository';
+import { GamePlayerRepository } from '../../infrastructure/player/game-player.repository';
 import { GamePlayer } from '../../domain/game-players.entity';
 import {
   DomainException,
   Extension,
 } from '../../../../core/exceptions/domain-exception';
 import { HttpStatus } from '@nestjs/common';
-import { GameRepository } from '../../infrastructure/game.repository';
 import { QuizGame } from '../../domain/quiz-game.entity';
 import { QuizGameMapper } from '../../dto/mapper/quiz-game.mapper';
 import { GameResponseDto } from '../../dto/game-response.dto';
 import { QuizGameStatusesEnum } from '../../types/quiz-game-status.enum';
 import { GamePlayerRoleEnum } from '../../types/player-role.enum';
+import { GameRepository } from '../../infrastructure/game/game.repository';
+import { QuestionRepository } from '../../infrastructure/question/question.repository';
+import { GameQwRepository } from '../../infrastructure/game/game-query.repository';
+import { QuestionQwRepository } from '../../infrastructure/question/question-query.repository';
 
 export class ConnectToPairGameCommand {
   constructor(public userInfo: { userId: string; login: string }) {}
@@ -22,15 +24,17 @@ export class ConnectToPairGameCommand {
 export class ConnectToPairGameUseCase implements ICommandHandler<ConnectToPairGameCommand> {
   constructor(
     private questionRepo: QuestionRepository,
+    private questionQueryRepo: QuestionQwRepository,
     private playerRepo: GamePlayerRepository,
     private gameRepo: GameRepository,
+    private gameQueryRepo: GameQwRepository,
   ) {}
   async execute(
     command: ConnectToPairGameCommand,
   ): Promise<GameResponseDto | null> {
     const userId = command.userInfo.userId;
 
-    const isActiveGameExist = await this.gameRepo.isActiveGameExist(userId);
+    const isActiveGameExist = await this.gameQueryRepo.existsByUserId(userId);
     if (isActiveGameExist) {
       throw new DomainException({
         code: HttpStatus.FORBIDDEN,
@@ -45,7 +49,7 @@ export class ConnectToPairGameUseCase implements ICommandHandler<ConnectToPairGa
 
     // Создание игры
     if (!pendingGame) {
-      const questions = await this.questionRepo.findQuestionsForGame();
+      const questions = await this.questionQueryRepo.findQuestionsForGame();
       const questionsIds = questions.map((q) => q.id);
 
       const game = QuizGame.createInstance();
@@ -74,7 +78,9 @@ export class ConnectToPairGameUseCase implements ICommandHandler<ConnectToPairGa
       });
     }
 
-    const questions = await this.questionRepo.findByIds(savedGame.questionIds);
+    const questions = await this.questionQueryRepo.findQuestionsByIds(
+      savedGame.questionIds,
+    );
     const player = GamePlayer.createInstance(userId);
     player.changeRole(GamePlayerRoleEnum.Second);
     player.addQuizGame(savedGame);

@@ -1,0 +1,37 @@
+import { PaginationInput } from '../../../../core/dto/pagination.request.dto';
+import { Question } from '../../domain/question.entity';
+import { QuestionPaginatedResponse } from '../question-paginated-view-model';
+import { QuestionViewModel } from '../question-view-model';
+
+export class QuestionMapper {
+  static toViewModel(question: Question): QuestionViewModel {
+    return {
+      id: question.id.toString(),
+      body: question.body,
+      correctAnswers: question.correctAnswers,
+      publish: question.published,
+      createdAt: question.createdAt,
+      updatedAt: question.updatedAt,
+    };
+  }
+
+  static mapToViewModel(questions: Question[]): QuestionViewModel[] {
+    return questions.map((q) => this.toViewModel(q));
+  }
+
+  static mapToPaginatedView(
+    questions: QuestionViewModel[],
+    paginationInput: PaginationInput,
+    totalCount: number,
+  ): QuestionPaginatedResponse {
+    const pageNumber = paginationInput.pageNumber ?? 1;
+    const pageSize = paginationInput.pageSize ?? 10;
+    return {
+      pagesCount: Math.ceil(totalCount / pageSize),
+      page: +pageNumber,
+      pageSize: +pageSize,
+      totalCount: totalCount,
+      items: questions,
+    };
+  }
+}

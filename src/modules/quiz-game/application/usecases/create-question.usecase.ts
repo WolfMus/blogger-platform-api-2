@@ -1,8 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateQuestionDto } from '../../dto/create-question.dto';
 import { Question } from '../../domain/question.entity';
-import { QuestionRepository } from '../../infrastructure/question.repository';
-import { QuestionViewModel } from '../../dto/question-view-model';
+import { QuestionMapper } from '../../dto/mapper/question.mapper';
+import { QuestionRepository } from '../../infrastructure/question/question.repository';
 
 export class CreateQuestionCommand {
   constructor(public dto: CreateQuestionDto) {}
@@ -17,6 +17,6 @@ export class CreateQuestionUseCase implements ICommandHandler<CreateQuestionComm
     if (!savedQuestion) {
       throw new Error('Question Was Not Saved');
     }
-    return QuestionViewModel.mapToView(question);
+    return QuestionMapper.toViewModel(question);
   }
 }

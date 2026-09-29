@@ -7,7 +7,7 @@ import {
   ConnectToPairGameCommand,
   ConnectToPairGameUseCase,
 } from '../../../src/modules/quiz-game/application/usecases/connection.usecase';
-import { GamePlayerRepository } from '../../../src/modules/quiz-game/infrastructure/game-player.repository';
+import { GamePlayerRepository } from '../../../src/modules/quiz-game/infrastructure/player/game-player.repository';
 import { GameRepository } from '../../../src/modules/quiz-game/infrastructure/game.repository';
 import { QuestionRepository } from '../../../src/modules/quiz-game/infrastructure/question.repository';
 import { DomainException } from '../../../src/core/exceptions/domain-exception';
@@ -25,12 +25,14 @@ describe('ConnectToPairGameUseCase', () => {
 
   // Создание фабрики моков для репозиториев
   const mockQuestionRepo = () => ({
-    findQuestionIdsForGame: jest.fn(),
+    findQuestionsForGame: jest.fn(),
+    findByIds: jest.fn(),
   });
   const mockPlayerRepo = () => ({
     findById: jest.fn(),
     findByUserId: jest.fn(),
     save: jest.fn(),
+    findByGameIdAndRole: jest.fn(),
   });
   const mockGameRepo = () => ({
     isActiveGameExist: jest.fn(),
@@ -100,13 +102,11 @@ describe('ConnectToPairGameUseCase', () => {
       } as any;
 
       // Мокаем успешный путь
-      playerRepo.findByUserId.mockResolvedValue(mockPlayer as any);
       gameRepo.isActiveGameExist.mockResolvedValue(false);
       gameRepo.findPendingGame.mockResolvedValue(null); // Ожидающей игры нет
-      questionRepo.findQuestionIdsForGame.mockResolvedValue(mockQuestions);
+      questionRepo.findQuestionsForGame.mockResolvedValue(mockQuestions);
       gameRepo.save.mockResolvedValue(mockSavedGame as any);
       playerRepo.save.mockResolvedValue(mockPlayer as any);
-      playerRepo.findById.mockResolvedValue(mockPlayer as any);
 
       // Мокаем статический метод маппера, чтобы не зависимо тестировать usecase
       jest
@@ -124,10 +124,72 @@ describe('ConnectToPairGameUseCase', () => {
       // Проверки
       expect(gameRepo.isActiveGameExist).toHaveBeenCalledWith('user-id');
       expect(gameRepo.findPendingGame).toHaveBeenCalled();
-      expect(questionRepo.findQuestionIdsForGame).toHaveBeenCalled();
+      expect(questionRepo.findQuestionsForGame).toHaveBeenCalled();
       expect(gameRepo.save).toHaveBeenCalled();
       expect(playerRepo.save).toHaveBeenCalled();
-      expect(playerRepo.findById).toHaveBeenCalledWith('player-id');
+      expect(result).toEqual(expectedMapperResult);
+    });
+
+    it('Should connect to pending game', async () => {
+      const mockQuestions = ['q1', 'q2', 'q3', 'q4', 'q5'] as string[];
+      const mockPendingGame = {
+        id: 'game-id',
+        status: QuizGameStatusesEnum.PendingSecondPlayer,
+        questionIds: mockQuestions,
+        addQuestionIds: jest.fn(),
+        changeStatus: jest.fn(),
+      };
+      const mockFirstPlayer = {
+        id: 'first-player-id',
+        score: 0,
+        role: GamePlayerRoleEnum.First,
+        userId: 'first-user-id',
+        quizGameId: 'game-id',
+        gamePlayerAnswers: [],
+      };
+      const mockSecondPlayer = {
+        id: 'second-player-id',
+        score: 0,
+        role: GamePlayerRoleEnum.Second,
+        userId: 'second-user-id',
+        quizGameId: 'game-id',
+        gamePlayerAnswers: [],
+        changeRole: jest.fn(),
+        addQuizGame: jest.fn(),
+      };
+      const expectedMapperResult = {
+        id: 'game-id',
+        status: 'Active',
+      } as any;
+
+      jest
+        .spyOn(GamePlayer, 'createInstance')
+        .mockReturnValue(mockSecondPlayer as any);
+      jest
+        .spyOn(QuizGameMapper, 'toMapViewForSecondPlayer')
+        .mockReturnValue(expectedMapperResult);
+
+      gameRepo.isActiveGameExist.mockResolvedValue(false);
+      gameRepo.findPendingGame.mockResolvedValue(mockPendingGame as any);
+      gameRepo.save.mockResolvedValue(mockPendingGame as any);
+      questionRepo.findByIds.mockResolvedValue(mockQuestions as any);
+      playerRepo.findById.mockResolvedValue(mockSecondPlayer as any);
+      playerRepo.findByGameIdAndRole.mockResolvedValue(mockFirstPlayer as any);
+      playerRepo.save.mockResolvedValue(mockSecondPlayer as any);
+
+      const result = await useCase.execute(command);
+
+      expect(gameRepo.isActiveGameExist).toHaveBeenCalledWith('user-id');
+      expect(gameRepo.findPendingGame).toHaveBeenCalled();
+      expect(mockSecondPlayer.changeRole).toHaveBeenCalledWith(
+        GamePlayerRoleEnum.Second,
+      );
+      expect(mockSecondPlayer.addQuizGame).toHaveBeenCalledWith(
+        mockPendingGame as any,
+      );
+      expect(playerRepo.save).toHaveBeenCalled();
+      expect(playerRepo.findById).toHaveBeenCalledWith('second-player-id');
+      expect(playerRepo.findByGameIdAndRole).toHaveBeenCalled();
       expect(result).toEqual(expectedMapperResult);
     });
   });

@@ -1,28 +1,30 @@
-import { InjectRepository } from '@nestjs/typeorm';
-import { Question } from '../domain/question.entity';
-import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { SortDirection } from '../../../../core/dto/pagination.request.dto';
+import { Question } from '../../domain/question.entity';
 import {
-  PublishedStatus,
   QuestionPaginationInput,
-} from '../types/question-pagination-input.type';
-import { SortDirection } from '../../../core/dto/pagination.request.dto';
-import { QuestionResponseType } from '../types/question-response.type';
+  PublishedStatus,
+} from '../../types/question-pagination-input.type';
+import { QuestionResponseType } from '../../types/question-response.type';
+import { QuestionViewModel } from '../../dto/question-view-model';
+import { QuestionMapper } from '../../dto/mapper/question.mapper';
 
 @Injectable()
-export class QuestionRepository {
+export class QuestionQwRepository {
   constructor(
     @InjectRepository(Question)
     private questionRepo: Repository<Question>,
   ) {}
 
-  async findById(id: string): Promise<Question | null> {
+  async findById(id: string): Promise<QuestionViewModel | null> {
     const question = await this.questionRepo.findOne({ where: { id } });
     if (!question) return null;
-    return question;
+    return QuestionMapper.toViewModel(question);
   }
 
-  async findByIds(ids: string[]): Promise<QuestionResponseType[]> {
+  async findQuestionsByIds(ids: string[]): Promise<QuestionResponseType[]> {
     const raw = await this.questionRepo
       .createQueryBuilder('q')
       .select('q.id', 'id')
@@ -55,19 +57,9 @@ export class QuestionRepository {
     return raw;
   }
 
-  async save(question: Question): Promise<Question | null> {
-    const saved = await this.questionRepo.save(question);
-    return saved;
-  }
-
-  async delete(id: string): Promise<boolean> {
-    const deleted = await this.questionRepo.delete({ id: id });
-    return deleted.affected === 1;
-  }
-
   async findAll(
     pagination: QuestionPaginationInput,
-  ): Promise<{ questions: Question[]; totalCount: number }> {
+  ): Promise<{ questions: QuestionViewModel[]; totalCount: number }> {
     const sortBy = pagination.sortBy ?? 'createdAt';
     const sortDirection =
       pagination.sortDirection === SortDirection.Asc ? 'ASC' : 'DESC';
@@ -96,7 +88,7 @@ export class QuestionRepository {
     const [questions, totalCount] = await query.getManyAndCount();
 
     return {
-      questions,
+      questions: QuestionMapper.mapToViewModel(questions),
       totalCount,
     };
   }

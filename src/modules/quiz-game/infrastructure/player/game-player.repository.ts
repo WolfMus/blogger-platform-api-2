@@ -1,8 +1,8 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { GamePlayer } from '../domain/game-players.entity';
-import { GamePlayerRoleEnum } from '../types/player-role.enum';
+import { GamePlayer } from '../../domain/game-players.entity';
+import { GamePlayerRoleEnum } from '../../types/player-role.enum';
 
 @Injectable()
 export class GamePlayerRepository {

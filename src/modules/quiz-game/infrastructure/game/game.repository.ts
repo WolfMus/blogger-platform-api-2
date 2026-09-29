@@ -1,8 +1,8 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { QuizGame } from '../domain/quiz-game.entity';
-import { QuizGameStatusesEnum } from '../types/quiz-game-status.enum';
+import { QuizGame } from '../../domain/quiz-game.entity';
+import { QuizGameStatusesEnum } from '../../types/quiz-game-status.enum';
 
 @Injectable()
 export class GameRepository {
@@ -26,7 +26,7 @@ export class GameRepository {
         status: QuizGameStatusesEnum.PendingSecondPlayer,
       },
       order: {
-        pairCreatedDate: 'ASC',
+        pairCreatedDate: 'DESC',
       },
       relations: { gamePlayer: true },
     });

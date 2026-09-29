@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { QuestionRepository } from '../../infrastructure/question.repository';
 import { QuestionPaginationInput } from '../../types/question-pagination-input.type';
-import { QuestionViewModel } from '../../dto/question-view-model';
+import { QuestionQwRepository } from '../../infrastructure/question/question-query.repository';
+import { QuestionMapper } from '../../dto/mapper/question.mapper';
 
 export class FindAllQuestionsCommand {
   constructor(public paginationInput: QuestionPaginationInput) {}
@@ -9,12 +9,12 @@ export class FindAllQuestionsCommand {
 
 @CommandHandler(FindAllQuestionsCommand)
 export class FindAllQuestionsUseCase implements ICommandHandler<FindAllQuestionsCommand> {
-  constructor(private questionRepo: QuestionRepository) {}
+  constructor(private questionQueryRepo: QuestionQwRepository) {}
   async execute(command: FindAllQuestionsCommand): Promise<any> {
-    const { questions, totalCount } = await this.questionRepo.findAll(
+    const { questions, totalCount } = await this.questionQueryRepo.findAll(
       command.paginationInput,
     );
-    return QuestionViewModel.mapToPaginatedView(
+    return QuestionMapper.mapToPaginatedView(
       questions,
       command.paginationInput,
       totalCount,
