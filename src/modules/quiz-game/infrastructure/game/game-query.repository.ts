@@ -14,6 +14,7 @@ export class GameQwRepository {
   async findById(id: string): Promise<QuizGame | null> {
     const game = await this.gameRepo.findOne({
       where: { id },
+      relations: { gamePlayer: true },
     });
     if (!game) return null;
     return game;

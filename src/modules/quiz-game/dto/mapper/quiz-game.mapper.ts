@@ -5,6 +5,7 @@ import { GameResponseDto } from '../game-response.dto';
 
 export class QuizGameMapper {
   static buildPlayerProgress(player: GamePlayer, score: number) {
+    console.log(player);
     return {
       answers: [],
       player: {

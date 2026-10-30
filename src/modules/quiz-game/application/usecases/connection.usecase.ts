@@ -59,10 +59,11 @@ export class ConnectToPairGameUseCase implements ICommandHandler<ConnectToPairGa
       const player = GamePlayer.createInstance(userId);
       player.addQuizGame(savedGame);
       const savedPlayer = await this.playerRepo.save(player);
+      const playerChange = await this.playerRepo.findById(savedPlayer.id);
 
       return QuizGameMapper.toMapViewForFirstPlayer(
         savedGame,
-        savedPlayer,
+        playerChange!,
         questions,
       );
     }
