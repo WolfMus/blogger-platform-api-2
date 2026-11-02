@@ -4,6 +4,19 @@ import { QuestionResponseType } from '../../types/question-response.type';
 import { GameResponseDto } from '../game-response.dto';
 
 export class QuizGameMapper {
+  static toViewModel(game: QuizGame, questions: QuestionResponseType[]) {
+    return {
+      id: game.id.toString(),
+      firstPlayerProgress: game.gamePlayer[0],
+      secondPlayerProgress: game.gamePlayer[1],
+      questions: questions,
+      status: game.status,
+      pairCreatedDate: game.pairCreatedDate,
+      startGameDate: game.startGameDate,
+      finishGameDate: game.finishGameDate,
+    };
+  }
+
   static buildPlayerProgress(player: GamePlayer, score: number) {
     console.log(player);
     return {

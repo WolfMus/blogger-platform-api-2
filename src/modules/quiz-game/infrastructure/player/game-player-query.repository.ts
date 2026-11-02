@@ -17,4 +17,10 @@ export class GamePlayerQwRepository {
     if (!player) return null;
     return GamePlayerMapper.toViewModel(player);
   }
+
+  async findByUserId(userId: string): Promise<GamePlayerViewModel | null> {
+    const player = await this.playerRepo.findOne({ where: { userId } });
+    if (!player) return null;
+    return GamePlayerMapper.toViewModel(player);
+  }
 }
