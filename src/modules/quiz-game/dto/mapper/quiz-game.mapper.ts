@@ -1,14 +1,52 @@
 import { GamePlayer } from '../../domain/game-players.entity';
 import { QuizGame } from '../../domain/quiz-game.entity';
 import { QuestionResponseType } from '../../types/question-response.type';
+import { QuizGameStatusesEnum } from '../../types/quiz-game-status.enum';
 import { GameResponseDto } from '../game-response.dto';
 
 export class QuizGameMapper {
-  static toViewModel(game: QuizGame, questions: QuestionResponseType[]) {
+  static fromEntity(
+    game: QuizGame,
+    questions: QuestionResponseType[],
+  ): GameResponseDto {
+    switch (game.status) {
+      case QuizGameStatusesEnum.PendingSecondPlayer:
+        return this.toPendingView(game);
+      case QuizGameStatusesEnum.Active:
+        return this.toActiveView(game, questions);
+      default: {
+        throw new Error(`Unknown game status: ${game.status}`);
+      }
+    }
+  }
+
+  static toPendingView(game: QuizGame): GameResponseDto {
     return {
       id: game.id.toString(),
-      firstPlayerProgress: game.gamePlayer[0],
-      secondPlayerProgress: game.gamePlayer[1],
+      firstPlayerProgress: this.buildPlayerProgress(game.gamePlayer[0], 0),
+      secondPlayerProgress: null,
+      questions: [],
+      status: game.status,
+      pairCreatedDate: game.pairCreatedDate,
+      startGameDate: null,
+      finishGameDate: null,
+    };
+  }
+
+  static toActiveView(
+    game: QuizGame,
+    questions: QuestionResponseType[],
+  ): GameResponseDto {
+    return {
+      id: game.id.toString(),
+      firstPlayerProgress: this.buildPlayerProgress(
+        game.gamePlayer[0],
+        game.gamePlayer[0].score,
+      ),
+      secondPlayerProgress: this.buildPlayerProgress(
+        game.gamePlayer[1],
+        game.gamePlayer[1].score,
+      ),
       questions: questions,
       status: game.status,
       pairCreatedDate: game.pairCreatedDate,
@@ -17,6 +55,7 @@ export class QuizGameMapper {
     };
   }
 
+  // score есть в player => можно убрать лишний параметр
   static buildPlayerProgress(player: GamePlayer, score: number) {
     console.log(player);
     return {
