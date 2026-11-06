@@ -1,5 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { QuizGame } from '../../domain/quiz-game.entity';
 import { QuizGameStatusesEnum } from '../../types/quiz-game-status.enum';
@@ -26,6 +26,35 @@ export class GameQwRepository {
         },
       },
     });
+    if (!game) return null;
+
+    const ids = game.questionIds;
+    const raw = await this.questionRepo
+      .createQueryBuilder('q')
+      .select('q.id', 'id')
+      .addSelect('q.body', 'body')
+      .where('q.id IN (:...ids)', { ids })
+      .getRawMany<QuestionResponseType>();
+
+    if (raw.length !== game.questionIds!.length) {
+      throw new Error('Not All Questions Founded');
+    }
+    return QuizGameMapper.fromEntity(game, raw);
+  }
+
+  async findCurrentGame(userId: string): Promise<GameResponseDto | null> {
+    const game = await this.gameRepo.findOne({
+      where: {
+        gamePlayer: { userId: userId },
+        status: Not(QuizGameStatusesEnum.Finished),
+      },
+      relations: {
+        gamePlayer: {
+          user: true,
+        },
+      },
+    });
+    console.log(game);
     if (!game) return null;
 
     const ids = game.questionIds;

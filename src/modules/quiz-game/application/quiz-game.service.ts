@@ -4,18 +4,15 @@ import {
   DomainException,
   Extension,
 } from '../../../core/exceptions/domain-exception';
-import { QuestionQwRepository } from '../infrastructure/question/question-query.repository';
+import { GameResponseDto } from '../dto/game-response.dto';
 
 @Injectable()
 export class QuizGameService {
-  constructor(
-    private gameQueryRepo: GameQwRepository,
-    private questionRepo: QuestionQwRepository,
-  ) {}
+  constructor(private gameQueryRepo: GameQwRepository) {}
 
-  async findById(id: string, userId: string): Promise<unknown> {
+  async findById(id: string, userId: string): Promise<GameResponseDto> {
+    // Получаем game
     const game = await this.gameQueryRepo.findById(id);
-    console.log(game);
     if (!game) {
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,
@@ -25,25 +22,32 @@ export class QuizGameService {
     }
 
     // Относится ли пользователь к этой игре
-    //if (game.gamePlayer.some((p) => p.userId === userId)) {
-    //  throw new DomainException({
-    //    code: HttpStatus.FORBIDDEN,
-    //    message: 'Forbidden',
-    //    extensions: [new Extension('User Is Not Participant', 'userId')],
-    //  });
-    //}
-//
-    //const questions = await this.questionRepo.findQuestionsByIds(
-    //  game.questionIds!,
-    //);
-    //console.log(questions);
+    const firstPlayerId = game.firstPlayerProgress.player.id;
+    const secondPlayerId = game.secondPlayerProgress?.player.id;
+    if (firstPlayerId !== userId && secondPlayerId !== userId) {
+      throw new DomainException({
+        code: HttpStatus.FORBIDDEN,
+        message: 'Forbidden',
+        extensions: [new Extension('User Is Not Participant', 'userId')],
+      });
+    }
+    console.log(game);
+    return game;
+  }
 
-    return;
+  async findCurrentGame(userId: string): Promise<GameResponseDto> {
+    const game = await this.gameQueryRepo.findCurrentGame(userId);
+    if (!game) {
+      throw new DomainException({
+        code: HttpStatus.NOT_FOUND,
+        message: 'Not Found',
+        extensions: [new Extension('Game Not Found', 'id')],
+      });
+    }
+    return game;
+    // Ищем игру, где
+    //            playerId === userId && status !== Finished
+    // Возвращаем
+    // Если игры нет => 404
   }
 }
-
-/**
- * Получить id игры
- * Проверить участвует ли пользователь в игре
- * Проверить сколько участников в игре
- */

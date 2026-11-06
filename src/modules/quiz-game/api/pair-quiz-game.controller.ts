@@ -21,21 +21,31 @@ export class PairQuizGameController {
     private gameService: QuizGameService,
   ) {}
 
-  @Get(':id')
+  @Get('/my-current')
   @UseGuards(JwtAuthGuard)
-  // Returns game by id
+  // RETURN CURRENT UNFINISHED GAME
+  async getCurrentGame(@Req() req: Request): Promise<GameResponseDto> {
+    console.log('asdasdasd');
+    const userInfo = req.user as { userId: string; login: string };
+    const game = await this.gameService.findCurrentGame(userInfo.userId);
+    return game;
+  }
+
+  @Get('/:id')
+  @UseGuards(JwtAuthGuard)
+  // ✅ RETURNS GAME BY ID
   async getGameById(
     @Req() req: Request,
     @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  ): Promise<GameResponseDto> {
     const userInfo = req.user as { userId: string; login: string };
-    await this.gameService.findById(id, userInfo.userId);
-    return;
+    const game = await this.gameService.findById(id, userInfo.userId);
+    return game;
   }
 
   @Post('/connection')
   @UseGuards(JwtAuthGuard)
-  // CONNECT USER TO PAIR QUIZ GAME
+  // ✅ CONNECT USER TO PAIR QUIZ GAME
   async connection(@Req() req: Request) {
     const userInfo = req.user as { userId: string; login: string };
     return await this.commandBus.execute<
