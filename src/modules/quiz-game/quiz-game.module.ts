@@ -20,6 +20,7 @@ import { GamePlayerQwRepository } from './infrastructure/player/game-player-quer
 import { GamePlayerRepository } from './infrastructure/player/game-player.repository';
 import { QuestionQwRepository } from './infrastructure/question/question-query.repository';
 import { QuestionRepository } from './infrastructure/question/question.repository';
+import { GamePlayerAnswersRepository } from './infrastructure/player-answers/game-player.repository';
 
 const questionUseCases = [
   CreateQuestionUseCase,
@@ -52,6 +53,7 @@ const pairGameUseCases = [ConnectToPairGameUseCase];
     GameQwRepository,
     GamePlayerRepository,
     GamePlayerQwRepository,
+    GamePlayerAnswersRepository,
   ],
 })
 export class QuizGameModule {}

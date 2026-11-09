@@ -40,4 +40,16 @@ export class GamePlayerAnswers {
   @ManyToOne(() => Question, (question) => question.gamePlayerAnswers)
   @JoinColumn({ name: 'questionId' })
   question: Question;
+
+  static createInstance(
+    playerId: string,
+    questionId: string,
+    status: AnswerStatusesEnum,
+  ): GamePlayerAnswers {
+    const playerAnswer = new GamePlayerAnswers();
+    playerAnswer.gamePlayerId = playerId;
+    playerAnswer.questionId = questionId;
+    playerAnswer.status = status;
+    return playerAnswer;
+  }
 }

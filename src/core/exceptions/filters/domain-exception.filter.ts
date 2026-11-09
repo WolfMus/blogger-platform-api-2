@@ -18,17 +18,25 @@ export class DomainExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const status = exception.code;
 
+    const extensionMessage = exception.extensions[0]?.message;
+
+    // Формируем окрашенную строку, если есть уточнение
+    let logMessage = exception.message;
+    if (extensionMessage) {
+      // \x1b[33m — желтый цвет, \x1b[0m — сброс цвета
+      logMessage += ` \x1b[1;36m-> ${extensionMessage}\x1b[0m`;
+    }
     if (status === HttpStatus.UNAUTHORIZED) {
-      this.logger.error(exception.message);
+      this.logger.error(logMessage);
       return response.sendStatus(status);
     }
 
     if (status === HttpStatus.FORBIDDEN) {
-      this.logger.error(exception.message);
+      this.logger.error(logMessage);
       return response.sendStatus(status);
     }
 
-    this.logger.error(exception.message);
+    this.logger.error(logMessage);
     return response.status(status).json({
       errorsMessages: [
         {

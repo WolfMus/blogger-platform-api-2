@@ -30,6 +30,7 @@ export class GamePlayerQwRepository {
   ): Promise<GamePlayerViewModel | null> {
     const player = await this.playerRepo.findOne({
       where: { userId, quizGameId: gameId },
+      relations: { gamePlayerAnswers: true },
     });
     if (!player) return null;
     return GamePlayerMapper.toViewModel(player);

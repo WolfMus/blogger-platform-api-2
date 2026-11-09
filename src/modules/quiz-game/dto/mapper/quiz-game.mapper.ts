@@ -37,7 +37,6 @@ export class QuizGameMapper {
     game: QuizGame,
     questions: QuestionResponseType[],
   ): GameResponseDto {
-    console.log(game.gamePlayer.length);
     return {
       id: game.id.toString(),
       firstPlayerProgress: this.buildPlayerProgress(

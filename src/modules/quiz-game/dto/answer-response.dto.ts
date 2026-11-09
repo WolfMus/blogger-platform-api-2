@@ -1,5 +1,7 @@
+import { AnswerStatusesEnum } from '../types/answer-status.enum';
+
 export class AnswerResponseDto {
   questionId: string;
-  answerStatus: boolean;
+  answerStatus: AnswerStatusesEnum;
   addedAt: Date;
 }
