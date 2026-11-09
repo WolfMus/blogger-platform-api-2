@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Param,
@@ -13,6 +14,7 @@ import type { Request } from 'express';
 import { ConnectToPairGameCommand } from '../application/usecases/connection.usecase';
 import { GameResponseDto } from '../dto/game-response.dto';
 import { QuizGameService } from '../application/quiz-game.service';
+import { AnswerResponseDto } from '../dto/answer-response.dto';
 
 @Controller('pair-game-quiz/pairs')
 export class PairQuizGameController {
@@ -23,9 +25,8 @@ export class PairQuizGameController {
 
   @Get('/my-current')
   @UseGuards(JwtAuthGuard)
-  // RETURN CURRENT UNFINISHED GAME
+  // ✅ RETURN CURRENT UNFINISHED GAME
   async getCurrentGame(@Req() req: Request): Promise<GameResponseDto> {
-    console.log('asdasdasd');
     const userInfo = req.user as { userId: string; login: string };
     const game = await this.gameService.findCurrentGame(userInfo.userId);
     return game;
@@ -52,5 +53,20 @@ export class PairQuizGameController {
       ConnectToPairGameCommand,
       GameResponseDto
     >(new ConnectToPairGameCommand(userInfo));
+  }
+
+  @Post('/my-current/answers')
+  @UseGuards(JwtAuthGuard)
+  // SEND ANSWER FOR NEXT QUESTION
+  async sendAnswer(
+    @Req() req: Request,
+    @Body() answer: string,
+  ): Promise<AnswerResponseDto> {
+    const userInfo = req.user as { userId: string; login: string };
+    const answerResponseDto = await this.gameService.sendAnswer(
+      userInfo.userId,
+      answer,
+    );
+    return answerResponseDto;
   }
 }

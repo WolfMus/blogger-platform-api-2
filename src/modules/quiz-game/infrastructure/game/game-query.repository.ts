@@ -43,18 +43,20 @@ export class GameQwRepository {
   }
 
   async findCurrentGame(userId: string): Promise<GameResponseDto | null> {
-    const game = await this.gameRepo.findOne({
+    const gameResult = await this.gameRepo.findOne({
       where: {
         gamePlayer: { userId: userId },
         status: Not(QuizGameStatusesEnum.Finished),
       },
-      relations: {
-        gamePlayer: {
-          user: true,
-        },
-      },
+      select: { id: true },
     });
-    console.log(game);
+    if (!gameResult) return null;
+    const gameId = gameResult.id;
+
+    const game = await this.gameRepo.findOne({
+      where: { id: gameId },
+      relations: { gamePlayer: { user: true } },
+    });
     if (!game) return null;
 
     const ids = game.questionIds;

@@ -37,6 +37,7 @@ export class QuizGameMapper {
     game: QuizGame,
     questions: QuestionResponseType[],
   ): GameResponseDto {
+    console.log(game.gamePlayer.length);
     return {
       id: game.id.toString(),
       firstPlayerProgress: this.buildPlayerProgress(
@@ -57,7 +58,6 @@ export class QuizGameMapper {
 
   // score есть в player => можно убрать лишний параметр
   static buildPlayerProgress(player: GamePlayer, score: number) {
-    console.log(player);
     return {
       answers: [],
       player: {
