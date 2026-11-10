@@ -1,52 +1,71 @@
 import { GamePlayer } from '../../domain/game-players.entity';
 import { QuizGame } from '../../domain/quiz-game.entity';
+import { GamePlayerRoleEnum } from '../../types/player-role.enum';
 import { QuestionResponseType } from '../../types/question-response.type';
 import { QuizGameStatusesEnum } from '../../types/quiz-game-status.enum';
+import { GamePlayerViewModel } from '../game-player/player-view.dto';
 import { GameResponseDto } from '../game-response.dto';
+import { QuizGameReadModel } from '../game.read-model';
+import { GamePlayerMapper } from './game-player.mapper';
 
 export class QuizGameMapper {
-  static fromEntity(
-    game: QuizGame,
-    questions: QuestionResponseType[],
+  // Сырой вид из БД
+  static toReadModel(game: QuizGame): QuizGameReadModel {
+    return {
+      id: game.id.toString(),
+      gamePlayer: GamePlayerMapper.mapToViewModel(game.gamePlayer),
+      questionIds: game.questionIds,
+      status: game.status,
+      pairCreatedDate: game.pairCreatedDate,
+      startGameDate: game.startGameDate,
+      finishGameDate: game.finishGameDate,
+    };
+  }
+
+  static toViewModel(
+    game: QuizGameReadModel,
+    questions: QuestionResponseType[] = [],
   ): GameResponseDto {
     switch (game.status) {
       case QuizGameStatusesEnum.PendingSecondPlayer:
         return this.toPendingView(game);
-      case QuizGameStatusesEnum.Active:
+      case QuizGameStatusesEnum.Active || QuizGameStatusesEnum.Finished:
         return this.toActiveView(game, questions);
-      default: {
+      default:
         throw new Error(`Unknown game status: ${game.status}`);
-      }
     }
   }
 
-  static toPendingView(game: QuizGame): GameResponseDto {
+  private static toPendingView(game: QuizGameReadModel): GameResponseDto {
+    const firstPlayer = game.gamePlayer.find(
+      (p) => p.role === GamePlayerRoleEnum.First,
+    );
     return {
       id: game.id.toString(),
-      firstPlayerProgress: this.buildPlayerProgress(game.gamePlayer[0], 0),
+      firstPlayerProgress: this.buildPlayer(firstPlayer!),
       secondPlayerProgress: null,
       questions: [],
       status: game.status,
       pairCreatedDate: game.pairCreatedDate,
-      startGameDate: null,
-      finishGameDate: null,
+      startGameDate: game.startGameDate,
+      finishGameDate: game.finishGameDate,
     };
   }
 
-  static toActiveView(
-    game: QuizGame,
-    questions: QuestionResponseType[],
+  private static toActiveView(
+    game: QuizGameReadModel,
+    questions: QuestionResponseType[] = [],
   ): GameResponseDto {
+    const firstPlayer = game.gamePlayer.find(
+      (p) => p.role === GamePlayerRoleEnum.First,
+    );
+    const secondPlayer = game.gamePlayer.find(
+      (p) => p.role === GamePlayerRoleEnum.Second,
+    );
     return {
       id: game.id.toString(),
-      firstPlayerProgress: this.buildPlayerProgress(
-        game.gamePlayer[0],
-        game.gamePlayer[0].score,
-      ),
-      secondPlayerProgress: this.buildPlayerProgress(
-        game.gamePlayer[1],
-        game.gamePlayer[1].score,
-      ),
+      firstPlayerProgress: this.buildPlayer(firstPlayer!),
+      secondPlayerProgress: this.buildPlayer(secondPlayer!),
       questions: questions,
       status: game.status,
       pairCreatedDate: game.pairCreatedDate,
@@ -55,15 +74,26 @@ export class QuizGameMapper {
     };
   }
 
+  private static buildPlayer(player: GamePlayerViewModel) {
+    return {
+      answers: [],
+      player: {
+        id: player.userId,
+        login: player.userLogin,
+      },
+      score: player.score,
+    };
+  }
+
   // score есть в player => можно убрать лишний параметр
-  static buildPlayerProgress(player: GamePlayer, score: number) {
+  private static buildPlayerProgress(player: GamePlayer) {
     return {
       answers: [],
       player: {
         id: player.user.id,
         login: player.user.login,
       },
-      score: score,
+      score: player.score,
     };
   }
 
@@ -74,7 +104,7 @@ export class QuizGameMapper {
   ): GameResponseDto {
     return {
       id: game.id.toString(),
-      firstPlayerProgress: this.buildPlayerProgress(player, 0),
+      firstPlayerProgress: this.buildPlayerProgress(player),
       secondPlayerProgress: null,
       questions: questions,
       status: game.status,
@@ -92,8 +122,8 @@ export class QuizGameMapper {
   ): GameResponseDto {
     return {
       id: game.id.toString(),
-      firstPlayerProgress: this.buildPlayerProgress(firstPlayer, 0),
-      secondPlayerProgress: this.buildPlayerProgress(secondPlayer, 0),
+      firstPlayerProgress: this.buildPlayerProgress(firstPlayer),
+      secondPlayerProgress: this.buildPlayerProgress(secondPlayer),
       questions: questions,
       status: game.status,
       pairCreatedDate: game.pairCreatedDate,

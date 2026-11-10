@@ -3,74 +3,45 @@ import { In, Not, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { QuizGame } from '../../domain/quiz-game.entity';
 import { QuizGameStatusesEnum } from '../../types/quiz-game-status.enum';
-import { Question } from '../../domain/question.entity';
-import { QuestionResponseType } from '../../types/question-response.type';
-import { GameResponseDto } from '../../dto/game-response.dto';
 import { QuizGameMapper } from '../../dto/mapper/quiz-game.mapper';
+import { QuizGameReadModel } from '../../dto/game.read-model';
 
 @Injectable()
 export class GameQwRepository {
   constructor(
     @InjectRepository(QuizGame)
     private gameRepo: Repository<QuizGame>,
-    @InjectRepository(Question)
-    private questionRepo: Repository<Question>,
   ) {}
 
-  async findById(id: string): Promise<GameResponseDto | null> {
+  async findById(id: string): Promise<QuizGameReadModel | null> {
     const game = await this.gameRepo.findOne({
       where: { id },
       relations: {
-        gamePlayer: {
-          user: true,
-        },
+        gamePlayer: { user: true, gamePlayerAnswers: true },
       },
     });
     if (!game) return null;
-
-    const ids = game.questionIds;
-    const raw = await this.questionRepo
-      .createQueryBuilder('q')
-      .select('q.id', 'id')
-      .addSelect('q.body', 'body')
-      .where('q.id IN (:...ids)', { ids })
-      .getRawMany<QuestionResponseType>();
-
-    if (raw.length !== game.questionIds!.length) {
-      throw new Error('Not All Questions Founded');
-    }
-    return QuizGameMapper.fromEntity(game, raw);
+    return QuizGameMapper.toReadModel(game);
   }
 
-  async findCurrentGame(userId: string): Promise<GameResponseDto | null> {
-    const gameResult = await this.gameRepo.findOne({
+  async findCurrentGame(userId: string): Promise<QuizGameReadModel | null> {
+    const gameRecord = await this.gameRepo.findOne({
       where: {
         gamePlayer: { userId: userId },
         status: Not(QuizGameStatusesEnum.Finished),
       },
       select: { id: true },
     });
-    if (!gameResult) return null;
-    const gameId = gameResult.id;
+    if (!gameRecord) return null;
+    const gameId = gameRecord.id;
 
     const game = await this.gameRepo.findOne({
       where: { id: gameId },
-      relations: { gamePlayer: { user: true } },
+      relations: { gamePlayer: { user: true, gamePlayerAnswers: true } },
     });
     if (!game) return null;
 
-    const ids = game.questionIds;
-    const raw = await this.questionRepo
-      .createQueryBuilder('q')
-      .select('q.id', 'id')
-      .addSelect('q.body', 'body')
-      .where('q.id IN (:...ids)', { ids })
-      .getRawMany<QuestionResponseType>();
-
-    if (raw.length !== game.questionIds!.length) {
-      throw new Error('Not All Questions Founded');
-    }
-    return QuizGameMapper.fromEntity(game, raw);
+    return QuizGameMapper.toReadModel(game);
   }
 
   async existsByUserId(userId: string): Promise<boolean> {

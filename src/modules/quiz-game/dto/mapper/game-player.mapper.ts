@@ -8,6 +8,7 @@ export class GamePlayerMapper {
       score: player.score,
       role: player.role,
       userId: player.userId,
+      userLogin: player.user.login,
       quizGameId: player.quizGameId,
     };
   }

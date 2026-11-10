@@ -5,5 +5,6 @@ export class GamePlayerViewModel {
   score: number;
   role: GamePlayerRoleEnum;
   userId: string;
+  userLogin: string;
   quizGameId: string | null;
 }

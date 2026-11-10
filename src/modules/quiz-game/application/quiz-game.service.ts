@@ -12,6 +12,7 @@ import { QuestionQwRepository } from '../infrastructure/question/question-query.
 import { AnswerStatusesEnum } from '../types/answer-status.enum';
 import { GamePlayerAnswersRepository } from '../infrastructure/player-answers/game-player.repository';
 import { AnswerResponseDto } from '../dto/answer-response.dto';
+import { QuizGameMapper } from '../dto/mapper/quiz-game.mapper';
 
 @Injectable()
 export class QuizGameService {
@@ -44,7 +45,14 @@ export class QuizGameService {
       });
     }
 
-    return game;
+    // Если игра ACTIVE то ищем вопросы
+    if (game.status === QuizGameStatusesEnum.Active) {
+      const questions = await this.questionQueryRepo.findQuestionsByIds(
+        game.questionIds!,
+      );
+      return QuizGameMapper.toViewModel(game, questions);
+    }
+    return QuizGameMapper.toViewModel(game);
   }
 
   async findCurrentGame(userId: string): Promise<GameResponseDto> {
@@ -55,6 +63,12 @@ export class QuizGameService {
         message: 'Not Found',
         extensions: [new Extension('Game Not Found', 'id')],
       });
+    }
+
+    if (game.status === QuizGameStatusesEnum.Active) {
+      const questions = await this.questionQueryRepo.findQuestionsByIds(
+        game.questionIds!,
+      );
     }
     return game;
   }
