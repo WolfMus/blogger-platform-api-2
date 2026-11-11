@@ -29,10 +29,11 @@ export class QuizGameMapper {
     switch (game.status) {
       case QuizGameStatusesEnum.PendingSecondPlayer:
         return this.toPendingView(game);
-      case QuizGameStatusesEnum.Active || QuizGameStatusesEnum.Finished:
+      case QuizGameStatusesEnum.Active:
+      case QuizGameStatusesEnum.Finished:
         return this.toActiveView(game, questions);
       default:
-        throw new Error(`Unknown game status: ${game.status}`);
+        throw new Error(`Unknown game status: ${game.status as string}`);
     }
   }
 

@@ -1,5 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Not, Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { QuizGame } from '../../domain/quiz-game.entity';
 import { QuizGameStatusesEnum } from '../../types/quiz-game-status.enum';
@@ -17,7 +17,10 @@ export class GameQwRepository {
     const game = await this.gameRepo.findOne({
       where: { id },
       relations: {
-        gamePlayer: { user: true, gamePlayerAnswers: true },
+        gamePlayer: {
+          user: true,
+          gamePlayerAnswers: true,
+        },
       },
     });
     if (!game) return null;
@@ -25,21 +28,38 @@ export class GameQwRepository {
   }
 
   async findCurrentGame(userId: string): Promise<QuizGameReadModel | null> {
-    const gameRecord = await this.gameRepo.findOne({
-      where: {
-        gamePlayer: { userId: userId },
-        status: Not(QuizGameStatusesEnum.Finished),
-      },
-      select: { id: true },
-    });
-    if (!gameRecord) return null;
-    const gameId = gameRecord.id;
+    const game = await this.gameRepo
+      .createQueryBuilder('game')
+      .innerJoin(
+        'game.gamePlayer',
+        'currentPlayer',
+        'currentPlayer.userId = :userId',
+        { userId },
+      )
+      .leftJoinAndSelect('game.gamePlayer', 'player')
+      .leftJoinAndSelect('player.user', 'user')
+      .leftJoinAndSelect('player.gamePlayerAnswers', 'answer')
+      .where('game.status != :finished', {
+        finished: QuizGameStatusesEnum.Finished,
+      })
+      .getOne();
 
-    const game = await this.gameRepo.findOne({
-      where: { id: gameId },
-      relations: { gamePlayer: { user: true, gamePlayerAnswers: true } },
-    });
     if (!game) return null;
+    // const gameRecord = await this.gameRepo.findOne({
+    //   where: {
+    //     gamePlayer: { userId: userId },
+    //     status: Not(QuizGameStatusesEnum.Finished),
+    //   },
+    //   select: { id: true },
+    // });
+    // if (!gameRecord) return null;
+    // const gameId = gameRecord.id;
+
+    // const game = await this.gameRepo.findOne({
+    //   where: { id: gameId },
+    //   relations: { gamePlayer: { user: true, gamePlayerAnswers: true } },
+    // });
+    // if (!game) return null;
 
     return QuizGameMapper.toReadModel(game);
   }
