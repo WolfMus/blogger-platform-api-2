@@ -4,14 +4,14 @@ import {
   DomainException,
   Extension,
 } from '../../../core/exceptions/domain-exception';
-import { GameResponseDto } from '../dto/game-response.dto';
+import { GameResponseDto } from '../dto/game/game-response.dto';
 import { QuizGameStatusesEnum } from '../types/quiz-game-status.enum';
 import { GamePlayerRepository } from '../infrastructure/player/game-player.repository';
 import { GamePlayerAnswers } from '../domain/game-answers.entity';
 import { QuestionQwRepository } from '../infrastructure/question/question-query.repository';
 import { AnswerStatusesEnum } from '../types/answer-status.enum';
 import { GamePlayerAnswersRepository } from '../infrastructure/player-answers/game-player.repository';
-import { AnswerResponseDto } from '../dto/answer-response.dto';
+import { AnswerResponseDto } from '../dto/answer/answer-response.dto';
 import { QuizGameMapper } from '../dto/mapper/quiz-game.mapper';
 import { GamePlayerRoleEnum } from '../types/player-role.enum';
 
@@ -156,6 +156,9 @@ export class QuizGameService {
     const status = question.correctAnswers.includes(answer)
       ? AnswerStatusesEnum.Correct
       : AnswerStatusesEnum.Incorrect;
+    // За правильный ответ добавляем балл
+    player.changeScore(status);
+    await this.playerRepo.save(player);
 
     // Сохраняем вопрос
     const playerAnswer = GamePlayerAnswers.createInstance(
@@ -175,8 +178,8 @@ export class QuizGameService {
 }
 
 /**
- *         403
- * user not PARTICIPANT
- * user not in ACTIVE pair
- * user ANSWERED ALL QUESTIONS
+ * Быстрее ответил и 1 правильный = +1 дополнительный балл
+ * Дополнительный балл начисляется по ЗАВЕРШЕНИЮ игры
+ *
+ * Сделать ЗАВЕРШЕНИЕ игры
  */

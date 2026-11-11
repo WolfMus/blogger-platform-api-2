@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { PublishQuestionDto } from '../../dto/question-publish.dto';
+import { PublishQuestionDto } from '../../dto/question/question-publish.dto';
 import {
   DomainException,
   Extension,

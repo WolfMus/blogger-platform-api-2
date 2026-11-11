@@ -1,7 +1,7 @@
 import { PaginationInput } from '../../../../core/dto/pagination.request.dto';
 import { Question } from '../../domain/question.entity';
-import { QuestionPaginatedResponse } from '../question-paginated-view-model';
-import { QuestionViewModel } from '../question-view-model';
+import { QuestionPaginatedResponse } from '../question/question-paginated-view-model';
+import { QuestionViewModel } from '../question/question-view-model';
 
 export class QuestionMapper {
   static toViewModel(question: Question): QuestionViewModel {

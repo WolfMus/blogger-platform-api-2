@@ -1,4 +1,4 @@
-import { AnswerStatusesEnum } from '../types/answer-status.enum';
+import { AnswerStatusesEnum } from '../../types/answer-status.enum';
 
 export class AnswerResponseDto {
   questionId: string;

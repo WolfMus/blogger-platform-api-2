@@ -12,10 +12,10 @@ import { CommandBus } from '@nestjs/cqrs';
 import { JwtAuthGuard } from '../../user-accounts/guards/bearer/jwt-auth.guard';
 import type { Request } from 'express';
 import { ConnectToPairGameCommand } from '../application/usecases/connection.usecase';
-import { GameResponseDto } from '../dto/game-response.dto';
+import { GameResponseDto } from '../dto/game/game-response.dto';
 import { QuizGameService } from '../application/quiz-game.service';
-import { AnswerResponseDto } from '../dto/answer-response.dto';
-import { AnswerRequestDto } from '../dto/answer-request.dto';
+import { AnswerResponseDto } from '../dto/answer/answer-response.dto';
+import { AnswerRequestDto } from '../dto/answer/answer-request.dto';
 
 @Controller('pair-game-quiz/pairs')
 export class PairQuizGameController {

@@ -3,9 +3,8 @@ import { QuizGame } from '../../domain/quiz-game.entity';
 import { GamePlayerRoleEnum } from '../../types/player-role.enum';
 import { QuestionResponseType } from '../../types/question-response.type';
 import { QuizGameStatusesEnum } from '../../types/quiz-game-status.enum';
-import { GamePlayerViewModel } from '../game-player/player-view.dto';
-import { GameResponseDto } from '../game-response.dto';
-import { QuizGameReadModel } from '../game.read-model';
+import { GameResponseDto } from '../game/game-response.dto';
+import { QuizGameReadModel } from '../game/game.read-model';
 import { GamePlayerMapper } from './game-player.mapper';
 
 export class QuizGameMapper {
@@ -13,7 +12,7 @@ export class QuizGameMapper {
   static toReadModel(game: QuizGame): QuizGameReadModel {
     return {
       id: game.id.toString(),
-      gamePlayer: GamePlayerMapper.mapToViewModel(game.gamePlayer),
+      gamePlayer: GamePlayerMapper.mapToReadModel(game.gamePlayer),
       questionIds: game.questionIds,
       status: game.status,
       pairCreatedDate: game.pairCreatedDate,
@@ -43,7 +42,7 @@ export class QuizGameMapper {
     );
     return {
       id: game.id.toString(),
-      firstPlayerProgress: this.buildPlayer(firstPlayer!),
+      firstPlayerProgress: GamePlayerMapper.toViewModel(firstPlayer!),
       secondPlayerProgress: null,
       questions: [],
       status: game.status,
@@ -65,24 +64,13 @@ export class QuizGameMapper {
     );
     return {
       id: game.id.toString(),
-      firstPlayerProgress: this.buildPlayer(firstPlayer!),
-      secondPlayerProgress: this.buildPlayer(secondPlayer!),
+      firstPlayerProgress: GamePlayerMapper.toViewModel(firstPlayer!),
+      secondPlayerProgress: GamePlayerMapper.toViewModel(secondPlayer!),
       questions: questions,
       status: game.status,
       pairCreatedDate: game.pairCreatedDate,
       startGameDate: game.startGameDate,
       finishGameDate: game.finishGameDate,
-    };
-  }
-
-  private static buildPlayer(player: GamePlayerViewModel) {
-    return {
-      answers: [],
-      player: {
-        id: player.userId,
-        login: player.userLogin,
-      },
-      score: player.score,
     };
   }
 
@@ -101,13 +89,12 @@ export class QuizGameMapper {
   static toMapViewForFirstPlayer(
     game: QuizGame,
     player: GamePlayer,
-    questions: QuestionResponseType[],
   ): GameResponseDto {
     return {
       id: game.id.toString(),
       firstPlayerProgress: this.buildPlayerProgress(player),
       secondPlayerProgress: null,
-      questions: questions,
+      questions: [],
       status: game.status,
       pairCreatedDate: game.pairCreatedDate,
       startGameDate: game.startGameDate,

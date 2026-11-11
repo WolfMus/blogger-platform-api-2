@@ -8,7 +8,7 @@ import {
   PublishedStatus,
 } from '../../types/question-pagination-input.type';
 import { QuestionResponseType } from '../../types/question-response.type';
-import { QuestionViewModel } from '../../dto/question-view-model';
+import { QuestionViewModel } from '../../dto/question/question-view-model';
 import { QuestionMapper } from '../../dto/mapper/question.mapper';
 
 @Injectable()

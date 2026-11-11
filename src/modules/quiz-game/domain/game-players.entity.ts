@@ -10,6 +10,7 @@ import { User } from '../../user-accounts/domain/users/user.entity';
 import { QuizGame } from './quiz-game.entity';
 import { GamePlayerAnswers } from './game-answers.entity';
 import { GamePlayerRoleEnum } from '../types/player-role.enum';
+import { AnswerStatusesEnum } from '../types/answer-status.enum';
 
 @Entity({ name: 'gamePlayers' })
 export class GamePlayer {
@@ -72,5 +73,11 @@ export class GamePlayer {
 
   changeRole(role: GamePlayerRoleEnum): void {
     this.role = role;
+  }
+
+  changeScore(status: AnswerStatusesEnum): void {
+    if (status === AnswerStatusesEnum.Correct) {
+      this.score += 1;
+    }
   }
 }
