@@ -173,10 +173,3 @@ export class QuizGameService {
     return answerResponse;
   }
 }
-
-/**
- *         403
- * user not PARTICIPANT
- * user not in ACTIVE pair
- * user ANSWERED ALL QUESTIONS
- */

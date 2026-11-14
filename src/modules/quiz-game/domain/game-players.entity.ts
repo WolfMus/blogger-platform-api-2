@@ -73,4 +73,8 @@ export class GamePlayer {
   changeRole(role: GamePlayerRoleEnum): void {
     this.role = role;
   }
+
+  addCorrectPoint(): void {
+    this.score += 1;
+  }
 }

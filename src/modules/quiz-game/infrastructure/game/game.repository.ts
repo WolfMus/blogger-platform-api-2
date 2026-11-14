@@ -20,6 +20,29 @@ export class GameRepository {
     return game;
   }
 
+  async findCurrentGameWithPlayersAndAnswers(
+    userId: string,
+  ): Promise<QuizGame | null> {
+    const game = await this.gameRepo
+      .createQueryBuilder('game')
+      .innerJoin(
+        'game.gamePlayer',
+        'currentPlayer',
+        'currentPlayer.userId = :userId',
+        { userId },
+      )
+      .leftJoinAndSelect('game.gamePlayer', 'player')
+      .leftJoinAndSelect('player.user', 'user')
+      .leftJoinAndSelect('player.gamePlayerAnswers', 'answer')
+      .where('game.status != :finished', {
+        finished: QuizGameStatusesEnum.Finished,
+      })
+      .getOne();
+
+    if (!game) return null;
+    return game;
+  }
+
   async findPendingGame(): Promise<QuizGame | null> {
     const game = await this.gameRepo.findOne({
       where: {

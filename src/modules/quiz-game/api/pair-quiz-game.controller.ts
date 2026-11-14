@@ -16,6 +16,7 @@ import { GameResponseDto } from '../dto/game-response.dto';
 import { QuizGameService } from '../application/quiz-game.service';
 import { AnswerResponseDto } from '../dto/answer-response.dto';
 import { AnswerRequestDto } from '../dto/answer-request.dto';
+import { SendAnswerCommand } from '../application/usecases/send-answer.usecase';
 
 @Controller('pair-game-quiz/pairs')
 export class PairQuizGameController {
@@ -64,10 +65,8 @@ export class PairQuizGameController {
     @Body() dto: AnswerRequestDto,
   ): Promise<AnswerResponseDto> {
     const userInfo = req.user as { userId: string; login: string };
-    const answerResponseDto = await this.gameService.sendAnswer(
-      userInfo.userId,
-      dto.answer,
+    return await this.commandBus.execute<SendAnswerCommand, AnswerResponseDto>(
+      new SendAnswerCommand(dto, userInfo.userId),
     );
-    return answerResponseDto;
   }
 }

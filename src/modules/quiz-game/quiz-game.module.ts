@@ -21,6 +21,7 @@ import { GamePlayerRepository } from './infrastructure/player/game-player.reposi
 import { QuestionQwRepository } from './infrastructure/question/question-query.repository';
 import { QuestionRepository } from './infrastructure/question/question.repository';
 import { GamePlayerAnswersRepository } from './infrastructure/player-answers/game-player.repository';
+import { SendAnswerUseCase } from './application/usecases/send-answer.usecase';
 
 const questionUseCases = [
   CreateQuestionUseCase,
@@ -30,6 +31,7 @@ const questionUseCases = [
   FindAllQuestionsUseCase,
 ];
 
+const quizUseCases = [SendAnswerUseCase];
 const pairGameUseCases = [ConnectToPairGameUseCase];
 
 @Module({
@@ -46,6 +48,7 @@ const pairGameUseCases = [ConnectToPairGameUseCase];
   providers: [
     ...questionUseCases,
     ...pairGameUseCases,
+    ...quizUseCases,
     QuizGameService,
     QuestionRepository,
     QuestionQwRepository,
