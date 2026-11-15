@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
@@ -25,6 +27,7 @@ export class PairQuizGameController {
     private gameService: QuizGameService,
   ) {}
 
+  @HttpCode(HttpStatus.OK)
   @Get('/my-current')
   @UseGuards(JwtAuthGuard)
   // ✅ RETURN CURRENT UNFINISHED GAME
@@ -34,8 +37,10 @@ export class PairQuizGameController {
     return game;
   }
 
+  @HttpCode(HttpStatus.OK)
   @Get('/:id')
   @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
   // ✅ RETURNS GAME BY ID
   async getGameById(
     @Req() req: Request,
@@ -46,6 +51,7 @@ export class PairQuizGameController {
     return game;
   }
 
+  @HttpCode(HttpStatus.OK)
   @Post('/connection')
   @UseGuards(JwtAuthGuard)
   // ✅ CONNECT USER TO PAIR QUIZ GAME
@@ -57,6 +63,7 @@ export class PairQuizGameController {
     >(new ConnectToPairGameCommand(userInfo));
   }
 
+  @HttpCode(HttpStatus.OK)
   @Post('/my-current/answers')
   @UseGuards(JwtAuthGuard)
   // ✅ SEND ANSWER FOR NEXT QUESTION

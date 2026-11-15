@@ -62,7 +62,14 @@ export class QuizGame {
   }
 
   changeStatus(status: QuizGameStatusesEnum): void {
-    this.status = status;
-    this.startGameDate = new Date();
+    if (status === QuizGameStatusesEnum.Finished) {
+      this.status = status;
+      this.finishGameDate = new Date();
+    } else if (status === QuizGameStatusesEnum.Active) {
+      this.status = status;
+      this.startGameDate = new Date();
+    } else if (status === QuizGameStatusesEnum.PendingSecondPlayer) {
+      this.status = status;
+    }
   }
 }

@@ -26,7 +26,7 @@ export class PublishQuestionUseCase implements ICommandHandler<PublishQuestionCo
         extensions: [new Extension('Question Not Found', 'id')],
       });
     }
-    question.changePublish(command.dto.publish);
+    question.changePublish(command.dto.published);
     const savedQuestion = await this.questionRepo.save(question);
     if (!savedQuestion) {
       throw new Error('Question Was Not Saved');

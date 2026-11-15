@@ -4,7 +4,6 @@ import {
   Entity,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 import { CreateQuestionDto } from '../dto/question/create-question.dto';
 import { GamePlayerAnswers } from './game-answers.entity';
@@ -40,8 +39,13 @@ export class Question {
   @CreateDateColumn({ name: 'createdAt' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updatedAt' })
-  updatedAt: Date;
+  @Column({
+    name: 'updatedAt',
+    type: 'timestamptz',
+    nullable: true,
+    default: null,
+  })
+  updatedAt: Date | null;
 
   @OneToMany(() => GamePlayerAnswers, (answer) => answer.question)
   gamePlayerAnswers: GamePlayerAnswers[];
@@ -50,15 +54,18 @@ export class Question {
     const question = new Question();
     question.body = dto.body;
     question.correctAnswers = dto.correctAnswers;
+    question.updatedAt = null;
     return question;
   }
 
   changePublish(dto: boolean): void {
     this.published = dto;
+    this.updatedAt = new Date();
   }
 
   updateQuestion(dto: CreateQuestionDto): void {
     this.body = dto.body;
     this.correctAnswers = dto.correctAnswers;
+    this.updatedAt = new Date();
   }
 }

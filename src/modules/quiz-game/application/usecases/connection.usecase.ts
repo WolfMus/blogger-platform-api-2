@@ -12,7 +12,6 @@ import { GameResponseDto } from '../../dto/game/game-response.dto';
 import { QuizGameStatusesEnum } from '../../types/quiz-game-status.enum';
 import { GamePlayerRoleEnum } from '../../types/player-role.enum';
 import { GameRepository } from '../../infrastructure/game/game.repository';
-import { QuestionRepository } from '../../infrastructure/question/question.repository';
 import { GameQwRepository } from '../../infrastructure/game/game-query.repository';
 import { QuestionQwRepository } from '../../infrastructure/question/question-query.repository';
 
@@ -23,7 +22,6 @@ export class ConnectToPairGameCommand {
 @CommandHandler(ConnectToPairGameCommand)
 export class ConnectToPairGameUseCase implements ICommandHandler<ConnectToPairGameCommand> {
   constructor(
-    private questionRepo: QuestionRepository,
     private questionQueryRepo: QuestionQwRepository,
     private playerRepo: GamePlayerRepository,
     private gameRepo: GameRepository,

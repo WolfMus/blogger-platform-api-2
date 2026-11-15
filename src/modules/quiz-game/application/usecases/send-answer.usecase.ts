@@ -1,6 +1,4 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { AnswerResponseDto } from '../../dto/answer-response.dto';
-import { AnswerRequestDto } from '../../dto/answer-request.dto';
 import { HttpStatus } from '@nestjs/common';
 import {
   DomainException,
@@ -8,13 +6,13 @@ import {
 } from '../../../../core/exceptions/domain-exception';
 import { GamePlayerAnswers } from '../../domain/game-answers.entity';
 import { AnswerStatusesEnum } from '../../types/answer-status.enum';
-import { GamePlayerRoleEnum } from '../../types/player-role.enum';
 import { QuizGameStatusesEnum } from '../../types/quiz-game-status.enum';
 import { GamePlayerAnswersRepository } from '../../infrastructure/player-answers/game-player.repository';
 import { QuestionQwRepository } from '../../infrastructure/question/question-query.repository';
 import { GamePlayerRepository } from '../../infrastructure/player/game-player.repository';
-import { GameQwRepository } from '../../infrastructure/game/game-query.repository';
 import { GameRepository } from '../../infrastructure/game/game.repository';
+import { AnswerResponseDto } from '../../dto/answer/answer-response.dto';
+import { AnswerRequestDto } from '../../dto/answer/answer-request.dto';
 
 export class SendAnswerCommand {
   constructor(
@@ -29,7 +27,6 @@ export class SendAnswerUseCase implements ICommandHandler<
   AnswerResponseDto
 > {
   constructor(
-    private gameQueryRepo: GameQwRepository,
     private gameRepo: GameRepository,
     private playerRepo: GamePlayerRepository,
     private questionQueryRepo: QuestionQwRepository,
@@ -43,9 +40,11 @@ export class SendAnswerUseCase implements ICommandHandler<
       await this.gameRepo.findCurrentGameWithPlayersAndAnswers(userId);
     if (!game) {
       throw new DomainException({
-        code: HttpStatus.NOT_FOUND,
+        code: HttpStatus.FORBIDDEN,
         message: 'Not Found',
-        extensions: [new Extension('Game Not Found', 'id')],
+        extensions: [
+          new Extension('User Is Not Participating In Active Pair', 'userId'),
+        ],
       });
     }
 
@@ -80,16 +79,26 @@ export class SendAnswerUseCase implements ICommandHandler<
     const currentAnswersCount = currentPlayer.gamePlayerAnswers?.length || 0;
     const enemyAnswersCount = enemyPlayer.gamePlayerAnswers?.length || 0;
     const totalQuestions = game.questionIds?.length || 0;
+    if (currentAnswersCount === totalQuestions) {
+      throw new DomainException({
+        code: HttpStatus.FORBIDDEN,
+        message: 'Forbidden',
+        extensions: [
+          new Extension('Already answered to all questions', 'questionIds'),
+        ],
+      });
+    }
 
-    const isLastAnswered =
+    const isGameFinishing =
       currentAnswersCount === totalQuestions - 1 &&
       enemyAnswersCount === totalQuestions;
 
+    const finishedBeforeEnemy =
+      currentAnswersCount === totalQuestions - 1 &&
+      enemyAnswersCount !== totalQuestions;
+
     // Поиск вопроса
-    if (!game.questionIds) {
-      throw new Error('ZALUPA');
-    }
-    const questionId = game.questionIds[currentAnswersCount];
+    const questionId = game.questionIds![currentAnswersCount];
     const question = await this.questionQueryRepo.findById(questionId);
     if (!question) {
       throw new DomainException({
@@ -100,22 +109,52 @@ export class SendAnswerUseCase implements ICommandHandler<
     }
 
     // Проверяем есть ли среди правильных ответов ответ игрока
-    const status = question.correctAnswers.includes(answer)
+    const answerStatus = question.correctAnswers.includes(answer)
       ? AnswerStatusesEnum.Correct
       : AnswerStatusesEnum.Incorrect;
+
+    if (isGameFinishing) {
+      const playerAnswer = GamePlayerAnswers.createInstance(
+        currentPlayer.id,
+        question.id,
+        answerStatus,
+      );
+
+      const playerAnswerSaved = await this.playerAnswersRepo.save(playerAnswer);
+
+      game.changeStatus(QuizGameStatusesEnum.Finished);
+      await this.gameRepo.save(game);
+
+      currentPlayer.addScore();
+      await this.playerRepo.save(currentPlayer);
+
+      const answerResponse: AnswerResponseDto = {
+        questionId: questionId,
+        answerStatus: answerStatus,
+        addedAt: playerAnswerSaved.addedAt,
+      };
+      return answerResponse;
+    }
 
     const playerAnswer = GamePlayerAnswers.createInstance(
       currentPlayer.id,
       question.id,
-      status,
+      answerStatus,
     );
 
-    // Начать транзакцию
+    if (answerStatus === AnswerStatusesEnum.Correct) {
+      currentPlayer.addScore();
+      if (finishedBeforeEnemy && currentPlayer.score !== 0) {
+        currentPlayer.addScore();
+      }
+      await this.playerRepo.save(currentPlayer);
+    }
+
     const playerAnswerSaved = await this.playerAnswersRepo.save(playerAnswer);
 
     const answerResponse: AnswerResponseDto = {
       questionId: questionId,
-      answerStatus: status,
+      answerStatus: answerStatus,
       addedAt: playerAnswerSaved.addedAt,
     };
     return answerResponse;

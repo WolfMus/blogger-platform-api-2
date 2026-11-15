@@ -2,7 +2,7 @@ export class QuestionViewModel {
   id: string;
   body: string;
   correctAnswers: string[];
-  publish: boolean;
+  published: boolean;
   createdAt: Date;
-  updatedAt: Date;
+  updatedAt: Date | null;
 }

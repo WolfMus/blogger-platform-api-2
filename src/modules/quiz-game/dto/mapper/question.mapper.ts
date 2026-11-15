@@ -9,7 +9,7 @@ export class QuestionMapper {
       id: question.id.toString(),
       body: question.body,
       correctAnswers: question.correctAnswers,
-      publish: question.published,
+      published: question.published,
       createdAt: question.createdAt,
       updatedAt: question.updatedAt,
     };

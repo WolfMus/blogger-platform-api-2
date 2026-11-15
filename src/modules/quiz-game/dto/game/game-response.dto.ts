@@ -6,7 +6,7 @@ export class GameResponseDto {
   id: string;
   firstPlayerProgress: PlayerProgressResponseType;
   secondPlayerProgress: PlayerProgressResponseType | null;
-  questions: QuestionResponseType[];
+  questions: QuestionResponseType[] | null;
   status: QuizGameStatusesEnum;
   pairCreatedDate: Date;
   startGameDate: Date | null;

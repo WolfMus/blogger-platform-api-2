@@ -45,21 +45,6 @@ export class GameQwRepository {
       .getOne();
 
     if (!game) return null;
-    // const gameRecord = await this.gameRepo.findOne({
-    //   where: {
-    //     gamePlayer: { userId: userId },
-    //     status: Not(QuizGameStatusesEnum.Finished),
-    //   },
-    //   select: { id: true },
-    // });
-    // if (!gameRecord) return null;
-    // const gameId = gameRecord.id;
-
-    // const game = await this.gameRepo.findOne({
-    //   where: { id: gameId },
-    //   relations: { gamePlayer: { user: true, gamePlayerAnswers: true } },
-    // });
-    // if (!game) return null;
 
     return QuizGameMapper.toReadModel(game);
   }
