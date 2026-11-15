@@ -5,7 +5,7 @@ import { Connection } from 'mongoose';
 import { App } from 'supertest/types';
 import { AppModule } from '../../../src/app.module';
 import request from 'supertest';
-import { QuestionViewModel } from '../../../src/modules/quiz-game/dto/question-view-model';
+import { QuestionViewModel } from '../../../src/modules/quiz-game/dto/question/question-view-model';
 
 describe('Quiz', () => {
   let app: INestApplication<App>;

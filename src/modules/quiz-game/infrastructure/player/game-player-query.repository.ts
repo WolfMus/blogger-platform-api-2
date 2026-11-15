@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { GamePlayerViewModel } from '../../dto/game-player/player-view.dto';
+import { GamePlayerReadModel } from '../../dto/game-player/player.read-model';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { GamePlayer } from '../../domain/game-players.entity';
@@ -12,27 +12,27 @@ export class GamePlayerQwRepository {
     private playerRepo: Repository<GamePlayer>,
   ) {}
 
-  async findById(id: string): Promise<GamePlayerViewModel | null> {
+  async findById(id: string): Promise<GamePlayerReadModel | null> {
     const player = await this.playerRepo.findOne({ where: { id } });
     if (!player) return null;
-    return GamePlayerMapper.toViewModel(player);
+    return GamePlayerMapper.toReadModel(player);
   }
 
-  async findByUserId(userId: string): Promise<GamePlayerViewModel | null> {
+  async findByUserId(userId: string): Promise<GamePlayerReadModel | null> {
     const player = await this.playerRepo.findOne({ where: { userId } });
     if (!player) return null;
-    return GamePlayerMapper.toViewModel(player);
+    return GamePlayerMapper.toReadModel(player);
   }
 
   async findByUserIdAndGameId(
     userId: string,
     gameId: string,
-  ): Promise<GamePlayerViewModel | null> {
+  ): Promise<GamePlayerReadModel | null> {
     const player = await this.playerRepo.findOne({
       where: { userId, quizGameId: gameId },
       relations: { gamePlayerAnswers: true },
     });
     if (!player) return null;
-    return GamePlayerMapper.toViewModel(player);
+    return GamePlayerMapper.toReadModel(player);
   }
 }

@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { QuizGame } from '../../domain/quiz-game.entity';
 import { QuizGameStatusesEnum } from '../../types/quiz-game-status.enum';
 import { QuizGameMapper } from '../../dto/mapper/quiz-game.mapper';
-import { QuizGameReadModel } from '../../dto/game.read-model';
+import { QuizGameReadModel } from '../../dto/game/game.read-model';
 
 @Injectable()
 export class GameQwRepository {

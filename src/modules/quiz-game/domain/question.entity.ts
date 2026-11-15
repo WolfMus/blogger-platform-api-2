@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { CreateQuestionDto } from '../dto/create-question.dto';
+import { CreateQuestionDto } from '../dto/question/create-question.dto';
 import { GamePlayerAnswers } from './game-answers.entity';
 
 @Entity({ name: 'questions' })

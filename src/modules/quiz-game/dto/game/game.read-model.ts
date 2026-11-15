@@ -1,9 +1,9 @@
-import { QuizGameStatusesEnum } from '../types/quiz-game-status.enum';
-import { GamePlayerViewModel } from './game-player/player-view.dto';
+import { QuizGameStatusesEnum } from '../../types/quiz-game-status.enum';
+import { GamePlayerReadModel } from '../game-player/player.read-model';
 
 export class QuizGameReadModel {
   id: string;
-  gamePlayer: GamePlayerViewModel[];
+  gamePlayer: GamePlayerReadModel[];
   questionIds: string[] | null;
   status: QuizGameStatusesEnum;
   pairCreatedDate: Date;

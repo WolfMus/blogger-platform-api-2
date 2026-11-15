@@ -8,7 +8,7 @@ import {
 import { HttpStatus } from '@nestjs/common';
 import { QuizGame } from '../../domain/quiz-game.entity';
 import { QuizGameMapper } from '../../dto/mapper/quiz-game.mapper';
-import { GameResponseDto } from '../../dto/game-response.dto';
+import { GameResponseDto } from '../../dto/game/game-response.dto';
 import { QuizGameStatusesEnum } from '../../types/quiz-game-status.enum';
 import { GamePlayerRoleEnum } from '../../types/player-role.enum';
 import { GameRepository } from '../../infrastructure/game/game.repository';
@@ -61,11 +61,7 @@ export class ConnectToPairGameUseCase implements ICommandHandler<ConnectToPairGa
       const savedPlayer = await this.playerRepo.save(player);
       const playerChange = await this.playerRepo.findById(savedPlayer.id);
 
-      return QuizGameMapper.toMapViewForFirstPlayer(
-        savedGame,
-        playerChange!,
-        questions,
-      );
+      return QuizGameMapper.toMapViewForFirstPlayer(savedGame, playerChange!);
     }
 
     // Подключение к существуйющей игре

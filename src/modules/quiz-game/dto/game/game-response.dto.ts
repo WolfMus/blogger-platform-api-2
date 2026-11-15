@@ -1,6 +1,6 @@
-import { PlayerProgressResponseType } from '../types/player-progress-response.type';
-import { QuestionResponseType } from '../types/question-response.type';
-import { QuizGameStatusesEnum } from '../types/quiz-game-status.enum';
+import { PlayerProgressResponseType } from '../../types/player-progress-response.type';
+import { QuestionResponseType } from '../../types/question-response.type';
+import { QuizGameStatusesEnum } from '../../types/quiz-game-status.enum';
 
 export class GameResponseDto {
   id: string;

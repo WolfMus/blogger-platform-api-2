@@ -12,14 +12,14 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { CreateQuestionDto } from '../dto/create-question.dto';
+import { CreateQuestionDto } from '../dto/question/create-question.dto';
 import { BasicAuthGuard } from '../../user-accounts/guards/basic/basic-auth.guard';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateQuestionCommand } from '../application/usecases/create-question.usecase';
-import { QuestionViewModel } from '../dto/question-view-model';
+import { QuestionViewModel } from '../dto/question/question-view-model';
 import { UpdateQuestionCommand } from '../application/usecases/update-question.usecase';
 import { DeleteQuestionCommand } from '../application/usecases/delete-question.usecase';
-import { PublishQuestionDto } from '../dto/question-publish.dto';
+import { PublishQuestionDto } from '../dto/question/question-publish.dto';
 import { PublishQuestionCommand } from '../application/usecases/publish-question.usecase';
 import { QuestionPaginationInput } from '../types/question-pagination-input.type';
 import { FindAllQuestionsCommand } from '../application/usecases/find-all-question.usecase';
