@@ -108,6 +108,17 @@ export class SendAnswerUseCase implements ICommandHandler<
       });
     }
 
+    console.log('=== ОТЛАДКА ОТВЕТА ===');
+    console.log('ID игрока:', currentPlayer.id);
+    console.log('Количество ответов у игрока:', currentAnswersCount);
+    console.log('Все questionIds в игре:', game.questionIds);
+    console.log('Выбранный questionId:', questionId);
+    console.log(
+      'Все ответы игрока (из БД):',
+      currentPlayer.gamePlayerAnswers?.map((a) => a.questionId),
+    );
+    console.log('======================');
+
     // Проверяем есть ли среди правильных ответов ответ игрока
     const answerStatus = question.correctAnswers.includes(answer)
       ? AnswerStatusesEnum.Correct

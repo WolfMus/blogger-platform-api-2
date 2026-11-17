@@ -14,6 +14,7 @@ import { GamePlayerRoleEnum } from '../../types/player-role.enum';
 import { GameRepository } from '../../infrastructure/game/game.repository';
 import { GameQwRepository } from '../../infrastructure/game/game-query.repository';
 import { QuestionQwRepository } from '../../infrastructure/question/question-query.repository';
+import { QuestionResponseType } from '../../types/question-response.type';
 
 export class ConnectToPairGameCommand {
   constructor(public userInfo: { userId: string; login: string }) {}
@@ -59,6 +60,12 @@ export class ConnectToPairGameUseCase implements ICommandHandler<ConnectToPairGa
       const savedPlayer = await this.playerRepo.save(player);
       const playerChange = await this.playerRepo.findById(savedPlayer.id);
 
+      console.log('====== Question Ids For First Player ======');
+      console.log(questionsIds);
+      console.log('game id: ', savedGame.id);
+      console.log('player id: ', player.id);
+      console.log('');
+
       return QuizGameMapper.toMapViewForFirstPlayer(savedGame, playerChange!);
     }
 
@@ -69,13 +76,17 @@ export class ConnectToPairGameUseCase implements ICommandHandler<ConnectToPairGa
       throw new DomainException({
         code: HttpStatus.NOT_FOUND,
         message: 'Not Found',
-        extensions: [new Extension('Player Not Found', 'id')],
+        extensions: [new Extension('No Questions In The Game', 'questionIds')],
       });
     }
 
     const questions = await this.questionQueryRepo.findQuestionsByIds(
       savedGame.questionIds,
     );
+    const sortedQuestions = savedGame.questionIds
+      .map((q) => questions.find((question) => question.id === q))
+      .filter((q): q is QuestionResponseType => !!q);
+
     const player = GamePlayer.createInstance(userId);
     player.changeRole(GamePlayerRoleEnum.Second);
     player.addQuizGame(savedGame);
@@ -88,6 +99,12 @@ export class ConnectToPairGameUseCase implements ICommandHandler<ConnectToPairGa
         extensions: [new Extension('Player Not Found', 'id')],
       });
     }
+
+    console.log('====== Question Ids For Second Player ======');
+    console.log(sortedQuestions.map((q) => q.id));
+    console.log('game id: ', savedGame.id);
+    console.log('player id: ', thisPlayer.id);
+    console.log('');
 
     const firstPlayer = await this.playerRepo.findByGameIdAndRole(
       savedGame.id,
@@ -105,7 +122,7 @@ export class ConnectToPairGameUseCase implements ICommandHandler<ConnectToPairGa
       savedGame,
       firstPlayer,
       thisPlayer,
-      questions,
+      sortedQuestions,
     );
   }
 }
