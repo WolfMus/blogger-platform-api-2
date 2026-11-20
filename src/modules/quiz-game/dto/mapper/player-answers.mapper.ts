@@ -26,6 +26,9 @@ export class AnswersMapper {
   }
 
   static mapToViewModel(answers: AnswersReadModel[]) {
-    return answers.map((a) => this.toViewModel(a));
+    const sortedAnswers = answers.sort((a, b) => {
+      return a.addedAt.getTime() - b.addedAt.getTime();
+    });
+    return sortedAnswers.map((a) => this.toViewModel(a));
   }
 }

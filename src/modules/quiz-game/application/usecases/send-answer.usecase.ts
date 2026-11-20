@@ -139,6 +139,14 @@ export class SendAnswerUseCase implements ICommandHandler<
       currentPlayer.addScore();
       await this.playerRepo.save(currentPlayer);
 
+      console.log('Последний ход');
+      console.log('Счет игроков');
+      console.log('1 игрок ', game.gamePlayer[0].score);
+      console.log('2 игрок ', game.gamePlayer[1].score);
+      console.log('======================');
+      console.log('');
+      console.log('');
+
       const answerResponse: AnswerResponseDto = {
         questionId: questionId,
         answerStatus: answerStatus,
@@ -155,13 +163,19 @@ export class SendAnswerUseCase implements ICommandHandler<
 
     if (answerStatus === AnswerStatusesEnum.Correct) {
       currentPlayer.addScore();
-      if (finishedBeforeEnemy && currentPlayer.score !== 0) {
-        currentPlayer.addScore();
-      }
-      await this.playerRepo.save(currentPlayer);
     }
+    if (finishedBeforeEnemy && currentPlayer.score !== 0) {
+      currentPlayer.addScore();
+    }
+    await this.playerRepo.save(currentPlayer);
 
     const playerAnswerSaved = await this.playerAnswersRepo.save(playerAnswer);
+
+    console.log('Score игрока: ', currentPlayer.score);
+    console.log('Score врага: ', enemyPlayer.score);
+    console.log('======================');
+    console.log('');
+    console.log('');
 
     const answerResponse: AnswerResponseDto = {
       questionId: questionId,
