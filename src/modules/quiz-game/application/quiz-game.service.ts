@@ -9,6 +9,7 @@ import { QuizGameStatusesEnum } from '../types/quiz-game-status.enum';
 import { QuestionQwRepository } from '../infrastructure/question/question-query.repository';
 import { QuizGameMapper } from '../dto/mapper/quiz-game.mapper';
 import { GamePlayerRoleEnum } from '../types/player-role.enum';
+import { QuestionResponseType } from '../types/question-response.type';
 
 @Injectable()
 export class QuizGameService {
@@ -51,7 +52,13 @@ export class QuizGameService {
       const questions = await this.questionQueryRepo.findQuestionsByIds(
         game.questionIds!,
       );
-      return QuizGameMapper.toViewModel(game, questions);
+      const sortedQuestions = game
+        .questionIds!.map((q) =>
+          questions.find((question) => question.id === q),
+        )
+        .filter((q): q is QuestionResponseType => !!q);
+
+      return QuizGameMapper.toViewModel(game, sortedQuestions);
     }
     return QuizGameMapper.toViewModel(game);
   }
@@ -70,7 +77,13 @@ export class QuizGameService {
       const questions = await this.questionQueryRepo.findQuestionsByIds(
         game.questionIds!,
       );
-      return QuizGameMapper.toViewModel(game, questions);
+      const sortedQuestions = game
+        .questionIds!.map((q) =>
+          questions.find((question) => question.id === q),
+        )
+        .filter((q): q is QuestionResponseType => !!q);
+
+      return QuizGameMapper.toViewModel(game, sortedQuestions);
     }
     return QuizGameMapper.toViewModel(game);
   }
