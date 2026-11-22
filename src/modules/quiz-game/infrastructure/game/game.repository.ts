@@ -20,6 +20,15 @@ export class GameRepository {
     return game;
   }
 
+  async findByIdWithPlayersAndAnswers(id: string): Promise<QuizGame | null> {
+    const game = await this.gameRepo.findOne({
+      where: { id },
+      relations: { gamePlayer: { gamePlayerAnswers: true } },
+    });
+    if (!game) return null;
+    return game;
+  }
+
   async findCurrentGameWithPlayersAndAnswers(
     userId: string,
   ): Promise<QuizGame | null> {

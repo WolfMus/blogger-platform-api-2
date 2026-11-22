@@ -10,12 +10,16 @@ import { QuestionQwRepository } from '../infrastructure/question/question-query.
 import { QuizGameMapper } from '../dto/mapper/quiz-game.mapper';
 import { GamePlayerRoleEnum } from '../types/player-role.enum';
 import { QuestionResponseType } from '../types/question-response.type';
+import { GameRepository } from '../infrastructure/game/game.repository';
+import { GamePlayerRepository } from '../infrastructure/player/game-player.repository';
 
 @Injectable()
 export class QuizGameService {
   constructor(
+    private gameRepo: GameRepository,
     private gameQueryRepo: GameQwRepository,
     private questionQueryRepo: QuestionQwRepository,
+    private playerRepo: GamePlayerRepository,
   ) {}
 
   async findById(id: string, userId: string): Promise<GameResponseDto> {
@@ -86,5 +90,70 @@ export class QuizGameService {
       return QuizGameMapper.toViewModel(game, sortedQuestions);
     }
     return QuizGameMapper.toViewModel(game);
+  }
+
+  async awardBonusForFirstCompletion(gameId: string): Promise<void> {
+    // Находим игру
+    const game = await this.gameRepo.findByIdWithPlayersAndAnswers(gameId);
+    if (!game) {
+      throw new DomainException({
+        code: HttpStatus.FORBIDDEN,
+        message: 'Not Found',
+        extensions: [
+          new Extension('User Is Not Participating In Active Pair', 'userId'),
+        ],
+      });
+    }
+    // Первый игрок
+    const firstPlayer = game.gamePlayer.find(
+      (player) => player.role === GamePlayerRoleEnum.First,
+    );
+    if (!firstPlayer) {
+      throw new DomainException({
+        code: HttpStatus.NOT_FOUND,
+        message: 'Not Found',
+        extensions: [new Extension('Player 1 Not Found', 'userId')],
+      });
+    }
+    // Второй игрок
+    const secondPlayer = game.gamePlayer.find(
+      (player) => player.role === GamePlayerRoleEnum.Second,
+    );
+    if (!secondPlayer) {
+      throw new DomainException({
+        code: HttpStatus.NOT_FOUND,
+        message: 'Not Found',
+        extensions: [new Extension('Player 2 Not Found', 'userId')],
+      });
+    }
+
+    const firstPlayerLastAnswer = firstPlayer.gamePlayerAnswers
+      .reduce((latest, current) =>
+        current.addedAt > latest.addedAt ? current : latest,
+      )
+      .addedAt.getTime();
+    if (!firstPlayerLastAnswer) {
+      throw new Error('No answers found');
+    }
+    const secondPlayerLastAnswer = [...secondPlayer.gamePlayerAnswers]
+      .reduce((latest, current) =>
+        current.addedAt > latest.addedAt ? current : latest,
+      )
+      .addedAt.getTime();
+    if (!secondPlayerLastAnswer) {
+      throw new Error('No answers found');
+    }
+
+    if (firstPlayerLastAnswer === secondPlayerLastAnswer) return;
+
+    const winner =
+      firstPlayerLastAnswer < secondPlayerLastAnswer
+        ? firstPlayer
+        : secondPlayer;
+
+    if (winner.score > 0) {
+      winner.addScore();
+      await this.playerRepo.save(winner);
+    }
   }
 }

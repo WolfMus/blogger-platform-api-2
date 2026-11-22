@@ -13,6 +13,7 @@ import { GamePlayerRepository } from '../../infrastructure/player/game-player.re
 import { GameRepository } from '../../infrastructure/game/game.repository';
 import { AnswerResponseDto } from '../../dto/answer/answer-response.dto';
 import { AnswerRequestDto } from '../../dto/answer/answer-request.dto';
+import { QuizGameService } from '../quiz-game.service';
 
 export class SendAnswerCommand {
   constructor(
@@ -28,6 +29,7 @@ export class SendAnswerUseCase implements ICommandHandler<
 > {
   constructor(
     private gameRepo: GameRepository,
+    private gameService: QuizGameService,
     private playerRepo: GamePlayerRepository,
     private questionQueryRepo: QuestionQwRepository,
     private playerAnswersRepo: GamePlayerAnswersRepository,
@@ -89,14 +91,6 @@ export class SendAnswerUseCase implements ICommandHandler<
       });
     }
 
-    const isGameFinishing =
-      currentAnswersCount === totalQuestions - 1 &&
-      enemyAnswersCount === totalQuestions;
-
-    const finishedBeforeEnemy =
-      currentAnswersCount === totalQuestions - 1 &&
-      enemyAnswersCount !== totalQuestions;
-
     // Поиск вопроса
     const questionId = game.questionIds![currentAnswersCount];
     const question = await this.questionQueryRepo.findById(questionId);
@@ -108,74 +102,34 @@ export class SendAnswerUseCase implements ICommandHandler<
       });
     }
 
-    console.log('=== ОТЛАДКА ОТВЕТА ===');
-    console.log('ID игрока:', currentPlayer.id);
-    console.log('Количество ответов у игрока:', currentAnswersCount);
-    console.log('Все questionIds в игре:', game.questionIds);
-    console.log('Выбранный questionId:', questionId);
-    console.log(
-      'Все ответы игрока (из БД):',
-      currentPlayer.gamePlayerAnswers?.map((a) => a.questionId),
-    );
-    console.log('======================');
-
     // Проверяем есть ли среди правильных ответов ответ игрока
     const answerStatus = question.correctAnswers.includes(answer)
       ? AnswerStatusesEnum.Correct
       : AnswerStatusesEnum.Incorrect;
 
-    if (isGameFinishing) {
-      const playerAnswer = GamePlayerAnswers.createInstance(
-        currentPlayer.id,
-        question.id,
-        answerStatus,
-      );
-
-      const playerAnswerSaved = await this.playerAnswersRepo.save(playerAnswer);
-
-      game.changeStatus(QuizGameStatusesEnum.Finished);
-      await this.gameRepo.save(game);
-
+    // Добавляем очко за правильный ответ
+    if (answerStatus === AnswerStatusesEnum.Correct) {
       currentPlayer.addScore();
-      await this.playerRepo.save(currentPlayer);
-
-      console.log('Последний ход');
-      console.log('Счет игроков');
-      console.log('1 игрок ', game.gamePlayer[0].score);
-      console.log('2 игрок ', game.gamePlayer[1].score);
-      console.log('======================');
-      console.log('');
-      console.log('');
-
-      const answerResponse: AnswerResponseDto = {
-        questionId: questionId,
-        answerStatus: answerStatus,
-        addedAt: playerAnswerSaved.addedAt,
-      };
-      return answerResponse;
     }
+    await this.playerRepo.save(currentPlayer);
 
+    // Сохранение ответа
     const playerAnswer = GamePlayerAnswers.createInstance(
       currentPlayer.id,
       question.id,
       answerStatus,
     );
-
-    if (answerStatus === AnswerStatusesEnum.Correct) {
-      currentPlayer.addScore();
-    }
-    if (finishedBeforeEnemy && currentPlayer.score !== 0) {
-      currentPlayer.addScore();
-    }
-    await this.playerRepo.save(currentPlayer);
-
     const playerAnswerSaved = await this.playerAnswersRepo.save(playerAnswer);
 
-    console.log('Score игрока: ', currentPlayer.score);
-    console.log('Score врага: ', enemyPlayer.score);
-    console.log('======================');
-    console.log('');
-    console.log('');
+    // Закончилась ли игра
+    const isGameFinishing =
+      currentAnswersCount === totalQuestions - 1 &&
+      enemyAnswersCount === totalQuestions;
+    if (isGameFinishing) {
+      game.changeStatus(QuizGameStatusesEnum.Finished);
+      await this.gameRepo.save(game);
+      await this.gameService.awardBonusForFirstCompletion(game.id);
+    }
 
     const answerResponse: AnswerResponseDto = {
       questionId: questionId,
