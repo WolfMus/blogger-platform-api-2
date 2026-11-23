@@ -7,6 +7,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -19,6 +20,8 @@ import { QuizGameService } from '../application/quiz-game.service';
 import { SendAnswerCommand } from '../application/usecases/send-answer.usecase';
 import { AnswerResponseDto } from '../dto/answer/answer-response.dto';
 import { AnswerRequestDto } from '../dto/answer/answer-request.dto';
+import { QuizGamePaginationInput } from '../types/quiz-pagination.input';
+import { QuizGamePaginatedResponseDto } from '../dto/game/game-paginated-view.dto';
 
 @Controller('pair-game-quiz/pairs')
 export class PairQuizGameController {
@@ -26,6 +29,21 @@ export class PairQuizGameController {
     private commandBus: CommandBus,
     private gameService: QuizGameService,
   ) {}
+
+  @Get('/my')
+  @UseGuards(JwtAuthGuard)
+  // RETURNS ALL MY GAMES
+  async findMyGames(
+    @Req() req: Request,
+    @Query() paginationInput: QuizGamePaginationInput,
+  ): Promise<QuizGamePaginatedResponseDto> {
+    const userInfo = req.user as { userId: string; login: string };
+    const games = await this.gameService.findMyGames(
+      userInfo.userId,
+      paginationInput,
+    );
+    return games;
+  }
 
   @HttpCode(HttpStatus.OK)
   @Get('/my-current')
@@ -40,7 +58,6 @@ export class PairQuizGameController {
   @HttpCode(HttpStatus.OK)
   @Get('/:id')
   @UseGuards(JwtAuthGuard)
-  @HttpCode(HttpStatus.OK)
   // ✅ RETURNS GAME BY ID
   async getGameById(
     @Req() req: Request,

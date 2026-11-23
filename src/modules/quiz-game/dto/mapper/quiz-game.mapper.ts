@@ -3,11 +3,32 @@ import { QuizGame } from '../../domain/quiz-game.entity';
 import { GamePlayerRoleEnum } from '../../types/player-role.enum';
 import { QuestionResponseType } from '../../types/question-response.type';
 import { QuizGameStatusesEnum } from '../../types/quiz-game-status.enum';
+import { QuizGamePaginationInput } from '../../types/quiz-pagination.input';
+import { QuizGamePaginatedResponseDto } from '../game/game-paginated-view.dto';
 import { GameResponseDto } from '../game/game-response.dto';
 import { QuizGameReadModel } from '../game/game.read-model';
 import { GamePlayerMapper } from './game-player.mapper';
 
 export class QuizGameMapper {
+  static toResponsePaginatedView(
+    games: GameResponseDto[],
+    totalCount: number,
+    pagination: QuizGamePaginationInput,
+  ): QuizGamePaginatedResponseDto {
+    const pageNumber = pagination.pageNumber ?? 1;
+    const pageSize = pagination.pageSize ?? 10;
+    return {
+      pagesCount: Math.ceil(totalCount / pageSize),
+      page: +pageNumber,
+      pageSize: +pageSize,
+      totalCount: totalCount,
+      items: games,
+    };
+  }
+
+  static mapToReadModel(games: QuizGame[]): QuizGameReadModel[] {
+    return games.map((game) => this.toReadModel(game));
+  }
   // Сырой вид из БД
   static toReadModel(game: QuizGame): QuizGameReadModel {
     return {

@@ -12,6 +12,8 @@ import { GamePlayerRoleEnum } from '../types/player-role.enum';
 import { QuestionResponseType } from '../types/question-response.type';
 import { GameRepository } from '../infrastructure/game/game.repository';
 import { GamePlayerRepository } from '../infrastructure/player/game-player.repository';
+import { QuizGamePaginationInput } from '../types/quiz-pagination.input';
+import { QuizGamePaginatedResponseDto } from '../dto/game/game-paginated-view.dto';
 
 @Injectable()
 export class QuizGameService {
@@ -21,6 +23,43 @@ export class QuizGameService {
     private questionQueryRepo: QuestionQwRepository,
     private playerRepo: GamePlayerRepository,
   ) {}
+
+  async findMyGames(
+    userId: string,
+    paginationInput: QuizGamePaginationInput,
+  ): Promise<QuizGamePaginatedResponseDto> {
+    // Поиск игр
+    const { games, totalCount } = await this.gameQueryRepo.findAllByUserId(
+      userId,
+      paginationInput,
+    );
+    // Собираем все id вопросов
+    const allQuestionIds = [
+      ...new Set(games.flatMap((g) => g.questionIds || [])),
+    ];
+    // Поиск вопросов
+    const questions =
+      await this.questionQueryRepo.findQuestionsByIds(allQuestionIds);
+    // Map для быстрого происка
+    const questionMap = new Map(questions.map((q) => [q.id, q]));
+    // Сборщик игр
+    const gamesDto = games.map((game) => {
+      if (game.status === QuizGameStatusesEnum.PendingSecondPlayer) {
+        return QuizGameMapper.toViewModel(game);
+      }
+
+      const sortedQuestions = game.questionIds
+        ?.map((id) => questionMap.get(id))
+        .filter((q): q is QuestionResponseType => !!q);
+
+      return QuizGameMapper.toViewModel(game, sortedQuestions);
+    });
+    return QuizGameMapper.toResponsePaginatedView(
+      gamesDto,
+      totalCount,
+      paginationInput,
+    );
+  }
 
   async findById(id: string, userId: string): Promise<GameResponseDto> {
     // Получаем game
