@@ -22,15 +22,17 @@ import { AnswerResponseDto } from '../dto/answer/answer-response.dto';
 import { AnswerRequestDto } from '../dto/answer/answer-request.dto';
 import { QuizGamePaginationInput } from '../types/quiz-pagination.input';
 import { QuizGamePaginatedResponseDto } from '../dto/game/game-paginated-view.dto';
+import { PlayerStatisticService } from '../player-statistic/application/player-statistic.service';
 
-@Controller('pair-game-quiz/pairs')
+@Controller('pair-game-quiz')
 export class PairQuizGameController {
   constructor(
     private commandBus: CommandBus,
     private gameService: QuizGameService,
+    private playerStatisticService: PlayerStatisticService,
   ) {}
 
-  @Get('/my')
+  @Get('/pairs/my')
   @UseGuards(JwtAuthGuard)
   // RETURNS ALL MY GAMES
   async findMyGames(
@@ -45,8 +47,17 @@ export class PairQuizGameController {
     return games;
   }
 
+  @Get('/users/my-statistic')
+  @UseGuards(JwtAuthGuard)
+  // GET CURRENT USER STATISTIC
+  async findMyStatistic(@Req() req: Request): Promise<void> {
+    const userInfo = req.user as { userId: string; login: string };
+    await this.playerStatisticService.findMyStatistic(userInfo.userId);
+    return;
+  }
+
   @HttpCode(HttpStatus.OK)
-  @Get('/my-current')
+  @Get('/pairs/my-current')
   @UseGuards(JwtAuthGuard)
   // ✅ RETURN CURRENT UNFINISHED GAME
   async getCurrentGame(@Req() req: Request): Promise<GameResponseDto> {
@@ -56,7 +67,7 @@ export class PairQuizGameController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get('/:id')
+  @Get('/pairs/:id')
   @UseGuards(JwtAuthGuard)
   // ✅ RETURNS GAME BY ID
   async getGameById(
@@ -69,7 +80,7 @@ export class PairQuizGameController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Post('/connection')
+  @Post('/pairs/connection')
   @UseGuards(JwtAuthGuard)
   // ✅ CONNECT USER TO PAIR QUIZ GAME
   async connection(@Req() req: Request) {
@@ -81,7 +92,7 @@ export class PairQuizGameController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Post('/my-current/answers')
+  @Post('/pairs/my-current/answers')
   @UseGuards(JwtAuthGuard)
   // ✅ SEND ANSWER FOR NEXT QUESTION
   async sendAnswer(

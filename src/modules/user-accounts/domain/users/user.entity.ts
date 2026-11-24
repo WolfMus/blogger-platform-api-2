@@ -6,6 +6,7 @@ import { Comment } from '../../../blogger-platform/comments/domain/comment.entit
 import { CreateUserDomainDto } from './dto/create-user.domain.dto';
 import { randomUUID } from 'crypto';
 import { GamePlayer } from '../../../quiz-game/domain/game-players.entity';
+import { PlayerStatistic } from '../../../quiz-game/player-statistic/domain/player-statistics.entity';
 
 @Entity({ name: 'users' })
 export class User extends BaseDbEntity {
@@ -77,6 +78,9 @@ export class User extends BaseDbEntity {
 
   @OneToMany(() => GamePlayer, (player) => player.user)
   gamePlayers: GamePlayer[];
+
+  @OneToMany(() => PlayerStatistic, (player) => player.user)
+  playerStatistic: PlayerStatistic;
 
   static createInstance(dto: CreateUserDomainDto) {
     const user = new User();

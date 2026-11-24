@@ -22,6 +22,9 @@ import { QuestionQwRepository } from './infrastructure/question/question-query.r
 import { QuestionRepository } from './infrastructure/question/question.repository';
 import { GamePlayerAnswersRepository } from './infrastructure/player-answers/game-player.repository';
 import { SendAnswerUseCase } from './application/usecases/send-answer.usecase';
+import { PlayerStatistic } from './player-statistic/domain/player-statistics.entity';
+import { PlayerStatisticRepository } from './player-statistic/infrastructure/player-statistic.repository';
+import { PlayerStatisticService } from './player-statistic/application/player-statistic.service';
 
 const questionUseCases = [
   CreateQuestionUseCase,
@@ -41,6 +44,7 @@ const pairGameUseCases = [ConnectToPairGameUseCase];
       QuizGame,
       GamePlayer,
       GamePlayerAnswers,
+      PlayerStatistic,
     ]),
     UserAccountsModule,
   ],
@@ -57,6 +61,8 @@ const pairGameUseCases = [ConnectToPairGameUseCase];
     GamePlayerRepository,
     GamePlayerQwRepository,
     GamePlayerAnswersRepository,
+    PlayerStatisticService,
+    PlayerStatisticRepository,
   ],
 })
 export class QuizGameModule {}
