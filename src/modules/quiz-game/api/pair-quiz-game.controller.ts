@@ -23,6 +23,7 @@ import { AnswerRequestDto } from '../dto/answer/answer-request.dto';
 import { QuizGamePaginationInput } from '../types/quiz-pagination.input';
 import { QuizGamePaginatedResponseDto } from '../dto/game/game-paginated-view.dto';
 import { PlayerStatisticService } from '../player-statistic/application/player-statistic.service';
+import { PlayerStatisticResponseDto } from '../player-statistic/dto/statistic-response.dto';
 
 @Controller('pair-game-quiz')
 export class PairQuizGameController {
@@ -50,10 +51,15 @@ export class PairQuizGameController {
   @Get('/users/my-statistic')
   @UseGuards(JwtAuthGuard)
   // GET CURRENT USER STATISTIC
-  async findMyStatistic(@Req() req: Request): Promise<void> {
+  async findMyStatistic(
+    @Req() req: Request,
+  ): Promise<PlayerStatisticResponseDto> {
     const userInfo = req.user as { userId: string; login: string };
-    await this.playerStatisticService.findMyStatistic(userInfo.userId);
-    return;
+    const myStatistic = await this.playerStatisticService.findMyStatistic(
+      userInfo.userId,
+    );
+    console.log(myStatistic);
+    return myStatistic;
   }
 
   @HttpCode(HttpStatus.OK)

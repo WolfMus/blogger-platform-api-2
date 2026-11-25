@@ -32,6 +32,15 @@ export class PlayerStatistic {
   sumScore: number;
 
   @Column({
+    name: 'avgScores',
+    type: 'numeric',
+    precision: 3,
+    scale: 2,
+    nullable: false,
+  })
+  avgScores: number;
+
+  @Column({
     name: 'gamesCount',
     type: 'integer',
     nullable: false,
