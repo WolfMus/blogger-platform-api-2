@@ -14,6 +14,7 @@ import { GameRepository } from '../../infrastructure/game/game.repository';
 import { AnswerResponseDto } from '../../dto/answer/answer-response.dto';
 import { AnswerRequestDto } from '../../dto/answer/answer-request.dto';
 import { QuizGameService } from '../quiz-game.service';
+import { PlayerStatisticService } from '../../player-statistic/application/player-statistic.service';
 
 export class SendAnswerCommand {
   constructor(
@@ -33,6 +34,7 @@ export class SendAnswerUseCase implements ICommandHandler<
     private playerRepo: GamePlayerRepository,
     private questionQueryRepo: QuestionQwRepository,
     private playerAnswersRepo: GamePlayerAnswersRepository,
+    private playerStatisticService: PlayerStatisticService,
   ) {}
   async execute(command: SendAnswerCommand): Promise<AnswerResponseDto> {
     const userId = command.userId;
@@ -129,6 +131,9 @@ export class SendAnswerUseCase implements ICommandHandler<
       game.changeStatus(QuizGameStatusesEnum.Finished);
       await this.gameRepo.save(game);
       await this.gameService.awardBonusForFirstCompletion(game.id);
+      await this.playerStatisticService.updateStatisticAfterGameFinished(
+        game.id,
+      );
     }
 
     const answerResponse: AnswerResponseDto = {
